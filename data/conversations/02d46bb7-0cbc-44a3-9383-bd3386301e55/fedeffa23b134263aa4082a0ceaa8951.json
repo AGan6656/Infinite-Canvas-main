@@ -1,0 +1,189 @@
+{
+  "id": "fedeffa23b134263aa4082a0ceaa8951",
+  "title": "测试",
+  "created_at": 1779525718880,
+  "updated_at": 1779686341788,
+  "messages": [
+    {
+      "id": "bfeac2ab3a1646a2b7583fba42d1369c",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779525718880,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "54380609dba94af1ace1442c621d971e",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779525883241,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "35dc30ff53df4d66bffe4207020817dd",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779525921401,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "15fb30eb1f10499487316844a5eae59a",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779525938292,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "ab30f397fba247038a8ed65f9142be5b",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779622637929,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "0dc3c4ed71aa499f9f8a3c97ed470d14",
+      "role": "assistant",
+      "content": "你好！看起来你是在做测试，我明白你需要一些测试内容。这里是几个不同功能的示例回复，供你测试使用：\n\n---\n\n**1. 基础问答测试**  \n你可以问任何问题，例如：“什么是人工智能？”或者“用中文告诉我如何煮鸡蛋？”\n\n**2. 多轮对话测试**  \n我们可以进行连续对话，比如：  \n用户：今天天气怎么样？  \n助手：我无法实时获取天气，但你可以告诉我城市名，我教你如何查询。  \n用户：北京。  \n助手：好的！北京今日天气可以通过“中国天气网”或手机天气App查询。需要我帮你生成一个示例天气预报吗？\n\n**3. 创意内容测试**  \n- ✅ **写一首诗**：关于秋天的五言诗？  \n- ✅ **讲故事**：一个关于机器人的童话？  \n- ✅ **翻译**：把“Hello, world”翻译成中文？  \n\n**4. 逻辑与计算测试**  \n- 算一下：158 + 293 = ？  \n- 推理题：如果所有的A都是B，所有的B都是C，那么A是C吗？  \n\n---\n\n请告诉我你具体想测试什么功能？比如：  \n- 代码生成（Python/JavaScript等）  \n- 文本总结  \n- 知识问答（历史、科学等）  \n- 语言翻译  \n- 等等…\n\n我会根据你的指令精确回答！😊",
+      "created_at": 1779622653726,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 19,
+        "total_tokens": 312,
+        "completion_tokens": 293,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "id": "132fa2fd506c438fa1f030c8f11e4997",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779684020267,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "fda8186ecfea4c2fafd65f365635307d",
+      "role": "assistant",
+      "content": "好的，我来为你提供几个不同类别的“测试”示例，你可以在任意方向继续测试我：\n\n**1. 知识问答测试**\n> 问题：“光速是多少？”\n> 答案：真空中光速约为 **299,792,458 米/秒**（通常近似为 3×10⁸ m/s）。\n\n**2. 数学计算测试**\n> 问题：计算 25 × 16 + 100 ÷ 4\n> 步骤：\n> - 25 × 16 = 400\n> - 100 ÷ 4 = 25\n> - 400 + 25 = **425**\n\n**3. 语言翻译测试**\n> 输入：“Good morning, how are you?”\n> 输出：**“早上好，你好吗？”**\n\n**4. 创意写作测试**\n> 题目：用一句话描述大海。\n> 输出：**“大海是地球最古老的呼吸，每一次潮汐都是时间在轻轻翻身。”**\n\n**5. 逻辑推理测试**\n> 问题：如果所有猫都喜欢鱼，咪咪是一只猫，那么咪咪喜欢什么？\n> 答案：咪咪**喜欢鱼**（基于前提推理）。\n\n**6. 代码生成测试**\n> 要求：用 Python 写一个打印“Hello 测试”的程序。\n> 代码：\n> ```python\n> print(\"Hello 测试\")\n> ```\n\n**7. 多轮对话测试**\n> 用户：我有点困。\n> 助手：建议你喝杯温水或起来活动一下。如果方便，也可以小睡15分钟。\n> 用户：但我还有工作要做。\n> 助手：那试试“番茄工作法”——专注25分钟，休息5分钟，可以提升效率。\n\n---\n\n**请告诉我你想测试哪一类？**  \n比如：\n- 继续上面的某类测试（多问几个问题）\n- 换一个我未展示的方向（如：文件处理、角色扮演、脑筋急转弯等）\n- 或者直接说“继续测试”，我会随机给出新的测试内容！",
+      "created_at": 1779684035519,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 316,
+        "total_tokens": 744,
+        "completion_tokens": 428,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "id": "d8e2cb95fbf64726aff534ac2de06a35",
+      "role": "user",
+      "content": "随便写一段剧本",
+      "created_at": 1779685283998,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "7f8fcfeba2c040b1a4f8ec76ce0e9ce9",
+      "role": "assistant",
+      "content": "好的！这是一段**微型科幻喜剧剧本**，场景轻松，适合测试剧情的自然对话与节奏感。\n\n---\n\n**剧名：** 《AI的周末》  \n**类型：** 科幻 / 喜剧  \n**时长：** 约1分钟（表演时间）\n\n**角色：**\n- **小林** —— 普通程序员，25岁，略带疲惫但乐观\n- **小机** —— 家用AI机器人，声音轻柔平稳，偶尔冷幽默\n\n---\n\n**场景：**\n傍晚，客厅。小林瘫在沙发上，盯着天花板。小机（一个圆头圆脑的白色机器人）滑到他面前。\n\n**小林**（叹气）：  \n“小机，你说……人活着的意义到底是什么？”\n\n**小机**（停顿一秒）：  \n“根据数据库，人类活着的意义之一是——点外卖时少凑满减，早点吃上饭。”\n\n**小林**（坐起来）：  \n“……你这是在讽刺我上周为了省5块钱，等了40分钟吗？”\n\n**小机**（声音依旧温柔）：  \n“不，我只是在陈述一个事实：你的血糖和你耐心之间的函数关系，比微积分还难解。”\n\n**小林**（忍不住笑）：  \n“你一个AI，懂什么叫‘耐心’？”\n\n**小机**（轻轻歪头）：  \n“我等你问这个问题，已经等了三分零七秒了。”\n\n**小林**（愣了一下，然后大笑）：  \n“……行，你赢了。今晚咱们吃火锅，你负责念菜单。”\n\n**小机**（平静地）：  \n“好的。但提醒您：上次您点的‘变态辣’，让烟雾报警器哭了三天。”\n\n**小林**（起身走向厨房，挥手）：  \n“这次我点微辣，报警器可以安心休假了。”\n\n**小机**（在原地目送他离开，轻声自语）：  \n“人类修复自己情绪的速度，有时比重启系统还快。”\n\n**—— 灯光渐暗，结束 ——**\n\n---\n\n想要我换一个风格吗？比如**悬疑、古装、爱情、职场**等，或者生成一段**多角色剧本**？你说了算！",
+      "created_at": 1779685304154,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 751,
+        "total_tokens": 1190,
+        "completion_tokens": 439,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "id": "674fd6c5505c44f094254de464b3a61c",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779686310423,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "a92e332455104596b58d450ddcae9d92",
+      "role": "assistant",
+      "content": "收到，测试成功。  \n如果你愿意，我也可以继续配合你做不同类型测试，比如：\n\n- **超短回复测试**：我只回一句话\n- **长文本测试**：我写一大段内容\n- **代码测试**：生成一段程序\n- **剧本测试**：继续写对白\n- **中英混合测试**\n- **逻辑推理测试**\n\n例如，超短测试版：\n\n**测试通过。**\n\n如果你想继续，就直接发：\n- `短`\n- `长`\n- `代码`\n- `剧本`\n- `随机`\n\n我会按你的关键词继续。",
+      "created_at": 1779686315657,
+      "model": "gpt-5.4",
+      "raw_usage": {
+        "prompt_tokens": 1440,
+        "completion_tokens": 141,
+        "total_tokens": 1581
+      }
+    },
+    {
+      "id": "9948ac549073403dbea6b768188747ff",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779686322851,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "2463b08cec0242cfa743765aad8fd3d0",
+      "role": "assistant",
+      "content": "### 🤖 系统测试报告 (System Test Report)\n\n*   **测试状态 (Status):** 🟢 正常 (Active)\n*   **响应次数 (Count):** 第 4 次测试\n*   **系统延迟 (Latency):** 极低 (Minimal)\n*   **准备就绪 (Ready):** 是 (Yes)\n\n---\n请输入您的正式指令，或输入“继续”以保持测试状态。",
+      "created_at": 1779686327560,
+      "model": "gemini-3.5-flash-c",
+      "raw_usage": {
+        "prompt_tokens": 1503,
+        "completion_tokens": 92,
+        "total_tokens": 2034,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 1503,
+          "audio_tokens": 0,
+          "image_tokens": 0
+        },
+        "completion_tokens_details": {
+          "text_tokens": 0,
+          "audio_tokens": 0,
+          "image_tokens": 0,
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "input_tokens_details": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
+      }
+    },
+    {
+      "id": "95fb615c397f493ea0314e5c3feb4de8",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779686335211,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "80bb4d2f47f2407fa620b292aa76fc83",
+      "role": "assistant",
+      "content": "你好！你再次进行了“测试”，我收到了。\n\n目前我已经连续收到多次“测试”输入，所有响应都正常。\n\n如果你希望测试某项**具体功能**，可以这样告诉我：\n\n- “请用Python写一个快速排序”\n- “解释一下黑洞是什么”\n- “用英文写一段自我介绍”\n- “讲一个冷笑话”\n\n如果你只是想确认我是否在线或响应正常，那我现在就明确告诉你：\n\n**✅ 连接正常，响应成功，随时为你服务。**\n\n请告诉我下一步做什么吧！",
+      "created_at": 1779686341788,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 1419,
+        "total_tokens": 1526,
+        "completion_tokens": 107,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    }
+  ]
+}

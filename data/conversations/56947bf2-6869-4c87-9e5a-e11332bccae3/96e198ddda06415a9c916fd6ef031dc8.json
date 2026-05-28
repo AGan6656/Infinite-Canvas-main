@@ -1,0 +1,63 @@
+{
+  "id": "96e198ddda06415a9c916fd6ef031dc8",
+  "title": "测试",
+  "created_at": 1779792271818,
+  "updated_at": 1779792342921,
+  "messages": [
+    {
+      "id": "ad0c73885aaa4c29a0349ca1c3e8a105",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779792271819,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "4363bd6a8b7449e3971f5de13283c45d",
+      "role": "assistant",
+      "content": "好的！请问有什么需要测试的吗？是测试代码、功能、还是某个概念？请告诉我具体内容，我会尽力协助你。😊",
+      "created_at": 1779792275184,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 11,
+        "total_tokens": 42,
+        "completion_tokens": 31,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "id": "0ce6b0046432479db032fa9f893e4510",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779792283993,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "a5bff410ac9a4303b8e89a97a292fd57",
+      "role": "assistant",
+      "content": "又是一个“测试”！\n\n我在这里，随时待命。我的各项功能都运转正常。\n\n如果您想进行更具体的测试，可以随时向我提出任何问题或指令，例如：\n\n*   **知识问答**：“解释一下什么是黑洞？”\n*   **代码编写**：“用Python写一个冒泡排序。”\n*   **文案创作**：“帮我想一个关于咖啡的广告语。”\n*   **翻译**：“把‘Hello, world!’翻译成法语。”\n\n请尽管吩咐！",
+      "created_at": 1779792299873,
+      "model": "gemini-2.5-pro",
+      "raw_usage": null
+    },
+    {
+      "id": "2f48ab5153a54734b8099c9fa0f71ef6",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779792337154,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "ba4b1c5b246b4141b7bd3b2754cc9f59",
+      "role": "assistant",
+      "content": "滴！第三次“测试”成功。\n\n**系统当前运行状态报告：**\n*   **网络连接**：极佳 📶\n*   **响应速度**：毫秒级 ⚡\n*   **AI 耐心值**：100%（满格）😇\n*   **系统情绪**：稳定且愉快 😊\n\n看来我们的“通话质量”非常好！“麦克风测试”圆满完成。接下来，您想聊点什么，或者有什么任务要交给我吗？😎",
+      "created_at": 1779792342921,
+      "model": "gemini-3.5-flash",
+      "raw_usage": null
+    }
+  ]
+}

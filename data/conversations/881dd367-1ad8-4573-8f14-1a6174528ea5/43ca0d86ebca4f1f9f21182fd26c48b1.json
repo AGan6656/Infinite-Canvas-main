@@ -1,0 +1,31 @@
+{
+  "id": "43ca0d86ebca4f1f9f21182fd26c48b1",
+  "title": "测试",
+  "created_at": 1779506638732,
+  "updated_at": 1779506641381,
+  "messages": [
+    {
+      "id": "fb78c817ef304f7886d538b0d24ef602",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779506638733,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "d255a24ed83644beb4ed53b3c46f9616",
+      "role": "assistant",
+      "content": "你好！很高兴为你服务！😊 请问有什么我可以帮助你的吗？",
+      "created_at": 1779506641381,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 11,
+        "total_tokens": 28,
+        "completion_tokens": 17,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    }
+  ]
+}

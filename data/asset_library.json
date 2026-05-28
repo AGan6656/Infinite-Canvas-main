@@ -1,0 +1,23 @@
+{
+  "categories": [
+    {
+      "id": "characters",
+      "name": "角色",
+      "type": "image",
+      "items": []
+    },
+    {
+      "id": "scenes",
+      "name": "场景",
+      "type": "image",
+      "items": []
+    },
+    {
+      "id": "workflows",
+      "name": "工作流",
+      "type": "workflow",
+      "items": []
+    }
+  ],
+  "updated_at": 1779932877957
+}

@@ -1,0 +1,159 @@
+{
+  "id": "e40efc760eff4f7fabec2ddb1e83b75e",
+  "title": "测试",
+  "created_at": 1779765320349,
+  "updated_at": 1779798061074,
+  "messages": [
+    {
+      "id": "45c023eed1b7478fb99bb697c97efde9",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779765320371,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "3fce75eb46654e45868658b218fc4b41",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779765336012,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "4aa7b1498381406686656b2514b3b5c3",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779765355748,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "b607667f1c514d7e84bf595cdf21840f",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779765366828,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "531cb9e68e6b42a7b5c30c53964a3256",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779765374613,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "83c2ca6e01544b438b7ac63170aab22b",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779770325415,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "ce2d152952da492ea1a9ac5473605313",
+      "role": "assistant",
+      "content": "收到！系统测试成功，运行一切正常。请问有什么我可以帮您的？",
+      "created_at": 1779770329700,
+      "model": "gemini-3.5-flash-c",
+      "raw_usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 17,
+        "total_tokens": 319,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 19,
+          "audio_tokens": 0,
+          "image_tokens": 0
+        },
+        "completion_tokens_details": {
+          "text_tokens": 0,
+          "audio_tokens": 0,
+          "image_tokens": 0,
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "input_tokens_details": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
+      }
+    },
+    {
+      "id": "3f28ad0e373b4179bcedce29320fdde1",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779770335636,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "5dc607fdfb544332a94691e3240d6aa4",
+      "role": "assistant",
+      "content": "测试已收到。请继续。",
+      "created_at": 1779770337840,
+      "model": "gpt-5.4",
+      "raw_usage": {
+        "prompt_tokens": 83,
+        "completion_tokens": 11,
+        "total_tokens": 94
+      }
+    },
+    {
+      "id": "cb5011eb05664b6c81de42df0c7b7747",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779770342726,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "36bf1f7ab5ef4463a416607d3f9ba55c",
+      "role": "assistant",
+      "content": "测试已通过。\n\n如需进一步测试，我可以：\n\n1. **生成长文本**（文章、代码、列表等）\n2. **回答复杂问题**（数学、逻辑、知识问答）\n3. **处理特殊格式**（JSON、Markdown、表格）\n4. **模拟对话**或**角色扮演**\n5. **执行多步任务**（总结、翻译、改写）\n\n请告诉我您希望我做什么类型的测试？",
+      "created_at": 1779770350866,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 54,
+        "total_tokens": 145,
+        "completion_tokens": 91,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "id": "04da365a01134f0ba8c2d1758d93e587",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779798044293,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "67521341a0cc43cd88144caacb75a5f1",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1779798055304,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "e22bc16e6db146ed8023912002301cf9",
+      "role": "assistant",
+      "content": "测试已收到，当前通信链路状态良好，响应时延正常。\n\n继续为您保持连接。随时可以开始正式任务或进行其他专项测试。",
+      "created_at": 1779798061074,
+      "model": "deepseek-v4-flash",
+      "raw_usage": {
+        "prompt_tokens": 151,
+        "total_tokens": 183,
+        "completion_tokens": 32,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    }
+  ]
+}
