@@ -1,4 +1,8 @@
-([('API\\.env', 'E:\\Program Files\\Infinite-Canvas-main\\API\\.env', 'DATA'),
+([('81d243bd2c585b0f4821__mypyc.cp313-win_amd64.pyd',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\81d243bd2c585b0f4821__mypyc.cp313-win_amd64.pyd',
+   'EXTENSION'),
+  ('API\\.env', 'E:\\Program Files\\Infinite-Canvas-main\\API\\.env', 'DATA'),
   ('Infinite-Canvas.exe',
    'E:\\Program '
    'Files\\Infinite-Canvas-main\\build\\Infinite-Canvas\\Infinite-Canvas.exe',
@@ -108,33 +112,33 @@
   ('certifi\\py.typed',
    'D:\\Program Files\\python313\\Lib\\site-packages\\certifi\\py.typed',
    'DATA'),
+  ('charset_normalizer\\cd.cp313-win_amd64.pyd',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\charset_normalizer\\cd.cp313-win_amd64.pyd',
+   'EXTENSION'),
   ('charset_normalizer\\md.cp313-win_amd64.pyd',
    'D:\\Program '
    'Files\\python313\\Lib\\site-packages\\charset_normalizer\\md.cp313-win_amd64.pyd',
    'EXTENSION'),
-  ('charset_normalizer\\md__mypyc.cp313-win_amd64.pyd',
+  ('click-8.4.1.dist-info\\INSTALLER',
    'D:\\Program '
-   'Files\\python313\\Lib\\site-packages\\charset_normalizer\\md__mypyc.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('click-8.2.1.dist-info\\INSTALLER',
-   'D:\\Program '
-   'Files\\python313\\Lib\\site-packages\\click-8.2.1.dist-info\\INSTALLER',
+   'Files\\python313\\Lib\\site-packages\\click-8.4.1.dist-info\\INSTALLER',
    'DATA'),
-  ('click-8.2.1.dist-info\\METADATA',
+  ('click-8.4.1.dist-info\\METADATA',
    'D:\\Program '
-   'Files\\python313\\Lib\\site-packages\\click-8.2.1.dist-info\\METADATA',
+   'Files\\python313\\Lib\\site-packages\\click-8.4.1.dist-info\\METADATA',
    'DATA'),
-  ('click-8.2.1.dist-info\\RECORD',
+  ('click-8.4.1.dist-info\\RECORD',
    'D:\\Program '
-   'Files\\python313\\Lib\\site-packages\\click-8.2.1.dist-info\\RECORD',
+   'Files\\python313\\Lib\\site-packages\\click-8.4.1.dist-info\\RECORD',
    'DATA'),
-  ('click-8.2.1.dist-info\\WHEEL',
+  ('click-8.4.1.dist-info\\WHEEL',
    'D:\\Program '
-   'Files\\python313\\Lib\\site-packages\\click-8.2.1.dist-info\\WHEEL',
+   'Files\\python313\\Lib\\site-packages\\click-8.4.1.dist-info\\WHEEL',
    'DATA'),
-  ('click-8.2.1.dist-info\\licenses\\LICENSE.txt',
+  ('click-8.4.1.dist-info\\licenses\\LICENSE.txt',
    'D:\\Program '
-   'Files\\python313\\Lib\\site-packages\\click-8.2.1.dist-info\\licenses\\LICENSE.txt',
+   'Files\\python313\\Lib\\site-packages\\click-8.4.1.dist-info\\licenses\\LICENSE.txt',
    'DATA'),
   ('cryptography-45.0.3.dist-info\\INSTALLER',
    'D:\\Program '
@@ -273,6 +277,34 @@
    'D:\\Program '
    'Files\\python313\\Lib\\site-packages\\psutil\\_psutil_windows.pyd',
    'EXTENSION'),
+  ('pydantic-2.13.4.dist-info\\INSTALLER',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\INSTALLER',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\METADATA',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\METADATA',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\RECORD',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\RECORD',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\REQUESTED',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\REQUESTED',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\WHEEL',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\WHEEL',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\licenses\\LICENSE',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\licenses\\LICENSE',
+   'DATA'),
+  ('pydantic_core\\_pydantic_core.cp313-win_amd64.pyd',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\pydantic_core\\_pydantic_core.cp313-win_amd64.pyd',
+   'EXTENSION'),
   ('pyexpat.pyd',
    'D:\\Program Files\\python313\\DLLs\\pyexpat.pyd',
    'EXTENSION'),
@@ -290,6 +322,12 @@
    'DATA'),
   ('static\\comfyui-settings.html',
    'E:\\Program Files\\Infinite-Canvas-main\\static\\comfyui-settings.html',
+   'DATA'),
+  ('static\\css\\canvas.css',
+   'E:\\Program Files\\Infinite-Canvas-main\\static\\css\\canvas.css',
+   'DATA'),
+  ('static\\css\\smart-canvas.css',
+   'E:\\Program Files\\Infinite-Canvas-main\\static\\css\\smart-canvas.css',
    'DATA'),
   ('static\\css\\theme.css',
    'E:\\Program Files\\Infinite-Canvas-main\\static\\css\\theme.css',
@@ -318,6 +356,9 @@
   ('static\\index.html',
    'E:\\Program Files\\Infinite-Canvas-main\\static\\index.html',
    'DATA'),
+  ('static\\js\\canvas.js',
+   'E:\\Program Files\\Infinite-Canvas-main\\static\\js\\canvas.js',
+   'DATA'),
   ('static\\js\\history-bulk-manager.js',
    'E:\\Program '
    'Files\\Infinite-Canvas-main\\static\\js\\history-bulk-manager.js',
@@ -327,6 +368,9 @@
    'DATA'),
   ('static\\js\\image-preview.js',
    'E:\\Program Files\\Infinite-Canvas-main\\static\\js\\image-preview.js',
+   'DATA'),
+  ('static\\js\\smart-canvas.js',
+   'E:\\Program Files\\Infinite-Canvas-main\\static\\js\\smart-canvas.js',
    'DATA'),
   ('static\\js\\theme.js',
    'E:\\Program Files\\Infinite-Canvas-main\\static\\js\\theme.js',
@@ -405,6 +449,38 @@
    'DATA'),
   ('unicodedata.pyd',
    'D:\\Program Files\\python313\\DLLs\\unicodedata.pyd',
+   'EXTENSION'),
+  ('websockets-15.0.1.dist-info\\INSTALLER',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets-15.0.1.dist-info\\INSTALLER',
+   'DATA'),
+  ('websockets-15.0.1.dist-info\\LICENSE',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets-15.0.1.dist-info\\LICENSE',
+   'DATA'),
+  ('websockets-15.0.1.dist-info\\METADATA',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets-15.0.1.dist-info\\METADATA',
+   'DATA'),
+  ('websockets-15.0.1.dist-info\\RECORD',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets-15.0.1.dist-info\\RECORD',
+   'DATA'),
+  ('websockets-15.0.1.dist-info\\WHEEL',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets-15.0.1.dist-info\\WHEEL',
+   'DATA'),
+  ('websockets-15.0.1.dist-info\\entry_points.txt',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets-15.0.1.dist-info\\entry_points.txt',
+   'DATA'),
+  ('websockets-15.0.1.dist-info\\top_level.txt',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets-15.0.1.dist-info\\top_level.txt',
+   'DATA'),
+  ('websockets\\speedups.cp313-win_amd64.pyd',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\websockets\\speedups.cp313-win_amd64.pyd',
    'EXTENSION'),
   ('workflows\\2511.json',
    'E:\\Program Files\\Infinite-Canvas-main\\workflows\\2511.json',

@@ -62,10 +62,6 @@
    'D:\\Program '
    'Files\\python313\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
-  ('pyi_rth_inspect',
-   'D:\\Program '
-   'Files\\python313\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
-   'PYSOURCE'),
   ('pyi_rth_pkgutil',
    'D:\\Program '
    'Files\\python313\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgutil.py',
@@ -73,6 +69,10 @@
   ('pyi_rth_multiprocessing',
    'D:\\Program '
    'Files\\python313\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
+   'PYSOURCE'),
+  ('pyi_rth_inspect',
+   'D:\\Program '
+   'Files\\python313\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
    'PYSOURCE'),
   ('pyi_rth_cryptography_openssl',
    'D:\\Program '
@@ -82,7 +82,7 @@
  [],
  False,
  False,
- 1779458837,
+ 1779948310,
  [('run.exe',
    'D:\\Program '
    'Files\\python313\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
