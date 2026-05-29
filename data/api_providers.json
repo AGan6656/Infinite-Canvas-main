@@ -104,29 +104,6 @@
     "rh_workflows": []
   },
   {
-    "id": "custom-api-2",
-    "name": "free",
-    "base_url": "https://aiapi1.cc.cd",
-    "protocol": "openai",
-    "image_generation_endpoint": "",
-    "image_edit_endpoint": "",
-    "enabled": true,
-    "primary": false,
-    "image_models": [],
-    "chat_models": [
-      "claude-opus-4-6",
-      "deepseek-v4",
-      "gpt-5.3-codex",
-      "gpt-5.4",
-      "gpt-5.5"
-    ],
-    "video_models": [],
-    "ms_loras": [],
-    "ms_defaults_version": 0,
-    "rh_apps": [],
-    "rh_workflows": []
-  },
-  {
     "id": "custom-api-3",
     "name": "yunwu",
     "base_url": "https://yunwu.ai",
@@ -194,6 +171,23 @@
       "grok-imagine-video",
       "sora2"
     ],
+    "ms_loras": [],
+    "ms_defaults_version": 0,
+    "rh_apps": [],
+    "rh_workflows": []
+  },
+  {
+    "id": "apimart",
+    "name": "APIMART",
+    "base_url": "https://api.apimart.ai",
+    "protocol": "apimart",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [],
+    "chat_models": [],
+    "video_models": [],
     "ms_loras": [],
     "ms_defaults_version": 0,
     "rh_apps": [],

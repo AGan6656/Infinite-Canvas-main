@@ -4,7 +4,7 @@
   "icon": "sparkles",
   "kind": "smart",
   "created_at": 1779936735433,
-  "updated_at": 1779946375953,
+  "updated_at": 1780025927456,
   "nodes": [
     {
       "id": "smart_mxiszqahdnca",
@@ -30,8 +30,8 @@
         "customHeight": "",
         "quality": "auto",
         "count": 1,
-        "videoProvider": "custom-api",
-        "videoModel": "sora-2",
+        "videoProvider": "custom-api-5",
+        "videoModel": "grok-imagine-video",
         "videoDuration": 5,
         "videoAspect": "16:9",
         "videoResolution": "",

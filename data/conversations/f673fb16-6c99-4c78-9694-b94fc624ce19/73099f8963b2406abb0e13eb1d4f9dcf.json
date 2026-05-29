@@ -2,7 +2,7 @@
   "id": "73099f8963b2406abb0e13eb1d4f9dcf",
   "title": "测试",
   "created_at": 1779847452348,
-  "updated_at": 1779960130282,
+  "updated_at": 1780025901276,
   "messages": [
     {
       "id": "bb0e7979079647168df2c112e9f972e6",
@@ -140,6 +140,22 @@
         "claude_cache_creation_5_m_tokens": 0,
         "claude_cache_creation_1_h_tokens": 0
       }
+    },
+    {
+      "id": "91e7f42cbd9e430d922b8ec010c35f39",
+      "role": "user",
+      "content": "测试",
+      "created_at": 1780025889598,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "75502fcc42f347c397aa46cd83eb2b49",
+      "role": "assistant",
+      "content": "你好！测试成功，我在线并且状态良好。👍\n\n请问有什么可以帮你的吗？无论是写代码、回答问题、翻译文本，还是构思创意，我都很乐意效劳！",
+      "created_at": 1780025901276,
+      "model": "gemini-2.5-pro",
+      "raw_usage": null
     }
   ]
 }
