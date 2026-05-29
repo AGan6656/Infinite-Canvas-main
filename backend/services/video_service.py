@@ -595,7 +595,7 @@ async def canvas_video(payload: CanvasVideoRequest):
                 # The upstream returned an HTML error page or another non-JSON response.
                 resp_text = response.text[:500]
                 raise HTTPException(status_code=502, detail=f"上游视频接口返回非 JSON 响应（状态 {response.status_code}）：{resp_text}")
-            task_id = extract_task_id(raw) or raw.get("task_id") or raw.get("id")
+            task_id = extract_task_id(raw) or raw.get("task_id") or raw.get("id") or raw.get("video_id")
             result = raw
             if task_id and not video_output_urls(raw):
                 result = await wait_for_video_task(client, provider, task_id, used_api_style)

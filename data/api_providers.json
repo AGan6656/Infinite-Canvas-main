@@ -118,8 +118,7 @@
       "deepseek-v4",
       "gpt-5.3-codex",
       "gpt-5.4",
-      "gpt-5.5",
-      "minimax-2.5"
+      "gpt-5.5"
     ],
     "video_models": [],
     "ms_loras": [],

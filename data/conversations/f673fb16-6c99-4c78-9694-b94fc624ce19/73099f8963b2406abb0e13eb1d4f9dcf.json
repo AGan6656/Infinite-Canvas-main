@@ -2,7 +2,7 @@
   "id": "73099f8963b2406abb0e13eb1d4f9dcf",
   "title": "测试",
   "created_at": 1779847452348,
-  "updated_at": 1779847456171,
+  "updated_at": 1779960130282,
   "messages": [
     {
       "id": "bb0e7979079647168df2c112e9f972e6",
@@ -25,6 +25,120 @@
         "completion_tokens_details": {
           "reasoning_tokens": 0
         }
+      }
+    },
+    {
+      "id": "bac29912915148d0895ba3d9b8ca930c",
+      "role": "user",
+      "content": "你好",
+      "created_at": 1779959981418,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "37d5c4b60f454dd0a4097fa34d2deb7d",
+      "role": "user",
+      "content": "你好",
+      "created_at": 1779960003697,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "c01208dbf5bd48d1a3eba759797210de",
+      "role": "assistant",
+      "content": "你好呀！👋\n\n你好，欢迎！有什么我可以帮助你的吗？😊",
+      "created_at": 1779960005872,
+      "model": "mimo-v2.5-pro",
+      "raw_usage": {
+        "completion_tokens": 31,
+        "prompt_tokens": 86,
+        "total_tokens": 117,
+        "completion_tokens_details": {
+          "reasoning_tokens": 12
+        },
+        "prompt_tokens_details": {}
+      }
+    },
+    {
+      "id": "d696976977664528a1737cb083892b02",
+      "role": "user",
+      "content": "你会写代码吗",
+      "created_at": 1779960023033,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "665efc3b3b254327ab8e94b4d50b46b2",
+      "role": "user",
+      "content": "你好",
+      "created_at": 1779960119570,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "961af4718f0847be9d8d3cc95debb47b",
+      "role": "assistant",
+      "content": "当前繁忙，稍后恢复，通知群:116231758",
+      "created_at": 1779960120094,
+      "model": "claude-opus-4-6",
+      "raw_usage": {
+        "prompt_tokens": 203,
+        "completion_tokens": 56,
+        "total_tokens": 259,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 0,
+          "audio_tokens": 0,
+          "image_tokens": 0
+        },
+        "completion_tokens_details": {
+          "text_tokens": 0,
+          "audio_tokens": 0,
+          "image_tokens": 0,
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "input_tokens_details": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
+      }
+    },
+    {
+      "id": "fe9aa55b30d549578e5cd5b5905053f8",
+      "role": "user",
+      "content": "你好",
+      "created_at": 1779960129753,
+      "attachments": [],
+      "mode": "chat"
+    },
+    {
+      "id": "e1030930f2984a9db070f93e2243d840",
+      "role": "assistant",
+      "content": "当前繁忙，稍后恢复，通知群:116231758",
+      "created_at": 1779960130282,
+      "model": "gpt-5.5",
+      "raw_usage": {
+        "prompt_tokens": 234,
+        "completion_tokens": 47,
+        "total_tokens": 281,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 0,
+          "audio_tokens": 0,
+          "image_tokens": 0
+        },
+        "completion_tokens_details": {
+          "text_tokens": 0,
+          "audio_tokens": 0,
+          "image_tokens": 0,
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "input_tokens_details": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
       }
     }
   ]
