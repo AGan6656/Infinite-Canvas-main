@@ -70,9 +70,18 @@ let activeAssetCategoryId = '';
 let mentionSource = 'input';
 let mentionAssetCategoryId = '';
 const PROMPT_PRESETS_KEY = 'smart_canvas_prompt_presets_v1';
+const ASSET_EXTRACTION_PROMPT_URLS = {
+    character:'/static/prompts/asset-extraction/character.txt',
+    scene:'/static/prompts/asset-extraction/scene.txt',
+    prop:'/static/prompts/asset-extraction/prop.txt'
+};
+const STORYBOARD_PROMPT_URL = '/static/prompts/storyboard/default.txt';
 let promptPresets = [];
+let assetExtractionPromptTemplates = {};
+let storyboardPromptTemplate = '';
 let promptPresetDeleteArmed = false;
 let createMenuPoint = {x:0, y:0};
+let createMenuContext = null;
 let nodeClipboard = null;
 let imageClickTimer = null;
 let suppressImageClickUntil = 0;
@@ -117,6 +126,12 @@ function pushUndo(){
     if(undoSuppressed) return;
     if(!canvas) return;
     undoStack.push(snapshotForUndo());
+    if(undoStack.length > UNDO_LIMIT) undoStack.shift();
+}
+function pushUndoSnapshot(snapshot){
+    if(undoSuppressed || !snapshot) return;
+    if(!canvas) return;
+    undoStack.push(snapshot);
     if(undoStack.length > UNDO_LIMIT) undoStack.shift();
 }
 function performUndo(){
@@ -291,7 +306,7 @@ function applyRecentSmartSettingsForCurrentMode(){
     normalizeVideoSelection(settings);
 }
 function isSmartImageNode(node){
-    return Boolean(node && (node.type === 'smart-image' || !node.type));
+    return Boolean(node && (node.type === 'smart-image' || node.type === 'smart-storyboard-shot' || !node.type));
 }
 function validOutpaintSize(node){
     const w = Math.round(Number(node?.outpaintSize?.width || 0));
@@ -536,8 +551,44 @@ function promptNodeLayoutSize(node){
         : Math.max(explicitH, fallbackH);
     return {width:Math.round(width), height:Math.round(height)};
 }
+function scriptNodeLayoutSize(node){
+    const width = Math.max(300, Number(node?.w) || 340);
+    const height = Math.max(220, Number(node?.h) || 260);
+    return {width:Math.round(width), height:Math.round(height)};
+}
+function assetExtractorNodeLayoutSize(node){
+    const width = Math.max(340, Number(node?.w) || 380);
+    const height = Math.max(300, Number(node?.h) || 360);
+    return {width:Math.round(width), height:Math.round(height)};
+}
+function assetOutputNodeLayoutSize(node){
+    const width = Math.max(300, Number(node?.w) || 320);
+    const height = Math.max(160, Number(node?.h) || 220);
+    return {width:Math.round(width), height:Math.round(height)};
+}
+function storyboardNodeLayoutSize(node){
+    const width = Math.max(380, Number(node?.w) || 430);
+    const height = Math.max(340, Number(node?.h) || 430);
+    return {width:Math.round(width), height:Math.round(height)};
+}
+function storyboardShotNodeLayoutSize(node){
+    const width = Math.max(320, Number(node?.w) || 360);
+    const height = Math.max(220, Number(node?.h) || 300);
+    return {width:Math.round(width), height:Math.round(height)};
+}
+function storyboardOutputNodeLayoutSize(node){
+    const width = Math.max(520, Number(node?.w) || 560);
+    const height = Math.max(480, Number(node?.h) || 640);
+    return {width:Math.round(width), height:Math.round(height)};
+}
 function imageLayout(images, scale=1, node=null){
     if(node?.type === 'smart-prompt') return {cols:1, rows:1, ...promptNodeLayoutSize(node), thumb:96, single:true};
+    if(node?.type === 'smart-script') return {cols:1, rows:1, ...scriptNodeLayoutSize(node), thumb:96, single:true};
+    if(node?.type === 'smart-asset-extractor') return {cols:1, rows:1, ...assetExtractorNodeLayoutSize(node), thumb:96, single:true};
+    if(node?.type === 'smart-asset-output') return {cols:1, rows:1, ...assetOutputNodeLayoutSize(node), thumb:96, single:true};
+    if(node?.type === 'smart-storyboard') return {cols:1, rows:1, ...storyboardNodeLayoutSize(node), thumb:96, single:true};
+    if(node?.type === 'smart-storyboard-output') return {cols:1, rows:1, ...storyboardOutputNodeLayoutSize(node), thumb:96, single:true};
+    if(node?.type === 'smart-storyboard-shot') return {cols:1, rows:1, ...storyboardShotNodeLayoutSize(node), thumb:96, single:true};
     if(node?.type === 'smart-loop') return {cols:1, rows:1, width:Math.round(Number(node.w) || smartLoopWidth(node)), height:Math.round(Math.max(Number(node.h) || 0, smartLoopHeight(node))), thumb:96, single:true};
     const count = (images || []).length;
     const s = node?.type === 'smart-image' || !node?.type ? mediaNodeDefaultScale(node) : (Number.isFinite(scale) && scale > 0 ? scale : 1);
@@ -1522,6 +1573,27 @@ function loadPromptPresets(){
         promptPresets = [];
     }
 }
+async function loadAssetExtractionPromptTemplates(){
+    const entries = await Promise.all(Object.entries(ASSET_EXTRACTION_PROMPT_URLS).map(async ([type, url]) => {
+        try {
+            const res = await fetch(`${url}?v=${Date.now()}`, {cache:'no-store'});
+            if(!res.ok) return [type, ''];
+            const text = (await res.text()).trim();
+            return [type, assetExtractorScriptTokenPattern().test(text) ? text : `${text}\n\n剧本文本：\n{{script_text}}`];
+        } catch(e) {
+            return [type, ''];
+        }
+    }));
+    assetExtractionPromptTemplates = Object.fromEntries(entries.filter(([, text]) => text));
+}
+async function loadStoryboardPromptTemplate(){
+    try {
+        const res = await fetch(`${STORYBOARD_PROMPT_URL}?v=${Date.now()}`, {cache:'no-store'});
+        storyboardPromptTemplate = res.ok ? (await res.text()).trim() : '';
+    } catch(e) {
+        storyboardPromptTemplate = '';
+    }
+}
 function savePromptPresets(){
     localStorage.setItem(PROMPT_PRESETS_KEY, JSON.stringify(promptPresets));
 }
@@ -1928,6 +2000,239 @@ function createPromptNode(x, y, options={}){
     scheduleSave();
     return node;
 }
+function createScriptNode(x, y, options={}){
+    if(!options.skipUndo) pushUndo();
+    const node = {
+        id:uid('script'),
+        type:'smart-script',
+        x,
+        y,
+        w:340,
+        h:260,
+        title:tr('smart.scriptNodeTitle'),
+        text:'',
+        created_at:Date.now()
+    };
+    nodes.push(node);
+    if(options.select !== false) selectedId = node.id;
+    render();
+    scheduleSave();
+    return node;
+}
+function normalizeAssetExtractorType(type){
+    return ['character','scene','prop'].includes(type) ? type : 'character';
+}
+function assetExtractorTypeMeta(type){
+    const assetType = normalizeAssetExtractorType(type);
+    const map = {
+        character:{
+            titleKey:'smart.extractCharacterNodeTitle',
+            subKey:'smart.extractCharacterSub',
+            instructionKey:'smart.extractCharacterDefaultInstruction',
+            labelKey:'smart.assetTypeCharacter',
+            icon:'user-search',
+            itemKeys:['name','aliases','description']
+        },
+        scene:{
+            titleKey:'smart.extractSceneNodeTitle',
+            subKey:'smart.extractSceneSub',
+            instructionKey:'smart.extractSceneDefaultInstruction',
+            labelKey:'smart.assetTypeScene',
+            icon:'map-pinned',
+            itemKeys:['name','aliases','description']
+        },
+        prop:{
+            titleKey:'smart.extractPropNodeTitle',
+            subKey:'smart.extractPropSub',
+            instructionKey:'smart.extractPropDefaultInstruction',
+            labelKey:'smart.assetTypeProp',
+            icon:'package-search',
+            itemKeys:['name','aliases','description']
+        }
+    };
+    return map[assetType];
+}
+function defaultAssetExtractionInstruction(type){
+    return defaultAssetExtractionPromptTemplate(type);
+}
+function assetExtractorScriptTokenPattern(){
+    return /\{\{\s*script_text\s*\}\}/;
+}
+function fallbackAssetExtractionPromptTemplate(type){
+    const assetType = normalizeAssetExtractorType(type);
+    const label = tr(assetExtractorTypeMeta(assetType).labelKey);
+    return [
+        `请从剧本文本中提取${label}资产。`,
+        '',
+        '只输出 JSON 数组。每个对象必须且只能包含 name、aliases、description 三个字段。',
+        'description 必须是可直接给后续图片节点使用的自然语言描述。',
+        '',
+        '剧本文本：',
+        '{{script_text}}'
+    ].join('\n');
+}
+function defaultAssetExtractionPromptTemplate(type){
+    const assetType = normalizeAssetExtractorType(type);
+    return String(assetExtractionPromptTemplates[assetType] || fallbackAssetExtractionPromptTemplate(assetType)).trim();
+}
+function mergeLegacyAssetInstructionIntoTemplate(template, legacy){
+    const note = String(legacy || '').trim();
+    if(!note) return template;
+    return String(template || '').replace(/\n剧本文本：\n\{\{\s*script_text\s*\}\}\s*$/m, `\n用户补充要求：\n${note}\n\n剧本文本：\n{{script_text}}`);
+}
+function ensureAssetExtractorInstructionTemplate(node){
+    if(!node || node.type !== 'smart-asset-extractor') return;
+    const assetType = normalizeAssetExtractorType(node.assetType);
+    const current = String(node.instruction || '').trim();
+    if(node.instructionMode === 'template'){
+        if(!current) node.instruction = defaultAssetExtractionPromptTemplate(assetType);
+        return;
+    }
+    const template = defaultAssetExtractionPromptTemplate(assetType);
+    node.instruction = assetExtractorScriptTokenPattern().test(current)
+        ? current
+        : mergeLegacyAssetInstructionIntoTemplate(template, current);
+    node.instructionMode = 'template';
+}
+function renderAssetExtractionPromptTemplate(template, node, scriptText){
+    const assetType = normalizeAssetExtractorType(node?.assetType);
+    const label = tr(assetExtractorTypeMeta(assetType).labelKey);
+    const schema = assetExtractorSchemaFields(assetType).join(', ');
+    let text = String(template || defaultAssetExtractionPromptTemplate(assetType)).trim();
+    const hasScriptToken = assetExtractorScriptTokenPattern().test(text);
+    text = text
+        .replace(/\{\{\s*script_text\s*\}\}/g, scriptText)
+        .replace(/\{\{\s*asset_type\s*\}\}/g, label)
+        .replace(/\{\{\s*schema_fields\s*\}\}/g, schema);
+    if(!hasScriptToken) text = `${text}\n\n剧本文本：\n${scriptText}`;
+    return text.trim();
+}
+function createAssetExtractorNode(assetType, x, y, options={}){
+    if(!options.skipUndo) pushUndo();
+    const type = normalizeAssetExtractorType(assetType);
+    const providerId = resolveChatProviderId();
+    const node = {
+        id:uid(`extract_${type}`),
+        type:'smart-asset-extractor',
+        assetType:type,
+        x,
+        y,
+        w:380,
+        h:360,
+        title:tr(assetExtractorTypeMeta(type).titleKey),
+        instruction:defaultAssetExtractionPromptTemplate(type),
+        instructionMode:'template',
+        llmProvider:providerId,
+        llmModel:resolveChatModel('', providerId),
+        items:[],
+        rawText:'',
+        sourceNodeIds:[],
+        assetFile:'',
+        created_at:Date.now()
+    };
+    nodes.push(node);
+    if(options.select !== false) selectedId = node.id;
+    render();
+    scheduleSave();
+    return node;
+}
+function createAssetOutputNode(extractor, item, index, text, x, y){
+    const assetType = normalizeAssetExtractorType(extractor?.assetType);
+    return {
+        id:uid(`asset_output_${assetType}`),
+        type:'smart-asset-output',
+        assetType,
+        x,
+        y,
+        w:320,
+        h:220,
+        title:tr('smart.assetOutputNodeTitle'),
+        text:String(text || '').trim(),
+        item:item && typeof item === 'object' ? JSON.parse(JSON.stringify(item)) : item,
+        sourceExtractorId:extractor?.id || '',
+        sourceItemIndex:index,
+        sourceItemName:assetExtractorItemName(item, assetType, index),
+        created_at:Date.now()
+    };
+}
+function createStoryboardNode(x, y, options={}){
+    if(!options.skipUndo) pushUndo();
+    const providerId = resolveChatProviderId();
+    const node = {
+        id:uid('storyboard'),
+        type:'smart-storyboard',
+        x,
+        y,
+        w:430,
+        h:470,
+        title:tr('smart.storyboardNodeTitle'),
+        instruction:defaultStoryboardInstruction(),
+        instructionMode:'template',
+        durationMode:'60',
+        customDurationSec:60,
+        llmProvider:providerId,
+        llmModel:resolveChatModel('', providerId),
+        shots:[],
+        rawText:'',
+        sourceNodeIds:[],
+        created_at:Date.now()
+    };
+    nodes.push(node);
+    if(options.select !== false) selectedId = node.id;
+    render();
+    scheduleSave();
+    return node;
+}
+function createStoryboardShotNode(storyboard, shot, index, x, y){
+    const refs = storyboardShotReferenceImages(storyboard, shot);
+    return {
+        id:uid('storyboard_shot'),
+        type:'smart-storyboard-shot',
+        x,
+        y,
+        w:360,
+        h:300,
+        title:`${tr('smart.storyboardShotNodeTitle')} ${index + 1}`,
+        text:storyboardShotNodeText(shot),
+        shot:JSON.parse(JSON.stringify(shot || {})),
+        images:refs.map(ref => stripImageGenerationMeta({...ref})),
+        sourceStoryboardId:storyboard?.id || '',
+        sourceShotIndex:index,
+        created_at:Date.now()
+    };
+}
+function storyboardOutputShotData(storyboard, shot, index, existingShot=null){
+    const copy = shot && typeof shot === 'object' ? JSON.parse(JSON.stringify(shot)) : {text:String(shot || '')};
+    const refs = storyboardShotReferenceImages(storyboard, copy).map(ref => stripImageGenerationMeta({...ref}));
+    copy.reference_images = uniqueReferenceImages(refs);
+    copy.sourceShotIndex = index;
+    if(existingShot?.textEdited){
+        copy.outputText = String(existingShot.outputText || existingShot.text || storyboardShotNodeText(existingShot)).trim();
+        copy.textEdited = true;
+    } else {
+        copy.outputText = storyboardShotNodeText(copy);
+        copy.textEdited = false;
+    }
+    if(existingShot && Object.prototype.hasOwnProperty.call(existingShot, 'open')) copy.open = Boolean(existingShot.open);
+    return copy;
+}
+function createStoryboardOutputNode(storyboard, x, y, existingShots=[]){
+    const shots = Array.isArray(storyboard?.shots) ? storyboard.shots : [];
+    return {
+        id:uid('storyboard_output'),
+        type:'smart-storyboard-output',
+        x,
+        y,
+        w:560,
+        h:640,
+        title:tr('smart.storyboardOutputNodeTitle'),
+        shots:shots.map((shot, index) => storyboardOutputShotData(storyboard, shot, index, existingShots[index])),
+        sourceStoryboardId:storyboard?.id || '',
+        sourceNodeIds:storyboard?.id ? [storyboard.id] : [],
+        created_at:Date.now()
+    };
+}
+
 function createLoopNode(x, y, options={}){
     if(!options.skipUndo) pushUndo();
     const node = {id:uid('loop'), type:'smart-loop', x, y, w:340, h:168, title:'Loop', count:1, mode:'serial', showPrompt:false, imageInput:false, loopStart:1, imageBatchSize:1, variablePrompt:'', created_at:Date.now()};
@@ -1939,7 +2244,7 @@ function createLoopNode(x, y, options={}){
 }
 function cloneSmartNode(node, dx=0, dy=0){
     const copy = JSON.parse(JSON.stringify(node));
-    copy.id = uid(node.type === 'smart-prompt' ? 'prompt' : node.type === 'smart-loop' ? 'loop' : 'smart');
+    copy.id = uid(node.type === 'smart-prompt' ? 'prompt' : node.type === 'smart-script' ? 'script' : node.type === 'smart-asset-extractor' ? `extract_${normalizeAssetExtractorType(node.assetType)}` : node.type === 'smart-asset-output' ? `asset_output_${normalizeAssetExtractorType(node.assetType)}` : node.type === 'smart-storyboard' ? 'storyboard' : node.type === 'smart-storyboard-output' ? 'storyboard_output' : node.type === 'smart-storyboard-shot' ? 'storyboard_shot' : node.type === 'smart-loop' ? 'loop' : 'smart');
     copy.x = (Number(node.x) || 0) + dx;
     copy.y = (Number(node.y) || 0) + dy;
     copy.running = false;
@@ -2430,6 +2735,558 @@ function promptNodeBodyHtml(node){
         ${llmParams}
     </div>`;
 }
+function scriptNodeBodyHtml(node){
+    const text = String(node.text || '');
+    const chars = text.trim().length;
+    const words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+    const count = window.StudioI18n?.lang?.() === 'en'
+        ? trf('smart.scriptNodeCountEn', {chars, words})
+        : trf('smart.scriptNodeCount', {n:chars});
+    return `<div class="script-node-card">
+        <div class="script-node-meta"><span><i data-lucide="scroll-text"></i>${escapeHtml(tr('smart.scriptNodeTitle'))}</span><span class="script-node-count">${escapeHtml(count)}</span></div>
+        <textarea class="script-node-text script-node-control" placeholder="${escapeHtml(tr('smart.scriptNodePlaceholder'))}">${escapeHtml(node.text || '')}</textarea>
+    </div>`;
+}
+function assetExtractorSchemaFields(type){
+    const assetType = normalizeAssetExtractorType(type);
+    if(assetType === 'scene') return ['name','aliases','description'];
+    if(assetType === 'prop') return ['name','aliases','description'];
+    return ['name','aliases','description'];
+}
+function assetExtractorInputNodes(node){
+    return inputNodesFor(node).filter(input => ['smart-script','smart-prompt','smart-loop','smart-asset-extractor','smart-asset-output'].includes(input?.type));
+}
+function assetExtractorInputTextFor(node){
+    return assetExtractorInputNodes(node).map(input => textForNode(input)).map(text => String(text || '').trim()).filter(Boolean).join('\n\n');
+}
+function assetExtractorItemName(item, assetType, index=0){
+    if(item && typeof item === 'object'){
+        for(const key of ['name','title','角色名','场景名','道具名','名称']){
+            const value = String(item[key] || '').trim();
+            if(value) return value;
+        }
+    }
+    const text = String(item || '').trim();
+    return text ? text.slice(0, 80) : `${tr(assetExtractorTypeMeta(assetType).labelKey)} ${index + 1}`;
+}
+function assetValuePreview(value){
+    if(value == null) return '';
+    if(Array.isArray(value)) return value.map(assetValuePreview).filter(Boolean).join(' / ');
+    if(typeof value === 'object') {
+        try { return JSON.stringify(value); }
+        catch(e) { return ''; }
+    }
+    return String(value || '').trim();
+}
+function normalizeAssetExtractionItem(item, assetType, index=0){
+    const clean = item && typeof item === 'object' && !Array.isArray(item) ? {...item} : {description:String(item || '')};
+    clean.name = assetExtractorItemName(clean, assetType, index);
+    const cleanType = normalizeAssetExtractorType(assetType);
+    if(cleanType === 'character' || cleanType === 'scene' || cleanType === 'prop'){
+        return {
+            name:clean.name,
+            aliases:assetValuePreview(clean.aliases || clean.alias || '').trim(),
+            description:assetValuePreview(clean.description || clean.appearance || clean.visual_details || clean.location || clean.usage || '').trim()
+        };
+    }
+    clean.type = cleanType;
+    return clean;
+}
+function assetExtractionItemsFromParsed(parsed, assetType){
+    const plural = assetType === 'character' ? 'characters' : assetType === 'scene' ? 'scenes' : 'props';
+    const candidates = Array.isArray(parsed)
+        ? parsed
+        : (Array.isArray(parsed?.items) ? parsed.items
+        : Array.isArray(parsed?.[plural]) ? parsed[plural]
+        : Array.isArray(parsed?.[assetType]) ? parsed[assetType]
+        : Array.isArray(parsed?.assets) ? parsed.assets
+        : []);
+    return candidates.map((item, index) => normalizeAssetExtractionItem(item, assetType, index)).filter(item => assetExtractorItemName(item, assetType).trim());
+}
+function parseAssetExtractionJson(text, assetType){
+    const raw = String(text || '').trim();
+    const unfenced = raw.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+    const candidates = [unfenced, raw];
+    const objectStart = unfenced.indexOf('{');
+    const objectEnd = unfenced.lastIndexOf('}');
+    if(objectStart >= 0 && objectEnd > objectStart) candidates.push(unfenced.slice(objectStart, objectEnd + 1));
+    const arrayStart = unfenced.indexOf('[');
+    const arrayEnd = unfenced.lastIndexOf(']');
+    if(arrayStart >= 0 && arrayEnd > arrayStart) candidates.push(unfenced.slice(arrayStart, arrayEnd + 1));
+    let lastError = null;
+    for(const candidate of [...new Set(candidates.filter(Boolean))]){
+        try {
+            const parsed = JSON.parse(candidate);
+            const cleanType = normalizeAssetExtractorType(assetType);
+            const plural = cleanType === 'character' ? 'characters' : cleanType === 'scene' ? 'scenes' : 'props';
+            const hasRecognizedArray = Array.isArray(parsed)
+                || Array.isArray(parsed?.items)
+                || Array.isArray(parsed?.[plural])
+                || Array.isArray(parsed?.[cleanType])
+                || Array.isArray(parsed?.assets);
+            const items = assetExtractionItemsFromParsed(parsed, cleanType);
+            if(items.length || hasRecognizedArray) return items;
+        } catch(e) {
+            lastError = e;
+        }
+    }
+    throw lastError || new Error(tr('smart.assetExtractorJsonFailed'));
+}
+function assetExtractorPromptFor(node, scriptText){
+    ensureAssetExtractorInstructionTemplate(node);
+    return renderAssetExtractionPromptTemplate(node.instruction, node, scriptText);
+}
+function assetExtractorItemSummary(item, assetType){
+    const nameKeys = new Set(['id','type','name','title','角色名','场景名','道具名','名称']);
+    const preferred = assetExtractorTypeMeta(assetType).itemKeys || [];
+    const values = [...preferred, ...Object.keys(item || {})]
+        .filter((key, index, arr) => !nameKeys.has(key) && arr.indexOf(key) === index)
+        .map(key => assetValuePreview(item?.[key]))
+        .filter(Boolean);
+    return values.join(' · ').slice(0, 180);
+}
+function assetExtractorOutputItemsFor(node){
+    const items = Array.isArray(node?.items) ? node.items : [];
+    if(!items.length) return [];
+    return items.map(item => assetValuePreview(item?.description).trim());
+    const assetType = normalizeAssetExtractorType(node.assetType);
+    const label = tr(assetExtractorTypeMeta(assetType).labelKey);
+    const skipKeys = new Set(['id','type','extractor_node_id','source_node_ids','updated_at']);
+    return items.map((item, index) => {
+        const description = assetValuePreview(item?.description).trim();
+        if(description) return description;
+        const name = assetExtractorItemName(item, assetType, index);
+        const lines = [`${label} ${index + 1}: ${name}`];
+        Object.entries(item || {}).forEach(([key, value]) => {
+            if(skipKeys.has(key)) return;
+            if(['name','title','角色名','场景名','道具名','名称'].includes(key)) return;
+            const preview = assetValuePreview(value);
+            if(preview) lines.push(`${key}: ${preview}`);
+        });
+        return lines.join('\n');
+    }).filter(Boolean);
+}
+function assetExtractorOutputTextFor(node){
+    return assetExtractorOutputItemsFor(node).join('\n\n');
+}
+function removeNodesSilently(ids){
+    const removeIds = new Set((ids || []).filter(Boolean));
+    if(!removeIds.size) return;
+    nodes = nodes.filter(node => !removeIds.has(node.id));
+    if(canvas) canvas.connections = (canvas.connections || []).filter(conn => !removeIds.has(conn.from) && !removeIds.has(conn.to));
+    nodes.forEach(node => {
+        if(Array.isArray(node.inputNodeIds)) node.inputNodeIds = node.inputNodeIds.filter(id => !removeIds.has(id));
+    });
+    if(removeIds.has(selectedId)) selectedId = '';
+    selectedIds = selectedIds.filter(id => !removeIds.has(id));
+    if(removeIds.has(selectedImage.nodeId)) selectedImage = {nodeId:'', index:-1};
+}
+function syncAssetExtractorOutputNodes(extractor){
+    if(!extractor || extractor.type !== 'smart-asset-extractor') return [];
+    const texts = assetExtractorOutputItemsFor(extractor);
+    const items = Array.isArray(extractor.items) ? extractor.items : [];
+    const sourceRect = nodeRect(extractor);
+    const x = sourceRect.x + sourceRect.width + 80;
+    const gap = 22;
+    let y = sourceRect.y;
+    const existing = nodes
+        .filter(node => node.type === 'smart-asset-output' && node.sourceExtractorId === extractor.id)
+        .sort((a, b) => (Number(a.sourceItemIndex) || 0) - (Number(b.sourceItemIndex) || 0));
+    const used = new Set();
+    const synced = [];
+    texts.forEach((text, index) => {
+        const item = items[index] || {};
+        let output = existing.find(node => !used.has(node.id) && Number(node.sourceItemIndex) === index);
+        if(!output) output = existing.find(node => !used.has(node.id));
+        if(output){
+            used.add(output.id);
+            output.assetType = normalizeAssetExtractorType(extractor.assetType);
+            output.text = String(text || '').trim();
+            output.item = item && typeof item === 'object' ? JSON.parse(JSON.stringify(item)) : item;
+            output.sourceItemIndex = index;
+            output.sourceItemName = assetExtractorItemName(item, output.assetType, index);
+            output.title = tr('smart.assetOutputNodeTitle');
+            output.x = x;
+            output.y = y;
+            output.w = Math.max(300, Number(output.w) || 320);
+            output.h = Math.max(160, Number(output.h) || 220);
+        } else {
+            output = createAssetOutputNode(extractor, item, index, text, x, y);
+            nodes.push(output);
+        }
+        connectInputNode(extractor.id, output.id);
+        synced.push(output);
+        y += nodeRect(output).height + gap;
+    });
+    removeNodesSilently(existing.filter(node => !used.has(node.id)).map(node => node.id));
+    return synced;
+}
+function defaultStoryboardInstruction(){
+    return String(storyboardPromptTemplate || '').trim();
+}
+function storyboardTokenPattern(name){
+    return new RegExp(`\\{\\{\\s*${name}\\s*\\}\\}`, 'g');
+}
+function storyboardInputNodes(node){
+    return inputNodesFor(node).filter(input => ['smart-script','smart-prompt','smart-loop','smart-asset-extractor','smart-asset-output','smart-image','smart-storyboard-shot'].includes(input?.type));
+}
+function storyboardScriptTextFor(node){
+    return storyboardInputNodes(node)
+        .filter(input => input.type !== 'smart-image')
+        .map(input => textForNode(input))
+        .map(text => String(text || '').trim())
+        .filter(Boolean)
+        .join('\n\n');
+}
+function assetItemUrl(item){
+    return imageUrlValue(item);
+}
+function imageUrlValue(value){
+    if(!value) return '';
+    if(typeof value === 'string') return value.trim();
+    if(typeof value !== 'object') return '';
+    const keys = ['url','image','image_url','reference_image','asset_url','src','href'];
+    for(const key of keys){
+        const nested = imageUrlValue(value[key]);
+        if(nested) return nested;
+    }
+    return '';
+}
+function normalizeReferenceImageValue(value, fallbackName='shot-ref'){
+    const url = imageUrlValue(value);
+    if(!url) return null;
+    const source = value && typeof value === 'object' ? value : {};
+    return {...source, url, name:source.name || source.title || fallbackName, kind:'image'};
+}
+function storyboardAssetTypeLabel(type){
+    if(type === 'scene') return tr('smart.assetTypeScene');
+    if(type === 'prop') return tr('smart.assetTypeProp');
+    if(type === 'image') return '图片';
+    return tr('smart.assetTypeCharacter');
+}
+function storyboardAssetEntriesFor(node){
+    const entries = [];
+    storyboardInputNodes(node).forEach(input => {
+        if(input.type === 'smart-asset-extractor'){
+            const assetType = normalizeAssetExtractorType(input.assetType);
+            (input.items || []).forEach((item, index) => {
+                const name = assetExtractorItemName(item, assetType, index);
+                entries.push({type:assetType, name, description:assetExtractorItemSummary(item, assetType) || assetValuePreview(item?.description), url:assetItemUrl(item), sourceNodeId:input.id});
+            });
+        } else if(input.type === 'smart-asset-output'){
+            const assetType = normalizeAssetExtractorType(input.assetType);
+            const item = input.item && typeof input.item === 'object' ? input.item : {description:input.text || ''};
+            const name = assetExtractorItemName(item, assetType, Number(input.sourceItemIndex) || 0);
+            entries.push({type:assetType, name, description:String(input.text || assetValuePreview(item.description) || '').trim(), url:assetItemUrl(item), sourceNodeId:input.id});
+        } else if(input.type === 'smart-image'){
+            imagesForNode(input).forEach((img, index) => {
+                entries.push({
+                    type:'image',
+                    name:img.name || `Image ${index + 1}`,
+                    description:img.name || '',
+                    url:imageUrlValue(img),
+                    sourceNodeId:input.id
+                });
+            });
+        }
+    });
+    return entries.filter(entry => entry.name || entry.description || entry.url);
+}
+function storyboardAssetContextFor(node){
+    const entries = storyboardAssetEntriesFor(node);
+    if(!entries.length) return '无';
+    return entries.map(entry => {
+        const parts = [`类型：${storyboardAssetTypeLabel(entry.type)}`, `名称：${entry.name || '未命名'}`];
+        if(entry.description) parts.push(`描述：${entry.description}`);
+        if(entry.url) parts.push(`图片：${entry.url}`);
+        return `- ${parts.join('；')}`;
+    }).join('\n');
+}
+const STORYBOARD_DURATION_OPTIONS = ['30', '60', '90', '120', '150', 'custom'];
+function normalizeStoryboardDurationMode(value){
+    const mode = String(value || '60');
+    return STORYBOARD_DURATION_OPTIONS.includes(mode) ? mode : '60';
+}
+function clampStoryboardDuration(seconds){
+    return Math.max(5, Math.min(3600, Math.round(Number(seconds) || 60)));
+}
+function storyboardDurationSeconds(node){
+    const mode = normalizeStoryboardDurationMode(node?.durationMode);
+    if(mode === 'custom') return clampStoryboardDuration(node?.customDurationSec);
+    return clampStoryboardDuration(mode);
+}
+function storyboardDurationLabel(seconds){
+    const sec = clampStoryboardDuration(seconds);
+    if(sec < 60) return `${sec}s`;
+    const min = Math.floor(sec / 60);
+    const rest = sec % 60;
+    return rest ? `${min}min${rest}s` : `${min}min`;
+}
+function storyboardTargetShotCount(node){
+    return Math.max(1, Math.round(storyboardDurationSeconds(node) / 2.5));
+}
+function storyboardDurationContextFor(node){
+    const seconds = storyboardDurationSeconds(node);
+    const target = storyboardTargetShotCount(node);
+    const min = Math.max(1, Math.floor(target * 0.9));
+    const max = Math.max(min, Math.ceil(target * 1.1));
+    return [
+        `总时长：${storyboardDurationLabel(seconds)}（${seconds}秒）`,
+        `建议分镜数量：${target}个`,
+        `允许范围：${min}-${max}个`,
+        '请按该时长和数量范围拆分分镜；如果剧情动作密集，优先接近上限。'
+    ].join('\n');
+}
+function storyboardDurationOptionsHtml(node){
+    const mode = normalizeStoryboardDurationMode(node?.durationMode);
+    const labels = {
+        '30':'30s',
+        '60':'1min',
+        '90':'1min30s',
+        '120':'2min',
+        '150':'2min30s',
+        custom:tr('smart.storyboardDurationCustom')
+    };
+    return STORYBOARD_DURATION_OPTIONS.map(value => `<option value="${value}" ${mode === value ? 'selected' : ''}>${escapeHtml(labels[value])}</option>`).join('');
+}
+function storyboardPromptFor(node, scriptText){
+    const template = String(node.instruction || defaultStoryboardInstruction()).trim();
+    const hasDuration = storyboardTokenPattern('duration_context').test(template);
+    let text = template
+        .replace(storyboardTokenPattern('script_text'), scriptText)
+        .replace(storyboardTokenPattern('duration_context'), storyboardDurationContextFor(node))
+        .replace(storyboardTokenPattern('asset_context'), storyboardAssetContextFor(node))
+        .trim();
+    if(!hasDuration) text += `\n\n### 总时长与分镜数量\n${storyboardDurationContextFor(node)}`;
+    return text.trim();
+}
+function storyboardShotPrompt(shot){
+    return String(shot?.prompt || shot?.text || shot?.description || shot?.title || '').trim();
+}
+function storyboardShotNodeText(shot){
+    const lines = [];
+    const title = String(shot?.title || shot?.name || '').trim();
+    const shotType = String(shot?.shot || shot?.shot_type || shot?.frame || '').trim();
+    const camera = String(shot?.camera || shot?.camera_movement || shot?.lens || '').trim();
+    const text = String(shot?.text || shot?.content || shot?.description || '').trim();
+    const prompt = String(shot?.prompt || '').trim();
+    if(title) lines.push(title);
+    if(shotType || camera) lines.push([shotType, camera].filter(Boolean).join(' / '));
+    if(text) lines.push(text);
+    if(prompt && prompt !== text) lines.push(prompt);
+    return lines.filter(Boolean).join('\n').trim() || storyboardShotPrompt(shot);
+}
+function normalizeStoryboardList(parsed){
+    if(Array.isArray(parsed)) return parsed;
+    if(Array.isArray(parsed?.shots)) return parsed.shots;
+    if(Array.isArray(parsed?.storyboard)) return parsed.storyboard;
+    if(Array.isArray(parsed?.items)) return parsed.items;
+    return [];
+}
+function normalizeStoryboardShot(item, index){
+    const shot = item && typeof item === 'object' && !Array.isArray(item) ? {...item} : {text:String(item || '')};
+    const toList = value => Array.isArray(value) ? value.map(v => String(typeof v === 'object' ? (v.name || v.title || JSON.stringify(v)) : v).trim()).filter(Boolean) : String(value || '').split(/[、,，/]/).map(v => v.trim()).filter(Boolean);
+    shot.index = Number(shot.index || shot.no || shot.id || index + 1) || index + 1;
+    shot.title = String(shot.title || shot.name || `分镜 ${shot.index}`).trim();
+    shot.shot = String(shot.shot || shot.shot_type || shot.frame || '').trim();
+    shot.camera = String(shot.camera || shot.camera_movement || shot.lens || '').trim();
+    shot.text = String(shot.text || shot.content || shot.description || '').trim();
+    shot.prompt = storyboardShotPrompt(shot);
+    shot.characters = toList(shot.characters || shot.roles || shot.character || '');
+    shot.scene = String(Array.isArray(shot.scene) ? shot.scene[0] : (shot.scene || shot.location || '')).trim();
+    shot.props = toList(shot.props || shot.prop || shot.items || '');
+    shot.asset_refs = toList(shot.asset_refs || shot.assets || '');
+    shot.reference_images = Array.isArray(shot.reference_images)
+        ? shot.reference_images.map(v => normalizeReferenceImageValue(v, shot.title || `shot-${shot.index}`)).filter(Boolean)
+        : [];
+    return shot;
+}
+function parseStoryboardJson(text){
+    const raw = String(text || '').trim();
+    const unfenced = raw.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+    const candidates = [unfenced, raw];
+    const objectStart = unfenced.indexOf('{'), objectEnd = unfenced.lastIndexOf('}');
+    if(objectStart >= 0 && objectEnd > objectStart) candidates.push(unfenced.slice(objectStart, objectEnd + 1));
+    const arrayStart = unfenced.indexOf('['), arrayEnd = unfenced.lastIndexOf(']');
+    if(arrayStart >= 0 && arrayEnd > arrayStart) candidates.push(unfenced.slice(arrayStart, arrayEnd + 1));
+    let lastError = null;
+    for(const candidate of [...new Set(candidates.filter(Boolean))]){
+        try {
+            const list = normalizeStoryboardList(JSON.parse(candidate));
+            if(list.length) return list.map(normalizeStoryboardShot);
+        } catch(e){ lastError = e; }
+    }
+    throw lastError || new Error(tr('smart.storyboardJsonFailed'));
+}
+function storyboardShotText(shot){
+    const lines = [`${shot.index || ''}. ${shot.title || tr('smart.storyboardShotNodeTitle')}`.trim()];
+    if(shot.shot || shot.camera) lines.push([shot.shot, shot.camera].filter(Boolean).join(' / '));
+    if(shot.text) lines.push(shot.text);
+    if(shot.prompt) lines.push(`Prompt: ${shot.prompt}`);
+    const assets = [...(shot.characters || []), shot.scene, ...(shot.props || [])].filter(Boolean);
+    if(assets.length) lines.push(`资产: ${assets.join('、')}`);
+    return lines.join('\n');
+}
+function storyboardOutputTextFor(node){
+    return (node?.shots || []).map(shot => storyboardEditableShotText(shot) || storyboardShotText(shot)).join('\n\n');
+}
+function storyboardOutputsHtml(node){
+    const shots = Array.isArray(node.shots) ? node.shots : [];
+    if(!shots.length) return `<div class="asset-extractor-empty">${escapeHtml(tr('smart.storyboardEmpty'))}</div>`;
+    return `<div class="asset-extractor-output-list storyboard-output-list">${shots.map((shot, index) => `<div class="asset-extractor-item" title="${escapeAttr(storyboardShotText(shot))}"><span class="asset-extractor-item-index">${index + 1}</span><span class="asset-extractor-item-main"><strong>${escapeHtml(shot.title || `${tr('smart.storyboardShotNodeTitle')} ${index + 1}`)}</strong><em>${escapeHtml(storyboardShotPrompt(shot) || shot.text || '')}</em></span></div>`).join('')}</div>`;
+}
+function storyboardEditableShotText(shot){
+    return String(shot?.outputText || '').trim();
+}
+function storyboardOutputShotImages(shot){
+    return uniqueReferenceImages((shot?.reference_images || []).map(ref => normalizeReferenceImageValue(ref, shot?.title || 'shot-ref')).filter(Boolean));
+}
+function storyboardOutputShotMetaHtml(shot){
+    const parts = [
+        shot.duration ? `${shot.duration}s` : '',
+        shot.shot || '',
+        shot.camera || '',
+        shot.scene || ''
+    ].filter(Boolean);
+    return parts.length ? `<div class="storyboard-output-shot-meta">${parts.map(part => `<span>${escapeHtml(part)}</span>`).join('')}</div>` : '';
+}
+function storyboardOutputNodeBodyHtml(node){
+    const shots = Array.isArray(node.shots) ? node.shots : [];
+    return `<div class="storyboard-output-card">
+        <div class="asset-output-head"><span><i data-lucide="list-video"></i>${escapeHtml(tr('smart.storyboardOutputNodeTitle'))}</span><em>${escapeHtml(trf('smart.storyboardOutputCount', {n:shots.length}))}</em></div>
+        <div class="storyboard-output-scroll">
+            ${shots.length ? shots.map((shot, index) => {
+                const refs = storyboardOutputShotImages(shot);
+                const text = storyboardEditableShotText(shot) || storyboardShotNodeText(shot);
+                const summary = storyboardShotPrompt(shot) || shot.description || shot.action || shot.text || '';
+                const open = shot.open !== false && (shot.open || index === 0);
+                return `<details class="storyboard-output-shot" data-shot-index="${index}" ${open ? 'open' : ''}>
+                    <summary>
+                        <span class="storyboard-shot-index">${index + 1}</span>
+                        <span class="storyboard-shot-main">
+                            <strong>${escapeHtml(shot.title || `${tr('smart.storyboardShotNodeTitle')} ${index + 1}`)}</strong>
+                            <em>${escapeHtml(summary)}</em>
+                        </span>
+                        <span class="storyboard-output-ref-count">${escapeHtml(refs.length ? trf('smart.storyboardRefCount', {n:refs.length}) : tr('smart.storyboardNoRefs'))}</span>
+                    </summary>
+                    <div class="storyboard-output-shot-body">
+                        ${storyboardOutputShotMetaHtml(shot)}
+                        ${smartNodeInputThumbsHtml(refs, {labelPrefix:'Ref '})}
+                        <textarea class="storyboard-output-shot-text" data-shot-index="${index}" placeholder="${escapeHtml(tr('smart.storyboardShotPlaceholder'))}">${escapeHtml(text)}</textarea>
+                    </div>
+                </details>`;
+            }).join('') : `<div class="asset-extractor-empty">${escapeHtml(tr('smart.storyboardOutputEmpty'))}</div>`}
+        </div>
+    </div>`;
+}
+function storyboardShotReferenceImages(storyboard, shot){
+    const refs = [];
+    (shot?.reference_images || []).forEach(ref => {
+        const url = typeof ref === 'object' ? ref.url : ref;
+        if(url) refs.push({url, name:ref.name || shot.title || 'shot-ref', kind:'image'});
+    });
+    const entries = storyboardAssetEntriesFor(storyboard);
+    const names = new Set([...(shot?.characters || []), shot?.scene, ...(shot?.props || []), ...(shot?.asset_refs || [])].filter(Boolean).map(v => String(v).trim().toLowerCase()));
+    entries.forEach(entry => {
+        if(entry.url && names.has(String(entry.name || '').trim().toLowerCase())) refs.push({url:entry.url, name:entry.name, kind:'image'});
+    });
+    return uniqueReferenceImages(refs);
+}
+function storyboardBodyHtml(node){
+    node.llmProvider = resolveChatProviderId(node.llmProvider || '');
+    node.llmModel = resolveChatModel(node.llmModel || '', node.llmProvider);
+    node.durationMode = normalizeStoryboardDurationMode(node.durationMode);
+    node.customDurationSec = clampStoryboardDuration(node.customDurationSec || storyboardDurationSeconds(node));
+    if(!String(node.instruction || '').trim()) node.instruction = defaultStoryboardInstruction();
+    const sourceCount = storyboardInputNodes(node).length;
+    const shotCount = Array.isArray(node.shots) ? node.shots.length : 0;
+    const instructionOpen = Boolean(node.instructionOpen);
+    const durationSeconds = storyboardDurationSeconds(node);
+    const targetShots = storyboardTargetShotCount(node);
+    return `<div class="asset-extractor-card storyboard-card">
+        <div class="asset-extractor-head"><span><i data-lucide="clapperboard"></i>${escapeHtml(tr('smart.storyboardNodeTitle'))}</span><span>${escapeHtml(sourceCount ? trf('smart.assetExtractorSourceCount', {n:sourceCount}) : tr('smart.assetExtractorNoSource'))}</span></div>
+        <button class="storyboard-edit asset-extractor-control ${instructionOpen ? 'active' : ''}" type="button"><i data-lucide="pencil"></i><span>${escapeHtml(tr('smart.storyboardInstruction'))}</span></button>
+        ${instructionOpen ? `<textarea class="storyboard-instruction asset-extractor-control" placeholder="${escapeHtml(tr('smart.storyboardInstruction'))}">${escapeHtml(node.instruction || '')}</textarea>` : ''}
+        <div class="storyboard-duration-row">
+            <span>${escapeHtml(tr('smart.storyboardDuration'))}</span>
+            <select class="asset-extractor-control storyboard-duration-select">${storyboardDurationOptionsHtml(node)}</select>
+            ${node.durationMode === 'custom' ? `<input class="asset-extractor-control storyboard-duration-custom" type="number" min="5" max="3600" step="1" value="${durationSeconds}">` : ''}
+            <em class="storyboard-duration-target">${escapeHtml(trf('smart.storyboardDurationTarget', {n:targetShots}))}</em>
+        </div>
+        <div class="asset-extractor-model-row"><select class="asset-extractor-control storyboard-provider">${chatProviderOptions(node.llmProvider)}</select><select class="asset-extractor-control storyboard-model">${chatModelOptions(node.llmModel, node.llmProvider)}</select></div>
+        <div class="asset-extractor-actions"><button class="storyboard-run asset-extractor-control" type="button" ${node.running ? 'disabled' : ''}><i data-lucide="${node.running ? 'loader-2' : 'sparkles'}"></i><span>${escapeHtml(node.running ? tr('common.running') : tr('smart.storyboardRun'))}</span></button><button class="storyboard-output asset-extractor-control" type="button" ${shotCount ? '' : 'disabled'}><i data-lucide="split-square-horizontal"></i><span>${escapeHtml(tr('smart.storyboardOutput'))}</span></button><span class="asset-extractor-status">${escapeHtml(shotCount ? trf('smart.storyboardOutputCount', {n:shotCount}) : tr('smart.storyboardReady'))}</span></div>
+        <div class="asset-extractor-output">${storyboardOutputsHtml(node)}</div>
+    </div>`;
+}
+function storyboardShotBodyHtml(node){
+    const refs = storyboardShotInputImages(node);
+    return `<div class="asset-output-card storyboard-shot-card">
+        <div class="asset-output-head"><span><i data-lucide="clapperboard"></i>${escapeHtml(node.title || tr('smart.storyboardShotNodeTitle'))}</span><em>${escapeHtml(refs.length ? trf('smart.storyboardRefCount', {n:refs.length}) : tr('smart.storyboardNoRefs'))}</em></div>
+        ${smartNodeInputThumbsHtml(refs, {labelPrefix:'Ref '})}
+        <textarea class="storyboard-shot-text" placeholder="${escapeHtml(tr('smart.storyboardShotPlaceholder'))}">${escapeHtml(node.text || '')}</textarea>
+    </div>`;
+}
+function assetOutputNodeBodyHtml(node){
+    const assetType = normalizeAssetExtractorType(node.assetType);
+    const meta = assetExtractorTypeMeta(assetType);
+    const text = String(node.text || '').trim();
+    const name = String(node.item?.name || node.sourceItemName || '').trim();
+    const editing = Boolean(node.editing);
+    return `<div class="asset-output-card asset-output-${escapeHtml(assetType)}">
+        <div class="asset-output-head">
+            <span title="${escapeAttr(name || tr('smart.assetOutputNodeTitle'))}"><i data-lucide="${escapeHtml(meta.icon)}"></i>${escapeHtml(name || tr('smart.assetOutputNodeTitle'))}</span>
+            <em>${escapeHtml(tr(meta.labelKey))}</em>
+        </div>
+        <textarea class="asset-output-text" ${editing ? '' : 'readonly'} placeholder="${escapeHtml(tr('smart.assetOutputEmpty'))}">${escapeHtml(text)}</textarea>
+        <button class="asset-output-edit ${editing ? 'active' : ''}" type="button" title="${escapeHtml(tr('common.edit'))}"><i data-lucide="pencil"></i><span>${escapeHtml(tr('common.edit'))}</span></button>
+    </div>`;
+}
+function assetExtractorOutputsHtml(node){
+    const items = Array.isArray(node.items) ? node.items : [];
+    if(!items.length) return `<div class="asset-extractor-empty">${escapeHtml(tr('smart.assetExtractorEmpty'))}</div>`;
+    return `<div class="asset-extractor-output-list">
+        ${items.map((item, index) => {
+            const name = assetExtractorItemName(item, node.assetType, index);
+            const summary = assetExtractorItemSummary(item, node.assetType);
+            return `<div class="asset-extractor-item" title="${escapeAttr(summary || name)}">
+                <span class="asset-extractor-item-index">${index + 1}</span>
+                <span class="asset-extractor-item-main">
+                    <strong>${escapeHtml(name)}</strong>
+                    ${summary ? `<em>${escapeHtml(summary)}</em>` : ''}
+                </span>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+function assetExtractorBodyHtml(node){
+    node.assetType = normalizeAssetExtractorType(node.assetType);
+    node.llmProvider = resolveChatProviderId(node.llmProvider || '');
+    node.llmModel = resolveChatModel(node.llmModel || '', node.llmProvider);
+    ensureAssetExtractorInstructionTemplate(node);
+    const meta = assetExtractorTypeMeta(node.assetType);
+    const sourceCount = assetExtractorInputNodes(node).length;
+    const itemCount = Array.isArray(node.items) ? node.items.length : 0;
+    const saved = node.assetFile || (canvasId ? `data/canvas_assets/${canvasId}.json` : '');
+    const instructionOpen = Boolean(node.instructionOpen);
+    return `<div class="asset-extractor-card asset-extractor-${escapeHtml(node.assetType)}">
+        <div class="asset-extractor-head">
+            <span><i data-lucide="${escapeHtml(meta.icon)}"></i>${escapeHtml(tr(meta.titleKey))}</span>
+            <span>${escapeHtml(sourceCount ? trf('smart.assetExtractorSourceCount', {n:sourceCount}) : tr('smart.assetExtractorNoSource'))}</span>
+        </div>
+        <button class="asset-extractor-edit asset-extractor-control ${instructionOpen ? 'active' : ''}" type="button"><i data-lucide="pencil"></i><span>${escapeHtml(tr('smart.assetExtractorInstruction'))}</span></button>
+        ${instructionOpen ? `<textarea class="asset-extractor-instruction asset-extractor-control" placeholder="${escapeHtml(tr('smart.assetExtractorInstruction'))}">${escapeHtml(node.instruction || '')}</textarea>` : ''}
+        <div class="asset-extractor-model-row">
+            <select class="asset-extractor-control asset-extractor-provider">${chatProviderOptions(node.llmProvider)}</select>
+            <select class="asset-extractor-control asset-extractor-model">${chatModelOptions(node.llmModel, node.llmProvider)}</select>
+        </div>
+        <div class="asset-extractor-actions">
+            <button class="asset-extractor-run asset-extractor-control" type="button" ${node.running ? 'disabled' : ''}><i data-lucide="${node.running ? 'loader-2' : 'play'}"></i><span>${escapeHtml(node.running ? tr('common.running') : tr('smart.assetExtractorRun'))}</span></button>
+            <span class="asset-extractor-status">${escapeHtml(itemCount ? trf('smart.assetExtractorOutputCount', {n:itemCount}) : tr('smart.assetExtractorOutputReady'))}</span>
+        </div>
+        <div class="asset-extractor-output">${assetExtractorOutputsHtml(node)}</div>
+        ${saved ? `<div class="asset-extractor-file" title="${escapeAttr(saved)}"><i data-lucide="save"></i><span>${escapeHtml(saved)}</span></div>` : ''}
+    </div>`;
+}
 function loopNumberControlHtml({label, value, key, min=1, max=100, quick=[1,2,3,4,5,6,8,10]}){
     const v = Math.max(min, Math.min(max, Number(value) || min));
     return `<div class="loop-number-control">
@@ -2538,6 +3395,12 @@ function smartLoopBodyHtml(node){
 }
 function nodeBodyHtml(node, layout){
     if(node.type === 'smart-prompt') return promptNodeBodyHtml(node);
+    if(node.type === 'smart-script') return scriptNodeBodyHtml(node);
+    if(node.type === 'smart-asset-extractor') return assetExtractorBodyHtml(node);
+    if(node.type === 'smart-asset-output') return assetOutputNodeBodyHtml(node);
+    if(node.type === 'smart-storyboard') return storyboardBodyHtml(node);
+    if(node.type === 'smart-storyboard-output') return storyboardOutputNodeBodyHtml(node);
+    if(node.type === 'smart-storyboard-shot') return storyboardShotBodyHtml(node);
     if(node.type === 'smart-loop') return smartLoopBodyHtml(node);
     const imgs = node.images || [];
     if(node.pending && imgs.length === 0){
@@ -2602,10 +3465,17 @@ function render(){
     });
     const nodeHtmlEntries = nodes.map(node => {
         const imgs = node.images || [];
-        const title = node.type === 'smart-prompt' ? 'Prompt' : node.type === 'smart-loop' ? 'Loop' : (imgs.length > 1 ? 'Group' : imgs.length ? 'Image' : '上传卡片');
+        const title = node.type === 'smart-prompt' ? 'Prompt' : node.type === 'smart-script' ? tr('smart.scriptNodeTitle') : node.type === 'smart-storyboard' ? tr('smart.storyboardNodeTitle') : node.type === 'smart-storyboard-output' ? tr('smart.storyboardOutputNodeTitle') : node.type === 'smart-storyboard-shot' ? tr('smart.storyboardShotNodeTitle') : node.type === 'smart-loop' ? 'Loop' : (imgs.length > 1 ? 'Group' : imgs.length ? 'Image' : '上传卡片');
+        const displayTitle = node.type === 'smart-asset-output' ? tr('smart.assetOutputNodeTitle') : title;
         const scale = nodeScale(node);
         const layout = imageLayout(imgs, scale, node);
         const isPrompt = node.type === 'smart-prompt';
+        const isScript = node.type === 'smart-script';
+        const isAssetExtractor = node.type === 'smart-asset-extractor';
+        const isAssetOutput = node.type === 'smart-asset-output';
+        const isStoryboard = node.type === 'smart-storyboard';
+        const isStoryboardOutput = node.type === 'smart-storyboard-output';
+        const isStoryboardShot = node.type === 'smart-storyboard-shot';
         const isLoop = node.type === 'smart-loop';
         const isImageNode = node.type === 'smart-image' || !node.type;
         const isEmpty = isImageNode && imgs.length === 0 && !node.pending;
@@ -2613,14 +3483,15 @@ function render(){
         const isPending = node.pending && imgs.length === 0;
         const body = nodeBodyHtml(node, layout);
         const deleteBtn = `<button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button>`;
-        const hint = isPending ? escapeHtml(tr('smart.hintPending')) : (imgs.length > 1 ? escapeHtml(tr('smart.hintMulti')) : imgs.length ? escapeHtml(tr('smart.hintSingle')) : escapeHtml(tr('smart.hintEmpty')));
-        const html = `<div class="image-node ${isEmpty ? 'empty-node' : ''} ${isGroup ? 'group-node' : ''} ${isPrompt ? 'prompt-smart-node' : ''} ${isLoop ? 'loop-smart-node' : ''} ${isNodeSelected(node.id) ? 'selected' : ''} ${(dragState?.groupIds?.includes(node.id) || dragState?.id === node.id) ? 'dragging' : ''} ${node.running ? 'node-running' : ''} ${isPending ? 'node-pending' : ''}" data-id="${escapeHtml(node.id)}" style="left:${node.x || 0}px;top:${node.y || 0}px;width:${layout.width}px;height:${layout.height}px">
-            <div class="node-head"><div class="node-title">${title}</div><div class="node-actions">${deleteBtn}</div></div>
+        const hint = isStoryboard ? escapeHtml(tr('smart.storyboardHint')) : isStoryboardOutput ? escapeHtml(tr('smart.storyboardOutputHint')) : isStoryboardShot ? escapeHtml(tr('smart.storyboardShotHint')) : isAssetExtractor ? escapeHtml(tr('smart.assetExtractorHint')) : isScript ? escapeHtml(tr('smart.scriptNodeHint')) : isPending ? escapeHtml(tr('smart.hintPending')) : (imgs.length > 1 ? escapeHtml(tr('smart.hintMulti')) : imgs.length ? escapeHtml(tr('smart.hintSingle')) : escapeHtml(tr('smart.hintEmpty')));
+        const displayHint = isAssetOutput ? escapeHtml(tr('smart.assetOutputHint')) : hint;
+        const html = `<div class="image-node ${isEmpty ? 'empty-node' : ''} ${isGroup ? 'group-node' : ''} ${isPrompt ? 'prompt-smart-node' : ''} ${isScript ? 'script-smart-node' : ''} ${isAssetExtractor ? 'asset-extractor-node' : ''} ${isAssetOutput ? 'asset-output-node' : ''} ${isStoryboard ? 'storyboard-node' : ''} ${isStoryboardOutput ? 'storyboard-output-node' : ''} ${isStoryboardShot ? 'storyboard-shot-node' : ''} ${isLoop ? 'loop-smart-node' : ''} ${isNodeSelected(node.id) ? 'selected' : ''} ${(dragState?.groupIds?.includes(node.id) || dragState?.id === node.id) ? 'dragging' : ''} ${node.running ? 'node-running' : ''} ${isPending ? 'node-pending' : ''}" data-id="${escapeHtml(node.id)}" style="left:${node.x || 0}px;top:${node.y || 0}px;width:${layout.width}px;height:${layout.height}px">
+            <div class="node-head"><div class="node-title">${displayTitle}</div><div class="node-actions">${deleteBtn}</div></div>
             ${!isEmpty ? `<div class="floating-node-actions"><button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button></div>` : ''}
             ${runTimePillHtml(node)}
             <div class="node-body">${body}</div>
-            <div class="node-hint">${hint}</div>
-            ${imgs.length || node.pending || isPrompt || isLoop ? '<div class="node-resize-handle" data-resize="1"></div>' : ''}
+            <div class="node-hint">${displayHint}</div>
+            ${imgs.length || node.pending || isPrompt || isScript || isAssetExtractor || isAssetOutput || isStoryboard || isStoryboardOutput || isStoryboardShot || isLoop ? '<div class="node-resize-handle" data-resize="1"></div>' : ''}
             <div class="node-port port-in" data-port="in" title="input"></div>
             <div class="node-port port-out" data-port="out" title="output"></div>
         </div>`;
@@ -2665,10 +3536,12 @@ function render(){
     world.insertAdjacentHTML('beforeend', renderConnections());
     const nodesHtml = nodes.map(node => {
         const imgs = node.images || [];
-        const title = node.type === 'smart-prompt' ? 'Prompt' : node.type === 'smart-loop' ? 'Loop' : (imgs.length > 1 ? 'Group' : 'Image');
+        const title = node.type === 'smart-prompt' ? 'Prompt' : node.type === 'smart-script' ? tr('smart.scriptNodeTitle') : node.type === 'smart-loop' ? 'Loop' : (imgs.length > 1 ? 'Group' : 'Image');
         const scale = nodeScale(node);
         const layout = imageLayout(imgs, scale, node);
         const isPrompt = node.type === 'smart-prompt';
+        const isScript = node.type === 'smart-script';
+        const isAssetExtractor = node.type === 'smart-asset-extractor';
         const isLoop = node.type === 'smart-loop';
         const isImageNode = node.type === 'smart-image' || !node.type;
         const isEmpty = isImageNode && imgs.length === 0 && !node.pending;
@@ -2676,13 +3549,13 @@ function render(){
         const isPending = node.pending && imgs.length === 0;
         const body = nodeBodyHtml(node, layout);
         const deleteBtn = `<button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button>`;
-        return `<div class="image-node ${isEmpty ? 'empty-node' : ''} ${isGroup ? 'group-node' : ''} ${isPrompt ? 'prompt-smart-node' : ''} ${isLoop ? 'loop-smart-node' : ''} ${isNodeSelected(node.id) ? 'selected' : ''} ${(dragState?.groupIds?.includes(node.id) || dragState?.id === node.id) ? 'dragging' : ''} ${node.running ? 'node-running' : ''} ${isPending ? 'node-pending' : ''}" data-id="${escapeHtml(node.id)}" style="left:${node.x || 0}px;top:${node.y || 0}px;width:${layout.width}px;height:${layout.height}px">
+        return `<div class="image-node ${isEmpty ? 'empty-node' : ''} ${isGroup ? 'group-node' : ''} ${isPrompt ? 'prompt-smart-node' : ''} ${isScript ? 'script-smart-node' : ''} ${isAssetExtractor ? 'asset-extractor-node' : ''} ${isLoop ? 'loop-smart-node' : ''} ${isNodeSelected(node.id) ? 'selected' : ''} ${(dragState?.groupIds?.includes(node.id) || dragState?.id === node.id) ? 'dragging' : ''} ${node.running ? 'node-running' : ''} ${isPending ? 'node-pending' : ''}" data-id="${escapeHtml(node.id)}" style="left:${node.x || 0}px;top:${node.y || 0}px;width:${layout.width}px;height:${layout.height}px">
             <div class="node-head"><div class="node-title">${title}</div><div class="node-actions">${deleteBtn}</div></div>
             ${!isEmpty ? `<div class="floating-node-actions"><button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button></div>` : ''}
             ${runTimePillHtml(node)}
             <div class="node-body">${body}</div>
             <div class="node-hint">${isPending ? escapeHtml(tr('smart.hintPending')) : (imgs.length > 1 ? escapeHtml(tr('smart.hintMulti')) : imgs.length ? escapeHtml(tr('smart.hintSingle')) : escapeHtml(tr('smart.hintEmpty')))}</div>
-            ${imgs.length || node.pending || isPrompt || isLoop ? '<div class="node-resize-handle" data-resize="1"></div>' : ''}
+            ${imgs.length || node.pending || isPrompt || isScript || isAssetExtractor || isLoop ? '<div class="node-resize-handle" data-resize="1"></div>' : ''}
             <div class="node-port port-in" data-port="in" title="输入"></div>
             <div class="node-port port-out" data-port="out" title="输出"></div>
         </div>`;
@@ -2835,6 +3708,198 @@ function bindPromptNodeControls(el, node){
     if(instructionEl) { bindScrollableText(instructionEl); instructionEl.oninput = e => { node.llmInstruction = e.target.value; scheduleSave(); }; }
     const runEl = el.querySelector('.prompt-node-run');
     if(runEl) runEl.onclick = e => { e.preventDefault(); e.stopPropagation(); runPromptLLMNode(node.id); };
+}
+function bindScriptNodeControls(el, node){
+    el.querySelectorAll('.script-node-control').forEach(control => {
+        control.addEventListener('mousedown', e => e.stopPropagation());
+        control.addEventListener('click', e => e.stopPropagation());
+        control.addEventListener('dblclick', e => e.stopPropagation());
+    });
+    const textEl = el.querySelector('.script-node-text');
+    if(textEl){
+        bindScrollableText(textEl);
+        textEl.oninput = e => {
+            node.text = e.target.value;
+            const chars = String(node.text || '').trim().length;
+            const words = node.text.trim() ? node.text.trim().split(/\s+/).filter(Boolean).length : 0;
+            const countEl = el.querySelector('.script-node-count');
+            if(countEl) countEl.textContent = window.StudioI18n?.lang?.() === 'en'
+                ? trf('smart.scriptNodeCountEn', {chars, words})
+                : trf('smart.scriptNodeCount', {n:chars});
+            scheduleSave();
+        };
+    }
+}
+function bindAssetExtractorControls(el, node){
+    el.querySelectorAll('.asset-extractor-control').forEach(control => {
+        control.addEventListener('mousedown', e => e.stopPropagation());
+        control.addEventListener('click', e => e.stopPropagation());
+        control.addEventListener('dblclick', e => e.stopPropagation());
+    });
+    const instructionEl = el.querySelector('.asset-extractor-instruction');
+    if(instructionEl){
+        bindScrollableText(instructionEl);
+        instructionEl.oninput = e => {
+            node.instruction = e.target.value;
+            node.instructionMode = 'template';
+            scheduleSave();
+        };
+    }
+    const editEl = el.querySelector('.asset-extractor-edit');
+    if(editEl) editEl.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        node.instructionOpen = !node.instructionOpen;
+        render();
+        scheduleSave();
+    };
+    const providerEl = el.querySelector('.asset-extractor-provider');
+    if(providerEl) providerEl.onchange = e => {
+        e.stopPropagation();
+        node.llmProvider = resolveChatProviderId(e.target.value);
+        node.llmModel = resolveChatModel('', node.llmProvider);
+        render();
+        scheduleSave();
+    };
+    const modelEl = el.querySelector('.asset-extractor-model');
+    if(modelEl) modelEl.onchange = e => {
+        e.stopPropagation();
+        node.llmModel = e.target.value;
+        scheduleSave();
+    };
+    const runEl = el.querySelector('.asset-extractor-run');
+    if(runEl) runEl.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        runAssetExtractorNode(node.id);
+    };
+}
+function bindAssetOutputControls(el, node){
+    const textEl = el.querySelector('.asset-output-text');
+    const editEl = el.querySelector('.asset-output-edit');
+    if(editEl) editEl.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        node.editing = !node.editing;
+        render();
+        scheduleSave();
+    };
+    if(textEl){
+        bindScrollableText(textEl);
+        ['mousedown','click','dblclick'].forEach(type => textEl.addEventListener(type, e => e.stopPropagation()));
+        textEl.oninput = e => {
+            node.text = e.target.value;
+            scheduleSave();
+        };
+    }
+}
+function bindStoryboardControls(el, node){
+    el.querySelectorAll('.asset-extractor-control').forEach(control => {
+        control.addEventListener('mousedown', e => e.stopPropagation());
+        control.addEventListener('click', e => e.stopPropagation());
+        control.addEventListener('dblclick', e => e.stopPropagation());
+    });
+    const instructionEl = el.querySelector('.storyboard-instruction');
+    if(instructionEl){
+        bindScrollableText(instructionEl);
+        instructionEl.oninput = e => {
+            node.instruction = e.target.value;
+            node.instructionMode = 'template';
+            scheduleSave();
+        };
+    }
+    const editEl = el.querySelector('.storyboard-edit');
+    if(editEl) editEl.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        node.instructionOpen = !node.instructionOpen;
+        render();
+        scheduleSave();
+    };
+    const durationSelect = el.querySelector('.storyboard-duration-select');
+    if(durationSelect) durationSelect.onchange = e => {
+        e.stopPropagation();
+        node.durationMode = normalizeStoryboardDurationMode(e.target.value);
+        if(node.durationMode !== 'custom') node.customDurationSec = storyboardDurationSeconds(node);
+        render();
+        scheduleSave();
+    };
+    const durationCustom = el.querySelector('.storyboard-duration-custom');
+    if(durationCustom){
+        durationCustom.oninput = e => {
+            e.stopPropagation();
+            node.customDurationSec = clampStoryboardDuration(e.target.value);
+            const targetEl = el.querySelector('.storyboard-duration-target');
+            if(targetEl) targetEl.textContent = trf('smart.storyboardDurationTarget', {n:storyboardTargetShotCount(node)});
+            scheduleSave();
+        };
+    }
+    const providerEl = el.querySelector('.storyboard-provider');
+    if(providerEl) providerEl.onchange = e => {
+        e.stopPropagation();
+        node.llmProvider = resolveChatProviderId(e.target.value);
+        node.llmModel = resolveChatModel('', node.llmProvider);
+        render();
+        scheduleSave();
+    };
+    const modelEl = el.querySelector('.storyboard-model');
+    if(modelEl) modelEl.onchange = e => {
+        e.stopPropagation();
+        node.llmModel = e.target.value;
+        scheduleSave();
+    };
+    const runEl = el.querySelector('.storyboard-run');
+    if(runEl) runEl.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        runStoryboardNode(node.id);
+    };
+    const outputEl = el.querySelector('.storyboard-output');
+    if(outputEl) outputEl.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        outputStoryboardShots(node.id);
+    };
+}
+function bindStoryboardShotControls(el, node){
+    const textEl = el.querySelector('.storyboard-shot-text');
+    if(textEl){
+        bindScrollableText(textEl);
+        ['mousedown','click','dblclick'].forEach(type => textEl.addEventListener(type, e => e.stopPropagation()));
+        textEl.oninput = e => {
+            node.text = e.target.value;
+            node.textEdited = true;
+            if(node.shot && typeof node.shot === 'object') node.shot.prompt = e.target.value;
+            scheduleSave();
+        };
+    }
+}
+function bindStoryboardOutputControls(el, node){
+    el.querySelectorAll('.storyboard-output-scroll, .storyboard-output-shot, .storyboard-output-shot summary, .storyboard-output-shot-text').forEach(control => {
+        control.addEventListener('mousedown', e => e.stopPropagation());
+        control.addEventListener('click', e => e.stopPropagation());
+        control.addEventListener('dblclick', e => e.stopPropagation());
+    });
+    el.querySelectorAll('.storyboard-output-shot').forEach(detail => {
+        detail.addEventListener('toggle', () => {
+            const index = Number(detail.dataset.shotIndex);
+            if(!Number.isFinite(index) || !node.shots?.[index]) return;
+            node.shots[index].open = detail.open;
+            scheduleSave();
+        });
+    });
+    el.querySelectorAll('.storyboard-output-shot-text').forEach(textEl => {
+        bindScrollableText(textEl);
+        textEl.oninput = e => {
+            const index = Number(e.target.dataset.shotIndex);
+            if(!Number.isFinite(index) || !node.shots?.[index]) return;
+            const shot = node.shots[index];
+            shot.outputText = e.target.value;
+            shot.textEdited = true;
+            shot.prompt = e.target.value;
+            scheduleSave();
+        };
+    });
 }
 function bindLoopNodeControls(el, node){
     el.querySelectorAll('.loop-smart-control').forEach(control => {
@@ -3066,22 +4131,25 @@ function handlePortDrop(drag, e){
     if(hit?.closest?.('.composer,.smart-back,.asset-panel,.asset-toggle,.smart-log-toggle,.log-modal,.image-edit-modal,.smart-minimap')){
         discardPendingUndo(); render(); return;
     }
-    const p = screenToWorld(e);
-    undoSuppressed = true;
-    const newNode = createImageNodeAt(p, [], {select:true, skipUndo:true});
-    undoSuppressed = false;
-    const fromId = drag.fromPort === 'out' ? drag.fromId : newNode.id;
-    const toId = drag.fromPort === 'out' ? newNode.id : drag.fromId;
-    connectInputNode(fromId, toId);
-    commitPendingUndo();
-    render();
-    scheduleSave();
+    openCreateMenu(e, {
+        context:{
+            type:'port-drop',
+            fromId:drag.fromId,
+            fromPort:drag.fromPort
+        }
+    });
 }
 function bindNodeEvents(){
     world.querySelectorAll('.image-node').forEach(el => {
         const id = el.dataset.id;
         const nodeForControls = nodes.find(n => n.id === id);
         if(nodeForControls?.type === 'smart-prompt') bindPromptNodeControls(el, nodeForControls);
+        if(nodeForControls?.type === 'smart-script') bindScriptNodeControls(el, nodeForControls);
+        if(nodeForControls?.type === 'smart-asset-extractor') bindAssetExtractorControls(el, nodeForControls);
+        if(nodeForControls?.type === 'smart-asset-output') bindAssetOutputControls(el, nodeForControls);
+        if(nodeForControls?.type === 'smart-storyboard') bindStoryboardControls(el, nodeForControls);
+        if(nodeForControls?.type === 'smart-storyboard-output') bindStoryboardOutputControls(el, nodeForControls);
+        if(nodeForControls?.type === 'smart-storyboard-shot') bindStoryboardShotControls(el, nodeForControls);
         if(nodeForControls?.type === 'smart-loop') bindLoopNodeControls(el, nodeForControls);
         el.onclick = e => {
             e.stopPropagation();
@@ -3197,8 +4265,8 @@ function bindNodeEvents(){
             capturePendingUndo();
         });
         const beginNodeDrag = e => {
-            if(e.button !== 0 || e.target.closest('.mini-x, .node-resize-handle, .thumb-item, .node-port, select, input, button')) return;
-            if(e.target.closest('.prompt-node-pill, .prompt-node-llm, textarea:not(.prompt-node-text)')) return;
+            if(e.button !== 0 || e.target.closest('.mini-x, .node-resize-handle, .thumb-item, .node-drop, .node-port, select, input, button')) return;
+            if(e.target.closest('.prompt-node-pill, .prompt-node-llm, textarea:not(.prompt-node-text):not(.script-node-text):not(.asset-extractor-instruction)')) return;
             e.preventDefault(); e.stopPropagation();
             window.getSelection?.()?.removeAllRanges?.();
             if(document.activeElement?.blur) document.activeElement.blur();
@@ -3256,11 +4324,29 @@ function dragConnectTargetFor(sourceNode){
     const r = nodeRect(sourceNode);
     return rectOverlapNode(sourceNode.id, r.x, r.y, r.width, r.height, dragState?.groupIds || []);
 }
+function nodeOutputsPromptText(node){
+    return Boolean(node && (
+        node.type === 'smart-prompt' ||
+        node.type === 'smart-script' ||
+        node.type === 'smart-asset-extractor' ||
+        node.type === 'smart-asset-output' ||
+        node.type === 'smart-storyboard' ||
+        node.type === 'smart-storyboard-output' ||
+        node.type === 'smart-storyboard-shot' ||
+        (node.type === 'smart-loop' && node.showPrompt)
+    ));
+}
 function canAutoConnectDraggedNode(sourceNode, targetNode){
     if(!sourceNode || !targetNode || sourceNode.id === targetNode.id) return false;
-    if(sourceNode.type === 'smart-image') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-prompt';
-    if(sourceNode.type === 'smart-prompt') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop';
-    if(sourceNode.type === 'smart-loop') return targetNode.type === 'smart-image';
+    if(sourceNode.type === 'smart-image') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-prompt' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
+    if(sourceNode.type === 'smart-prompt') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-script') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-asset-extractor') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-asset-output' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-asset-output') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-storyboard') return targetNode.type === 'smart-storyboard-output' || targetNode.type === 'smart-storyboard-shot' || targetNode.type === 'smart-image' || targetNode.type === 'smart-loop';
+    if(sourceNode.type === 'smart-storyboard-output') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-storyboard-shot') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-loop') return targetNode.type === 'smart-image' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
     return false;
 }
 function restoreDraggedNodePosition(){
@@ -4367,6 +5453,8 @@ function loadPromptDraft(subject){
         promptInput.innerHTML = hasToken
             ? subject.promptDraftHtml
             : (promptHtmlWithMentionTokens(subject.runPrompt || subject.promptDraftText || '', subject.runPromptRefs || []) || subject.promptDraftHtml);
+    } else if(subject?.type === 'smart-storyboard-shot'){
+        setPromptText(subject.text || storyboardShotNodeText(subject.shot) || '');
     } else if(typeof subject?.runPrompt === 'string'){
         const rebuilt = promptHtmlWithMentionTokens(subject.runPrompt, subject.runPromptRefs || []);
         if(rebuilt) promptInput.innerHTML = rebuilt;
@@ -4698,9 +5786,15 @@ function connectInputNode(fromId, toId){
     const from = nodes.find(n => n.id === fromId);
     const to = nodes.find(n => n.id === toId);
     if(!from || !to || from.id === to.id) return false;
+    const fromOutputsText = nodeOutputsPromptText(from);
+    if(to.type === 'smart-asset-output' && from.type !== 'smart-asset-extractor') return false;
+    if(to.type === 'smart-storyboard-output' && from.type !== 'smart-storyboard') return false;
+    if(to.type === 'smart-storyboard-shot' && from.type !== 'smart-storyboard' && from.type !== 'smart-image') return false;
+    if(to.type === 'smart-asset-extractor' && !fromOutputsText) return false;
+    if(to.type === 'smart-storyboard' && !fromOutputsText && from.type !== 'smart-image') return false;
     if(to.type === 'smart-loop'){
-        const looksImage = from.type === 'smart-image' || (from.type === 'smart-loop' && from.imageInput);
-        const looksPrompt = from.type === 'smart-prompt' || (from.type === 'smart-loop' && from.showPrompt);
+        const looksImage = from.type === 'smart-image' || from.type === 'smart-storyboard-shot' || (from.type === 'smart-loop' && from.imageInput);
+        const looksPrompt = fromOutputsText;
         if(looksImage && !to.imageInput) to.imageInput = true;
         if(looksPrompt && !to.showPrompt) to.showPrompt = true;
         if(looksImage || looksPrompt) fitSmartLoopNode(to);
@@ -4737,7 +5831,12 @@ function smartLoopInputPromptItems(node){
     smartLoopPromptVisiting.add(node.id);
     try {
         return inputNodesFor(node).flatMap(input => {
-            if(input.type === 'smart-prompt') return String(input.text || '').trim() ? [String(input.text || '').trim()] : [];
+            if(input.type === 'smart-prompt' || input.type === 'smart-script') return String(input.text || '').trim() ? [String(input.text || '').trim()] : [];
+            if(input.type === 'smart-asset-extractor') return assetExtractorOutputItemsFor(input);
+            if(input.type === 'smart-asset-output') return String(input.text || '').trim() ? [String(input.text || '').trim()] : [];
+            if(input.type === 'smart-storyboard') return Array.isArray(input.shots) ? input.shots.map(shot => storyboardShotPrompt(shot)).filter(Boolean) : [];
+            if(input.type === 'smart-storyboard-output') return Array.isArray(input.shots) ? input.shots.map(shot => storyboardEditableShotText(shot) || storyboardShotNodeText(shot)).filter(Boolean) : [];
+            if(input.type === 'smart-storyboard-shot') return String(input.text || storyboardShotPrompt(input.shot) || '').trim() ? [String(input.text || storyboardShotPrompt(input.shot) || '').trim()] : [];
             if(input.type === 'smart-loop') {
                 const text = smartLoopPrompt(input);
                 return text ? [text] : [];
@@ -4786,8 +5885,17 @@ function smartLoopPreviewImages(node){
         return imagesForNode(input);
     }).filter(img => img?.url);
 }
+function storyboardShotInputImages(node){
+    const self = imagesForNode(node).filter(img => img?.url);
+    const upstream = inputNodesFor(node)
+        .filter(input => input?.type === 'smart-image')
+        .flatMap(input => imagesForNode(input))
+        .filter(img => img?.url);
+    return uniqueReferenceImages([...self, ...upstream]);
+}
 function outputImagesForNode(node, consume=false, ctx=smartLoopContext){
     if(node?.type === 'smart-loop') return smartLoopInputImages(node, ctx);
+    if(node?.type === 'smart-storyboard-shot') return storyboardShotInputImages(node);
     return imagesForNode(node).filter(img => img?.url);
 }
 function selfReferenceImagesForNode(node, consume=false, ctx=smartLoopContext){
@@ -4795,12 +5903,18 @@ function selfReferenceImagesForNode(node, consume=false, ctx=smartLoopContext){
 }
 function textForNode(node, ctx=smartLoopContext){
     if(!node) return '';
-    if(node.type === 'smart-prompt') return node.text || '';
+    if(node.type === 'smart-prompt' || node.type === 'smart-script') return node.text || '';
+    if(node.type === 'smart-asset-extractor') return assetExtractorOutputTextFor(node);
+    if(node.type === 'smart-asset-output') return node.text || '';
+    if(node.type === 'smart-storyboard') return storyboardOutputTextFor(node);
+    if(node.type === 'smart-storyboard-output') return storyboardOutputTextFor(node);
+    if(node.type === 'smart-storyboard-shot') return node.text || storyboardShotPrompt(node.shot);
     if(node.type === 'smart-loop') return smartLoopPrompt(node, ctx);
     return '';
 }
 function promptInputNodesFor(node){
-    return inputNodesFor(node).filter(input => input?.type === 'smart-prompt' || input?.type === 'smart-loop');
+    if(node?.type === 'smart-storyboard-shot') return [];
+    return inputNodesFor(node).filter(nodeOutputsPromptText);
 }
 function inputPromptTextFor(node, ctx=smartLoopContext){
     return promptInputNodesFor(node).map(input => textForNode(input, ctx)).filter(Boolean).join('\n\n');
@@ -4823,7 +5937,8 @@ function isInputRefBlocked(node, img){
     return blockedInputRefKeys(node).has(inputRefKey(img));
 }
 function activeInputImagesFor(node, consume=false, ctx=smartLoopContext){
-    return inputImagesFor(node, consume, ctx).filter(img => img?.url && !isInputRefBlocked(node, img));
+    const refs = node?.type === 'smart-storyboard-shot' ? outputImagesForNode(node, consume, ctx) : inputImagesFor(node, consume, ctx);
+    return refs.filter(img => img?.url && !isInputRefBlocked(node, img));
 }
 function toggleInputRefBlocked(node, img){
     if(!node || !img?.url) return;
@@ -4924,6 +6039,7 @@ function uniqueReferenceImages(images){
     return refs;
 }
 function visibleReferenceImagesFor(node){
+    if(node?.type === 'smart-storyboard-shot') return uniqueReferenceImages([...activeInputImagesFor(node), ...collectMentionedImagesFromPrompt()]);
     const upstream = inputImagesFor(node);
     const base = upstream.length ? upstream : defaultReferenceImagesFor(node);
     return uniqueReferenceImages([...base, ...collectMentionedImagesFromPrompt()]);
@@ -5367,12 +6483,12 @@ function primaryImageInputFor(node){
 function hasDownstreamImageNode(node){
     return outgoingInputConnectionsFor(node).some(conn => {
         const to = nodes.find(n => n.id === conn.to);
-        return to?.type === 'smart-image';
+        return isSmartImageNode(to);
     });
 }
 function smartImageChainTo(nodeId){
     const tail = nodes.find(n => n.id === nodeId);
-    if(!tail || tail.type !== 'smart-image') return [];
+    if(!isSmartImageNode(tail)) return [];
     const chain = [];
     const seen = new Set();
     let cur = tail;
@@ -5423,7 +6539,7 @@ function downstreamNodesForId(nodeId){
 }
 function cascadeTailForLoop(loopId){
     const candidates = downstreamNodesForId(loopId)
-        .filter(n => n.type === 'smart-image')
+        .filter(n => isSmartImageNode(n))
         .filter(n => canRunSmartCascade(n));
     if(!candidates.length) return null;
     return candidates.sort((a, b) => {
@@ -5433,7 +6549,7 @@ function cascadeTailForLoop(loopId){
     })[0];
 }
 function canRunSmartCascade(node){
-    return node?.type === 'smart-image' && !hasDownstreamImageNode(node) && smartImageChainTo(node.id).length > 1;
+    return isSmartImageNode(node) && !hasDownstreamImageNode(node) && smartImageChainTo(node.id).length > 1;
 }
 function coolRunButton(ms=2000){
     if(!runBtn) return 0;
@@ -5918,6 +7034,171 @@ async function runPromptLLMNode(nodeId){
         render();
     }
 }
+async function runStoryboardNode(nodeId){
+    const node = nodes.find(n => n.id === nodeId);
+    if(!node || node.type !== 'smart-storyboard') return;
+    const scriptText = storyboardScriptTextFor(node).trim();
+    if(!scriptText){ toast(tr('smart.storyboardNeedText')); return; }
+    const undoBeforeRun = snapshotForUndo();
+    node.running = true;
+    node.runStartedAt = nowMs();
+    delete node.runFinishedAt;
+    delete node.runElapsedMs;
+    node.runTimerHidden = false;
+    render();
+    try {
+        const provider = resolveChatProviderId(node.llmProvider || '');
+        const model = resolveChatModel(node.llmModel || '', provider);
+        const message = storyboardPromptFor(node, scriptText);
+        if(!message) throw new Error(tr('smart.storyboardInstructionMissing'));
+        const result = await fetch('/api/canvas-llm', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                message,
+                messages:[],
+                images:imageRefsOnly(activeInputImagesFor(node)).map(img => img.url).filter(Boolean),
+                model,
+                provider,
+                ms_model:provider === 'modelscope' ? model : '',
+                system_prompt:''
+            })
+        }).then(async r => {
+            if(!r.ok) throw new Error(await r.text());
+            return r.json();
+        });
+        const rawText = (result.text || '').trim();
+        const shots = parseStoryboardJson(rawText);
+        pushUndoSnapshot(undoBeforeRun);
+        node.shots = shots;
+        node.rawText = rawText;
+        node.sourceNodeIds = storyboardInputNodes(node).map(input => input.id);
+        node.llmProvider = provider;
+        node.llmModel = model;
+        node.runFinishedAt = nowMs();
+        node.runElapsedMs = Math.max(0, node.runFinishedAt - Number(node.runStartedAt || node.runFinishedAt));
+        selectedId = node.id;
+        selectedIds = [];
+        selectedImage = {nodeId:'', index:-1};
+        toast(trf('smart.storyboardSaved', {n:node.shots.length}));
+        scheduleSave();
+    } catch(e) {
+        toast((e.message || tr('smart.storyboardFailed')).slice(0, 180));
+    } finally {
+        node.running = false;
+        render();
+    }
+}
+function outputStoryboardShots(nodeId){
+    const storyboard = nodes.find(n => n.id === nodeId);
+    if(!storyboard || storyboard.type !== 'smart-storyboard') return;
+    const shots = Array.isArray(storyboard.shots) ? storyboard.shots : [];
+    if(!shots.length){ toast(tr('smart.storyboardNoShots')); return; }
+    pushUndo();
+    const sourceRect = nodeRect(storyboard);
+    let output = nodes.find(node => node.type === 'smart-storyboard-output' && node.sourceStoryboardId === storyboard.id);
+    const x = sourceRect.x + sourceRect.width + 80;
+    const y = sourceRect.y;
+    if(output){
+        const existingShots = Array.isArray(output.shots) ? output.shots : [];
+        output.shots = shots.map((shot, index) => storyboardOutputShotData(storyboard, shot, index, existingShots[index]));
+        output.title = tr('smart.storyboardOutputNodeTitle');
+        output.sourceNodeIds = [storyboard.id];
+        output.x = x;
+        output.y = y;
+        output.w = Math.max(520, Number(output.w) || 560);
+        output.h = Math.max(480, Number(output.h) || 640);
+    } else {
+        output = createStoryboardOutputNode(storyboard, x, y);
+        nodes.push(output);
+    }
+    connectInputNode(storyboard.id, output.id);
+    removeNodesSilently(nodes.filter(node => node.type === 'smart-storyboard-shot' && node.sourceStoryboardId === storyboard.id).map(node => node.id));
+    selectedIds = [];
+    selectedId = output.id;
+    selectedImage = {nodeId:'', index:-1};
+    render();
+    scheduleSave();
+    toast(trf('smart.storyboardOutputDone', {n:shots.length}));
+}
+async function runAssetExtractorNode(nodeId){
+    const node = nodes.find(n => n.id === nodeId);
+    if(!node || node.type !== 'smart-asset-extractor') return;
+    const scriptText = assetExtractorInputTextFor(node).trim();
+    if(!scriptText){ toast(tr('smart.assetExtractorNeedText')); return; }
+    const assetType = normalizeAssetExtractorType(node.assetType);
+    const undoBeforeRun = snapshotForUndo();
+    node.assetType = assetType;
+    node.running = true;
+    node.runStartedAt = nowMs();
+    delete node.runFinishedAt;
+    delete node.runElapsedMs;
+    node.runTimerHidden = false;
+    render();
+    try {
+        const provider = resolveChatProviderId(node.llmProvider || '');
+        const model = resolveChatModel(node.llmModel || '', provider);
+        const message = assetExtractorPromptFor(node, scriptText);
+        const result = await fetch('/api/canvas-llm', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                message,
+                messages:[],
+                images:[],
+                model,
+                provider,
+                ms_model:provider === 'modelscope' ? model : '',
+                system_prompt:tr('smart.assetExtractorSystemPrompt')
+            })
+        }).then(async r => {
+            if(!r.ok) throw new Error(await r.text());
+            return r.json();
+        });
+        const rawText = (result.text || '').trim();
+        const items = parseAssetExtractionJson(rawText, assetType);
+        const sourceNodeIds = assetExtractorInputNodes(node).map(input => input.id);
+        pushUndoSnapshot(undoBeforeRun);
+        node.items = items;
+        node.rawText = rawText;
+        node.sourceNodeIds = sourceNodeIds;
+        node.llmProvider = provider;
+        node.llmModel = model;
+        node.assetFile = canvasId ? `data/canvas_assets/${canvasId}.json` : '';
+        node.runFinishedAt = nowMs();
+        node.runElapsedMs = Math.max(0, node.runFinishedAt - Number(node.runStartedAt || node.runFinishedAt));
+        if(canvasId){
+            const saveRes = await fetch(`/api/canvases/${encodeURIComponent(canvasId)}/assets/${encodeURIComponent(node.id)}`, {
+                method:'PUT',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    asset_type:assetType,
+                    source_node_ids:sourceNodeIds,
+                    instruction:node.instruction || '',
+                    provider,
+                    model,
+                    raw_text:rawText,
+                    items
+                })
+            }).then(async r => {
+                if(!r.ok) throw new Error(await r.text());
+                return r.json();
+            });
+            if(saveRes?.extraction?.items) node.items = saveRes.extraction.items;
+        }
+        syncAssetExtractorOutputNodes(node);
+        selectedId = node.id;
+        selectedIds = [];
+        selectedImage = {nodeId:'', index:-1};
+        toast(trf('smart.assetExtractorSaved', {n:node.items.length}));
+        scheduleSave();
+    } catch(e) {
+        toast((e.message || tr('smart.assetExtractorFailed')).slice(0, 180));
+    } finally {
+        node.running = false;
+        render();
+    }
+}
 function comfyFieldKind(field){
     if(['image','video','audio'].includes(field?.type)) return field.type;
     const key = `${field?.input || ''} ${field?.name || ''}`.toLowerCase();
@@ -6228,14 +7509,16 @@ function mergeImageNodesIntoGroup(sourceId, targetId){
     selectedImage = {nodeId:'', index:-1};
     return true;
 }
-function closeCreateMenu(){
+function closeCreateMenu(options={}){
     createMenu?.classList.remove('open');
+    if(!options.keepContext) createMenuContext = null;
 }
-function openCreateMenu(event){
+function openCreateMenu(event, options={}){
     if(!createMenu) return;
     createMenuPoint = screenToWorld(event);
-    const w = 420;
-    const h = 150;
+    createMenuContext = options.context || null;
+    const w = 680;
+    const h = 292;
     const left = Math.max(14, Math.min(window.innerWidth - w - 14, event.clientX + 8));
     const top = Math.max(14, Math.min(window.innerHeight - h - 14, event.clientY + 8));
     createMenu.style.left = `${left}px`;
@@ -6245,10 +7528,33 @@ function openCreateMenu(event){
 }
 function createNodeFromMenu(type){
     const p = createMenuPoint || viewportCenter();
+    const context = createMenuContext;
     closeCreateMenu();
-    if(type === 'prompt') return createPromptNode(p.x - 158, p.y - 97);
-    if(type === 'loop') return createLoopNode(p.x - 135, p.y - 95);
-    return createImageNodeAt(p);
+    let node = null;
+    if(type === 'prompt') node = createPromptNode(p.x - 158, p.y - 97, {skipUndo:Boolean(context)});
+    else if(type === 'script') node = createScriptNode(p.x - 170, p.y - 130, {skipUndo:Boolean(context)});
+    else if(type === 'extract-character') node = createAssetExtractorNode('character', p.x - 190, p.y - 180, {skipUndo:Boolean(context)});
+    else if(type === 'extract-scene') node = createAssetExtractorNode('scene', p.x - 190, p.y - 180, {skipUndo:Boolean(context)});
+    else if(type === 'extract-prop') node = createAssetExtractorNode('prop', p.x - 190, p.y - 180, {skipUndo:Boolean(context)});
+    else if(type === 'storyboard') node = createStoryboardNode(p.x - 215, p.y - 215, {skipUndo:Boolean(context)});
+    else if(type === 'loop') node = createLoopNode(p.x - 135, p.y - 95, {skipUndo:Boolean(context)});
+    else node = createImageNodeAt(p, [], {skipUndo:Boolean(context)});
+    if(context?.type === 'port-drop' && node){
+        const fromId = context.fromPort === 'out' ? context.fromId : node.id;
+        const toId = context.fromPort === 'out' ? node.id : context.fromId;
+        if(connectInputNode(fromId, toId)){
+            commitPendingUndo();
+            render();
+            scheduleSave();
+        } else {
+            nodes = nodes.filter(n => n.id !== node.id);
+            discardPendingUndo();
+            render();
+            scheduleSave();
+            toast('该节点不能连接到这里');
+        }
+    }
+    return node;
 }
 shell.addEventListener('mousedown', e => {
     if(!zoomPreviewState) return;
@@ -6284,6 +7590,11 @@ shell.onmousedown = e => {
 };
 shell.ondblclick = e => {
     if(didPan || e.target.closest('.image-node,.composer,.smart-back,.smart-log-toggle,.log-modal,.image-edit-modal,.create-menu')) return;
+    if(document.getElementById('imageEditModal')?.classList.contains('open')) return;
+    e.preventDefault();
+};
+shell.oncontextmenu = e => {
+    if(didPan || e.target.closest('.image-node,.composer,.smart-back,.smart-log-toggle,.log-modal,.image-edit-modal,.create-menu,.smart-minimap')) return;
     if(document.getElementById('imageEditModal')?.classList.contains('open')) return;
     e.preventDefault();
     openCreateMenu(e);
@@ -6395,8 +7706,8 @@ window.onmousemove = e => {
         if(!node) return;
         const dx = (e.clientX - resizeState.startX) / viewport.scale;
         const dy = (e.clientY - resizeState.startY) / viewport.scale;
-        const minW = node.type === 'smart-prompt' ? 260 : node.type === 'smart-loop' ? 252 : 48;
-        const minH = node.type === 'smart-prompt' ? 170 : node.type === 'smart-loop' ? 132 : 48;
+        const minW = node.type === 'smart-prompt' ? 260 : node.type === 'smart-script' ? 300 : node.type === 'smart-asset-extractor' ? 340 : node.type === 'smart-asset-output' ? 300 : node.type === 'smart-storyboard' ? 380 : node.type === 'smart-storyboard-output' ? 520 : node.type === 'smart-storyboard-shot' ? 320 : node.type === 'smart-loop' ? 252 : 48;
+        const minH = node.type === 'smart-prompt' ? 170 : node.type === 'smart-script' ? 220 : node.type === 'smart-asset-extractor' ? 300 : node.type === 'smart-asset-output' ? 160 : node.type === 'smart-storyboard' ? 340 : node.type === 'smart-storyboard-output' ? 480 : node.type === 'smart-storyboard-shot' ? 220 : node.type === 'smart-loop' ? 132 : 48;
         node.w = Math.max(minW, Math.round(resizeState.startW + dx));
         node.h = Math.max(minH, Math.round(resizeState.startH + dy));
         node.scale = 1;
@@ -6466,7 +7777,7 @@ window.onmousemove = e => {
         setAssetDragOver(false);
     }
     const draggedRect = nodeRect(node);
-    const target = (dragState.ctrlGroup || ['smart-image','smart-prompt','smart-loop'].includes(node.type))
+    const target = (dragState.ctrlGroup || ['smart-image','smart-prompt','smart-script','smart-asset-extractor','smart-asset-output','smart-storyboard','smart-storyboard-output','smart-storyboard-shot','smart-loop'].includes(node.type))
         ? rectOverlapNode(node.id, draggedRect.x, draggedRect.y, draggedRect.width, draggedRect.height, dragState.groupIds)
         : null;
     setDropHighlight(target?.id || '');
@@ -7116,6 +8427,8 @@ window.onload = async () => {
     loadPromptPresets();
     if(window.StudioI18n) window.StudioI18n.apply();
     if(window.lucide) lucide.createIcons();
+    await loadAssetExtractionPromptTemplates();
+    await loadStoryboardPromptTemplate();
     await loadConfig();
     await loadAssetLibrary();
     await loadCanvas();

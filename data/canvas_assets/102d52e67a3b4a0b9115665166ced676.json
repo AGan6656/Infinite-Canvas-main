@@ -1,0 +1,950 @@
+{
+  "canvas_id": "102d52e67a3b4a0b9115665166ced676",
+  "updated_at": 1780187801349,
+  "extractions": {
+    "extract_character_2stgczi88v7z": {
+      "node_id": "extract_character_2stgczi88v7z",
+      "asset_type": "character",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取剧本中出现或被明确提及的角色。每个角色单独输出，包含姓名、别名、身份、外貌、性格、关系、关键行为和可用于生图的视觉描述。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "{\"items\":[{\"name\":\"江凡\",\"aliases\":[\"江江凡\"],\"identity\":\"网文作家，小说《女主跑出来了怎么办？》的作者\",\"appearance\":\"满头大汗，神色惊恐，穿着现代日常衣物。情绪变化剧烈，从惊恐狂奔、绝望、呆滞到嬉皮笑脸，最后秒怂崩溃。\",\"personality\":\"有些胆小懦弱但反应极快，能屈能伸，擅长自我安慰和吐槽，带有一点现代青年的幽默感。\",\"relationships\":\"洛仙的创作者（小说作者），目前正被洛仙持剑追杀。\",\"key_actions\":[\"深夜在胡同里躲避追杀并报警\",\"认出洛仙和冰璃剑，起初以为是Cosplay并试图拨开剑尖\",\"被洛仙的破坏力吓到后迅速求饶\",\"确认洛仙是自己笔下的女主角并彻底石化\"],\"visual_description\":\"一个20多岁的中国年轻男子，留着凌乱的黑色短发，脸上满是汗水，双眼因极度惊恐而圆睁。他靠在长满青苔的阴暗小巷墙壁上，穿着现代休闲卫衣，神情惊恐而绝望。\",\"notes\":\"本故事的男主角，写的小说女主跑到了现实世界。\",\"source\":\"《女主跑出来了怎么办？》第1集\"},{\"name\":\"洛仙\",\"aliases\":[\"女鬼\",\"天生仙骨的洛仙\",\"女侠\"],\"identity\":\"江凡所著小说《女主跑出来了怎么办？》中的高冷女主角，天生仙骨，从书中实体化来到现实世界的修仙者。\",\"appearance\":\"清冷绝世，五官精致，气质孤傲。赤足悬空，身穿一袭白裙，露出精致的锁骨和温润如玉的小腿。手持散发着凛冽寒气的‘冰璃剑’。\",\"personality\":\"冷漠、孤傲、杀伐果断，视凡人如蝼蚁，脾气冰冷且不容侵犯，反感轻浮下流的言行。\",\"relationships\":\"由江凡创造，但目前视江凡为目标或惩罚对象，正对其进行生命威胁。\",\"key_actions\":[\"如幽灵般赤足悬空逼近江凡\",\"凭空凝聚出冰璃剑并直抵江凡咽喉\",\"挥剑斩碎青石板地面，留下带寒霜的剑痕\",\"将冰璃剑化作冰蓝色流光收回眉心\",\"缓缓落地并赤足走向江凡\"],\"visual_description\":\"一位清冷高绝、美若天仙的中国年轻女子，约二十岁。她身穿一袭纯白色的轻盈古装长裙，飘逸出尘。她赤足悬空半空，面无表情，眼神冰冷如霜。手中握着一柄散发着幽蓝色寒气和白色霜雾的半透明冰晶长剑。背景是雷雨交加的黑夜和狭窄、潮湿的胡同巷口。\",\"notes\":\"配兵为‘冰璃剑’，可化为流光收纳于眉心。实力强大且冰冷无情。\",\"source\":\"《女主跑出来了怎么办？》第1集\"}]}",
+      "items": [
+        {
+          "name": "江凡",
+          "aliases": [
+            "江江凡"
+          ],
+          "identity": "网文作家，小说《女主跑出来了怎么办？》的作者",
+          "appearance": "满头大汗，神色惊恐，穿着现代日常衣物。情绪变化剧烈，从惊恐狂奔、绝望、呆滞到嬉皮笑脸，最后秒怂崩溃。",
+          "personality": "有些胆小懦弱但反应极快，能屈能伸，擅长自我安慰和吐槽，带有一点现代青年的幽默感。",
+          "relationships": "洛仙的创作者（小说作者），目前正被洛仙持剑追杀。",
+          "key_actions": [
+            "深夜在胡同里躲避追杀并报警",
+            "认出洛仙和冰璃剑，起初以为是Cosplay并试图拨开剑尖",
+            "被洛仙的破坏力吓到后迅速求饶",
+            "确认洛仙是自己笔下的女主角并彻底石化"
+          ],
+          "visual_description": "一个20多岁的中国年轻男子，留着凌乱的黑色短发，脸上满是汗水，双眼因极度惊恐而圆睁。他靠在长满青苔的阴暗小巷墙壁上，穿着现代休闲卫衣，神情惊恐而绝望。",
+          "notes": "本故事的男主角，写的小说女主跑到了现实世界。",
+          "source": "《女主跑出来了怎么办？》第1集",
+          "type": "character",
+          "id": "character_25076d38f81e",
+          "extractor_node_id": "extract_character_2stgczi88v7z",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780136438570
+        },
+        {
+          "name": "洛仙",
+          "aliases": [
+            "女鬼",
+            "天生仙骨的洛仙",
+            "女侠"
+          ],
+          "identity": "江凡所著小说《女主跑出来了怎么办？》中的高冷女主角，天生仙骨，从书中实体化来到现实世界的修仙者。",
+          "appearance": "清冷绝世，五官精致，气质孤傲。赤足悬空，身穿一袭白裙，露出精致的锁骨和温润如玉的小腿。手持散发着凛冽寒气的‘冰璃剑’。",
+          "personality": "冷漠、孤傲、杀伐果断，视凡人如蝼蚁，脾气冰冷且不容侵犯，反感轻浮下流的言行。",
+          "relationships": "由江凡创造，但目前视江凡为目标或惩罚对象，正对其进行生命威胁。",
+          "key_actions": [
+            "如幽灵般赤足悬空逼近江凡",
+            "凭空凝聚出冰璃剑并直抵江凡咽喉",
+            "挥剑斩碎青石板地面，留下带寒霜的剑痕",
+            "将冰璃剑化作冰蓝色流光收回眉心",
+            "缓缓落地并赤足走向江凡"
+          ],
+          "visual_description": "一位清冷高绝、美若天仙的中国年轻女子，约二十岁。她身穿一袭纯白色的轻盈古装长裙，飘逸出尘。她赤足悬空半空，面无表情，眼神冰冷如霜。手中握着一柄散发着幽蓝色寒气和白色霜雾的半透明冰晶长剑。背景是雷雨交加的黑夜和狭窄、潮湿的胡同巷口。",
+          "notes": "配兵为‘冰璃剑’，可化为流光收纳于眉心。实力强大且冰冷无情。",
+          "source": "《女主跑出来了怎么办？》第1集",
+          "type": "character",
+          "id": "character_7b1facbad066",
+          "extractor_node_id": "extract_character_2stgczi88v7z",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780136438570
+        }
+      ],
+      "updated_at": 1780136438570
+    },
+    "extract_scene_s1xyyifwd4af": {
+      "node_id": "extract_scene_s1xyyifwd4af",
+      "asset_type": "scene",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取剧本中的场景资产。提取主要场景，包含场景名、地点、时间、空间特征、氛围、可用于生图的视觉描述。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "{\n  \"items\": [\n    {\n      \"name\": \"胡同巷口\",\n      \"location\": \"胡同巷口\",\n      \"time\": \"夜晚\",\n      \"description\": \"漆黑幽暗的旧式胡同入口，光线极其微弱。两侧是高耸且陈旧的砖墙，墙面斑驳，长满了湿漉漉的绿色青苔。地面阴暗潮湿，充满压抑与惊悚的氛围。\",\n      \"mood\": \"恐怖、惊慌、绝望\",\n      \"key_actions\": \"江凡满头大汗、神色惊恐地狂奔，一边跑一边用手机报警，最后脚下滑倒，靠在满是青苔的墙壁上喘息。\",\n      \"notes\": \"关键道具：手机。环境质感：潮湿、斑驳青苔墙面。\",\n      \"source\": \"场1-1\"\n    },\n    {\n      \"name\": \"胡同深处\",\n      \"location\": \"幽深的胡同内部\",\n      \"time\": \"夜晚\",\n      \"description\": \"狭窄而幽深的古旧胡同，地面铺着斑驳不平的青石板。夜空有雷电交加，瞬间的闪光照亮四周。空气中因温度骤降而弥漫着白雾。青石板地面上有一道深不见底的裂痕，切口边缘结着厚厚的白霜，散发着森森寒气。\",\n      \"mood\": \"阴冷、诡异、剑拔弩张、奇幻\",\n      \"key_actions\": \"洛仙赤足悬空现身，手持散发寒气的冰璃剑指向江凡；洛仙挥剑在地面斩出冰冻裂痕；随后长剑化作冰蓝色流光缩入洛仙眉心，洛仙赤足落地走向江凡。\",\n      \"notes\": \"关键道具/特效：冰璃剑（散发寒气、凭空凝聚）、地面结霜的剑痕、眉心冰蓝色流光。视觉特征：女主赤足悬空、白裙、清冷绝世。\",\n      \"source\": \"场1-2至场1-6\"\n    }\n  ]\n}",
+      "items": [
+        {
+          "name": "胡同巷口",
+          "location": "胡同巷口",
+          "time": "夜晚",
+          "description": "漆黑幽暗的旧式胡同入口，光线极其微弱。两侧是高耸且陈旧的砖墙，墙面斑驳，长满了湿漉漉的绿色青苔。地面阴暗潮湿，充满压抑与惊悚的氛围。",
+          "mood": "恐怖、惊慌、绝望",
+          "key_actions": "江凡满头大汗、神色惊恐地狂奔，一边跑一边用手机报警，最后脚下滑倒，靠在满是青苔的墙壁上喘息。",
+          "notes": "关键道具：手机。环境质感：潮湿、斑驳青苔墙面。",
+          "source": "场1-1",
+          "type": "scene",
+          "id": "scene_de99484bf857",
+          "extractor_node_id": "extract_scene_s1xyyifwd4af",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780146850613
+        },
+        {
+          "name": "胡同深处",
+          "location": "幽深的胡同内部",
+          "time": "夜晚",
+          "description": "狭窄而幽深的古旧胡同，地面铺着斑驳不平的青石板。夜空有雷电交加，瞬间的闪光照亮四周。空气中因温度骤降而弥漫着白雾。青石板地面上有一道深不见底的裂痕，切口边缘结着厚厚的白霜，散发着森森寒气。",
+          "mood": "阴冷、诡异、剑拔弩张、奇幻",
+          "key_actions": "洛仙赤足悬空现身，手持散发寒气的冰璃剑指向江凡；洛仙挥剑在地面斩出冰冻裂痕；随后长剑化作冰蓝色流光缩入洛仙眉心，洛仙赤足落地走向江凡。",
+          "notes": "关键道具/特效：冰璃剑（散发寒气、凭空凝聚）、地面结霜的剑痕、眉心冰蓝色流光。视觉特征：女主赤足悬空、白裙、清冷绝世。",
+          "source": "场1-2至场1-6",
+          "type": "scene",
+          "id": "scene_e6f83857406c",
+          "extractor_node_id": "extract_scene_s1xyyifwd4af",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780146850613
+        }
+      ],
+      "updated_at": 1780146850613
+    },
+    "extract_prop_hf4c7mfijmew": {
+      "node_id": "extract_prop_hf4c7mfijmew",
+      "asset_type": "prop",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取剧本中的道具资产。每个道具单独输出，包含名称、所属角色、材质外观和可用于生图的视觉描述。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "{\n  \"items\": [\n    {\n      \"name\": \"冰璃剑\",\n      \"description\": \"女主角洛仙的专属配剑，由极寒之气凝聚而成，威力巨大，散发着刺骨寒意。\",\n      \"owner\": \"洛仙\",\n      \"usage\": \"洛仙凭空凝聚此剑指向江凡进行威胁；挥剑在青石板上斩出深痕；最后化作冰蓝色流光没入洛仙眉心。\",\n      \"visual_details\": \"一把由半透明湛蓝冰晶构成的华美长剑。剑身修长，散发着淡淡的幽蓝色微光与白色寒气，剑刃锋利无比，表面隐隐有精致的冰霜纹路。当它挥动时，空气中会凝结出细小的雪花，切口处会瞬间结霜。\",\n      \"notes\": \"剧中的核心奇幻道具，是展现洛仙仙侠身份的关键视觉元素。\",\n      \"source\": \"第1集\"\n    },\n    {\n      \"name\": \"智能手机\",\n      \"description\": \"江凡随身携带的现代通讯工具。\",\n      \"owner\": \"江凡\",\n      \"usage\": \"在胡同奔跑时用于拨打110报警求助。\",\n      \"visual_details\": \"一部普通的黑色触屏智能手机。在漆黑的胡同中，手机屏幕亮起，散发出微弱的白光照亮江凡惊恐的面容，屏幕上显示着“110 拨号中”或“通话中”的界面。\",\n      \"notes\": \"用于突出现代都市背景与突发灵异事件的对比冲突。\",\n      \"source\": \"第1集\"\n    },\n    {\n      \"name\": \"创作电脑\",\n      \"description\": \"网络作家江凡用于撰写小说的电脑。\",\n      \"owner\": \"江凡\",\n      \"usage\": \"在闪回镜头中出现，显示江凡创作《女主跑出来了怎么办？》的文档界面。\",\n      \"visual_details\": \"一台亮着的液晶电脑显示器。屏幕上展示着文字排版软件，亮白色背景下有黑色宋体字，标题栏醒目地写着《女主跑出来了怎么办？》，主角栏写着“洛仙”，并有关于“冰璃剑”外形的详细文字描述。\",\n      \"notes\": \"打破第四面墙、揭示剧情设定（女主从书中走出来）的核心媒介道具。\",\n      \"source\": \"第1集\"\n    }\n  ]\n}",
+      "items": [
+        {
+          "name": "冰璃剑",
+          "description": "女主角洛仙的专属配剑，由极寒之气凝聚而成，威力巨大，散发着刺骨寒意。",
+          "owner": "洛仙",
+          "usage": "洛仙凭空凝聚此剑指向江凡进行威胁；挥剑在青石板上斩出深痕；最后化作冰蓝色流光没入洛仙眉心。",
+          "visual_details": "一把由半透明湛蓝冰晶构成的华美长剑。剑身修长，散发着淡淡的幽蓝色微光与白色寒气，剑刃锋利无比，表面隐隐有精致的冰霜纹路。当它挥动时，空气中会凝结出细小的雪花，切口处会瞬间结霜。",
+          "notes": "剧中的核心奇幻道具，是展现洛仙仙侠身份的关键视觉元素。",
+          "source": "第1集",
+          "type": "prop",
+          "id": "prop_7558780fe17c",
+          "extractor_node_id": "extract_prop_hf4c7mfijmew",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780147121252
+        },
+        {
+          "name": "智能手机",
+          "description": "江凡随身携带的现代通讯工具。",
+          "owner": "江凡",
+          "usage": "在胡同奔跑时用于拨打110报警求助。",
+          "visual_details": "一部普通的黑色触屏智能手机。在漆黑的胡同中，手机屏幕亮起，散发出微弱的白光照亮江凡惊恐的面容，屏幕上显示着“110 拨号中”或“通话中”的界面。",
+          "notes": "用于突出现代都市背景与突发灵异事件的对比冲突。",
+          "source": "第1集",
+          "type": "prop",
+          "id": "prop_56bd2d1fc973",
+          "extractor_node_id": "extract_prop_hf4c7mfijmew",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780147121252
+        },
+        {
+          "name": "创作电脑",
+          "description": "网络作家江凡用于撰写小说的电脑。",
+          "owner": "江凡",
+          "usage": "在闪回镜头中出现，显示江凡创作《女主跑出来了怎么办？》的文档界面。",
+          "visual_details": "一台亮着的液晶电脑显示器。屏幕上展示着文字排版软件，亮白色背景下有黑色宋体字，标题栏醒目地写着《女主跑出来了怎么办？》，主角栏写着“洛仙”，并有关于“冰璃剑”外形的详细文字描述。",
+          "notes": "打破第四面墙、揭示剧情设定（女主从书中走出来）的核心媒介道具。",
+          "source": "第1集",
+          "type": "prop",
+          "id": "prop_794e16b6f4c4",
+          "extractor_node_id": "extract_prop_hf4c7mfijmew",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780147121252
+        }
+      ],
+      "updated_at": 1780147121252
+    },
+    "extract_character_2zgxpfrbcihm": {
+      "node_id": "extract_character_2zgxpfrbcihm",
+      "asset_type": "character",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取剧本中出现或被明确提及的角色。每个角色单独输出，包含人物形象描述",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "{\"items\":[{\"name\":\"江凡\",\"aliases\":[\"江江凡\"],\"description\":\"网文小说《女主跑出来了怎么办？》的作者，突然在现实中遇到了自己笔下的女主角洛仙，并面临生命威胁。\",\"appearance\":\"出场时满头大汗，神色惊恐。在逃跑中显得有些狼狈，身穿现代日常服饰。\",\"personality\":\"胆小怕死，求生欲极强，懂得认怂（“能屈能伸”），在紧张时刻会通过嬉皮笑脸和贫嘴来掩饰恐惧。\",\"relationships\":[{\"character\":\"洛仙\",\"relation\":\"自己笔下的小说女主角（创作者与虚构角色的关系），目前正被对方持剑追杀。\"}],\"notes\":\"设定了洛仙的武器“冰璃剑”及“天生仙骨”等背景。起初以为洛仙是玩Cosplay的书粉，确认其真实身份后彻底震惊。\",\"source\":\"《女主跑出来了怎么办？》第1集\"},{\"name\":\"洛仙\",\"aliases\":[],\"description\":\"江凡所著小说中的女主角，拥有“天生仙骨”的修仙者。不知为何从书中的世界来到了现实世界，并找到了作者江凡。\",\"appearance\":\"清冷绝世。身穿一袭白裙，赤足悬空，拥有温润如玉的小腿和精致的锁骨。面无表情，眼神冰冷，自带强大气场。\",\"personality\":\"冷漠无情，杀意凛然，高傲且居高临下，对江凡的行为感到厌恶和不屑，视其如蝼蚁。\",\"relationships\":[{\"character\":\"江凡\",\"relation\":\"创造自己的小说作者。对其态度冷酷，一见面便持剑逼问并意图杀之。\"}],\"notes\":\"拥有极强的超自然力量。能够凭空凝聚散发寒气的“冰璃剑”，一剑能将地面劈出深痕并使切口结霜，心念一动便可将剑化作流光收入眉心。\",\"source\":\"《女主跑出来了怎么办？》第1集\"}]}",
+      "items": [
+        {
+          "name": "江凡",
+          "aliases": [
+            "江江凡"
+          ],
+          "description": "网文小说《女主跑出来了怎么办？》的作者，突然在现实中遇到了自己笔下的女主角洛仙，并面临生命威胁。",
+          "appearance": "出场时满头大汗，神色惊恐。在逃跑中显得有些狼狈，身穿现代日常服饰。",
+          "personality": "胆小怕死，求生欲极强，懂得认怂（“能屈能伸”），在紧张时刻会通过嬉皮笑脸和贫嘴来掩饰恐惧。",
+          "relationships": [
+            {
+              "character": "洛仙",
+              "relation": "自己笔下的小说女主角（创作者与虚构角色的关系），目前正被对方持剑追杀。"
+            }
+          ],
+          "notes": "设定了洛仙的武器“冰璃剑”及“天生仙骨”等背景。起初以为洛仙是玩Cosplay的书粉，确认其真实身份后彻底震惊。",
+          "source": "《女主跑出来了怎么办？》第1集",
+          "type": "character",
+          "id": "character_2e5785eca935",
+          "extractor_node_id": "extract_character_2zgxpfrbcihm",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185716769
+        },
+        {
+          "name": "洛仙",
+          "aliases": [],
+          "description": "江凡所著小说中的女主角，拥有“天生仙骨”的修仙者。不知为何从书中的世界来到了现实世界，并找到了作者江凡。",
+          "appearance": "清冷绝世。身穿一袭白裙，赤足悬空，拥有温润如玉的小腿和精致的锁骨。面无表情，眼神冰冷，自带强大气场。",
+          "personality": "冷漠无情，杀意凛然，高傲且居高临下，对江凡的行为感到厌恶和不屑，视其如蝼蚁。",
+          "relationships": [
+            {
+              "character": "江凡",
+              "relation": "创造自己的小说作者。对其态度冷酷，一见面便持剑逼问并意图杀之。"
+            }
+          ],
+          "notes": "拥有极强的超自然力量。能够凭空凝聚散发寒气的“冰璃剑”，一剑能将地面劈出深痕并使切口结霜，心念一动便可将剑化作流光收入眉心。",
+          "source": "《女主跑出来了怎么办？》第1集",
+          "type": "character",
+          "id": "character_7555db104875",
+          "extractor_node_id": "extract_character_2zgxpfrbcihm",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185716769
+        }
+      ],
+      "updated_at": 1780185716769
+    },
+    "extract_scene_2sk3w1e2j38o": {
+      "node_id": "extract_scene_2sk3w1e2j38o",
+      "asset_type": "scene",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取剧本中的场景资产。，包含场景名、地点、时间、空间特征、氛围、关键动作和可用于生图的视觉描述。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "{\n  \"items\": [\n    {\n      \"name\": \"胡同巷口惊慌奔跑\",\n      \"location\": \"胡同巷口\",\n      \"time\": \"夜\",\n      \"description\": \"漆黑幽暗的深夜胡同，下着微雨或空气潮湿，两侧是长满斑驳青苔的古旧砖墙。一个满头大汗、神色极度恐慌的年轻男子在狭窄的巷道中狂奔，身后的阴影重重。他脚下一滑，狼狈地靠在冰冷潮湿的墙壁上。\",\n      \"mood\": \"惊恐、绝望、阴暗、紧张\",\n      \"key_actions\": \"江凡在胡同狂奔，对着手机绝望大喊求救，最后滑倒靠在长满青苔的墙上。\",\n      \"notes\": \"出场人物：江凡。环境需要呈现出深夜老旧胡同的压抑与阴森感。\",\n      \"source\": \"场1-1\"\n    },\n    {\n      \"name\": \"女主角飘然现身\",\n      \"location\": \"胡同深处\",\n      \"time\": \"夜\",\n      \"description\": \"幽深黑暗的胡同。一道惨白的闪电骤然划破夜空，照亮了一个无声逼近的白影。一名绝美清冷的女子赤足悬空，白裙飘飘，露出温润如玉的小腿与精致的锁骨。她面无表情，手中凭空凝聚出一把散发着森森寒气、半透明的冰蓝色长剑，剑尖直指前方男子的喉结，散发着缕缕白雾。\",\n      \"mood\": \"惊艳、唯美、肃杀、神秘\",\n      \"key_actions\": \"白影无声逼近，闪电照亮洛仙，洛仙凭空召唤冰璃剑直指江凡咽喉，江凡瞳孔地震。\",\n      \"notes\": \"出场人物：江凡、洛仙。特写镜头包含赤足、白裙、锁骨、清冷脸庞以及冰璃剑的寒气。\",\n      \"source\": \"场1-2\"\n    },\n    {\n      \"name\": \"冰刃逼问\",\n      \"location\": \"胡同深处\",\n      \"time\": \"夜\",\n      \"description\": \"寒风呼啸的胡同深处，空气仿佛凝结。一袭白衣的清冷女侠手持散发刺骨寒气的长剑，眼神如冰，步步紧逼。对面的年轻男子浑身发抖，蜷缩在墙角，满脸堆笑试图求饶，冷热对比强烈。\",\n      \"mood\": \"压迫感、冷酷、戏剧性紧张\",\n      \"key_actions\": \"洛仙持剑逼问江凡名字并释放杀意，江凡哆嗦结巴地解释并求饶。\",\n      \"notes\": \"出场人物：江凡、洛仙。着重刻画洛仙的冷酷杀意与江凡的秒怂对比。\",\n      \"source\": \"场1-3\"\n    },\n    {\n      \"name\": \"质疑与挑衅\",\n      \"location\": \"胡同深处\",\n      \"time\": \"夜\",\n      \"description\": \"阴冷的胡同。画面穿插闪回：亮着的现代电脑屏幕，上面显示着小说文档，主角栏写着“洛仙”。现实中，江凡自以为是在做梦或遇到Cosplay，嬉皮笑脸地伸出手指去拨动那柄散发寒气的剑尖。白衣女子眼神一冷，手腕微抖挥剑。\",\n      \"mood\": \"荒诞、挑衅、转瞬即逝的轻松\",\n      \"key_actions\": \"闪回电脑小说文档，江凡试图用手拨开剑尖并开玩笑质疑，洛仙眼神一凛挥剑反击。\",\n      \"notes\": \"出场人物：江凡、洛仙。包含一个电脑屏幕的闪回画面。\",\n      \"source\": \"场1-4\"\n    },\n    {\n      \"name\": \"剑气震慑与秒怂\",\n      \"location\": \"胡同深处\",\n      \"time\": \"夜\",\n      \"description\": \"古老胡同的青石板地面上，有一道被剑气斩出的深不见底的裂痕，切口边缘结满了厚厚的白霜，散发着寒气。江凡吓得面色苍白，滑稽地双手捂住裤裆，缩在墙根瑟瑟发抖。洛仙手持长剑，居高临下地俯视他，犹如看着蝼蚁。\",\n      \"mood\": \"震撼、滑稽、极度恐惧\",\n      \"key_actions\": \"洛仙挥剑在青石板斩出结霜剑痕，江凡炸毛护裆、秒怂求饶，并崩溃质问对方是否是自己写的小说女主。\",\n      \"notes\": \"出场人物：江凡、洛仙。视觉重点在地面上结满寒霜的深邃剑痕。\",\n      \"source\": \"场1-5\"\n    },\n    {\n      \"name\": \"法术收剑与震惊定格\",\n      \"location\": \"胡同深处\",\n      \"time\": \"夜\",\n      \"description\": \"夜色浓郁的胡同。白衣女子心念微动，手中的冰璃剑瞬间化作一道冰蓝色的流光，顺畅地钻入她的眉心消失不见。她白皙的赤足缓缓降落，轻轻踩在冰冷的青石板上，一步步走向前方。江凡张大嘴巴，整个人彻底石化，表情定格在惊恐与懵逼之中。\",\n      \"mood\": \"玄幻、震撼、余韵悠长\",\n      \"key_actions\": \"洛仙将长剑化作冰蓝流光收入眉心，赤足落地走向江凡；江凡彻底石化。\",\n      \"notes\": \"出场人物：江凡、洛仙。冰蓝色流光入眉心与赤足踩青石板是极具视觉冲击力的玄幻画面。\",\n      \"source\": \"场1-6\"\n    }\n  ]\n}",
+      "items": [
+        {
+          "name": "胡同巷口惊慌奔跑",
+          "location": "胡同巷口",
+          "time": "夜",
+          "description": "漆黑幽暗的深夜胡同，下着微雨或空气潮湿，两侧是长满斑驳青苔的古旧砖墙。一个满头大汗、神色极度恐慌的年轻男子在狭窄的巷道中狂奔，身后的阴影重重。他脚下一滑，狼狈地靠在冰冷潮湿的墙壁上。",
+          "mood": "惊恐、绝望、阴暗、紧张",
+          "key_actions": "江凡在胡同狂奔，对着手机绝望大喊求救，最后滑倒靠在长满青苔的墙上。",
+          "notes": "出场人物：江凡。环境需要呈现出深夜老旧胡同的压抑与阴森感。",
+          "source": "场1-1",
+          "type": "scene",
+          "id": "scene_d87cedd316c0",
+          "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185655796
+        },
+        {
+          "name": "女主角飘然现身",
+          "location": "胡同深处",
+          "time": "夜",
+          "description": "幽深黑暗的胡同。一道惨白的闪电骤然划破夜空，照亮了一个无声逼近的白影。一名绝美清冷的女子赤足悬空，白裙飘飘，露出温润如玉的小腿与精致的锁骨。她面无表情，手中凭空凝聚出一把散发着森森寒气、半透明的冰蓝色长剑，剑尖直指前方男子的喉结，散发着缕缕白雾。",
+          "mood": "惊艳、唯美、肃杀、神秘",
+          "key_actions": "白影无声逼近，闪电照亮洛仙，洛仙凭空召唤冰璃剑直指江凡咽喉，江凡瞳孔地震。",
+          "notes": "出场人物：江凡、洛仙。特写镜头包含赤足、白裙、锁骨、清冷脸庞以及冰璃剑的寒气。",
+          "source": "场1-2",
+          "type": "scene",
+          "id": "scene_11c37927dce8",
+          "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185655796
+        },
+        {
+          "name": "冰刃逼问",
+          "location": "胡同深处",
+          "time": "夜",
+          "description": "寒风呼啸的胡同深处，空气仿佛凝结。一袭白衣的清冷女侠手持散发刺骨寒气的长剑，眼神如冰，步步紧逼。对面的年轻男子浑身发抖，蜷缩在墙角，满脸堆笑试图求饶，冷热对比强烈。",
+          "mood": "压迫感、冷酷、戏剧性紧张",
+          "key_actions": "洛仙持剑逼问江凡名字并释放杀意，江凡哆嗦结巴地解释并求饶。",
+          "notes": "出场人物：江凡、洛仙。着重刻画洛仙的冷酷杀意与江凡的秒怂对比。",
+          "source": "场1-3",
+          "type": "scene",
+          "id": "scene_d7dc392e5ad8",
+          "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185655796
+        },
+        {
+          "name": "质疑与挑衅",
+          "location": "胡同深处",
+          "time": "夜",
+          "description": "阴冷的胡同。画面穿插闪回：亮着的现代电脑屏幕，上面显示着小说文档，主角栏写着“洛仙”。现实中，江凡自以为是在做梦或遇到Cosplay，嬉皮笑脸地伸出手指去拨动那柄散发寒气的剑尖。白衣女子眼神一冷，手腕微抖挥剑。",
+          "mood": "荒诞、挑衅、转瞬即逝的轻松",
+          "key_actions": "闪回电脑小说文档，江凡试图用手拨开剑尖并开玩笑质疑，洛仙眼神一凛挥剑反击。",
+          "notes": "出场人物：江凡、洛仙。包含一个电脑屏幕的闪回画面。",
+          "source": "场1-4",
+          "type": "scene",
+          "id": "scene_0e339f9d743a",
+          "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185655796
+        },
+        {
+          "name": "剑气震慑与秒怂",
+          "location": "胡同深处",
+          "time": "夜",
+          "description": "古老胡同的青石板地面上，有一道被剑气斩出的深不见底的裂痕，切口边缘结满了厚厚的白霜，散发着寒气。江凡吓得面色苍白，滑稽地双手捂住裤裆，缩在墙根瑟瑟发抖。洛仙手持长剑，居高临下地俯视他，犹如看着蝼蚁。",
+          "mood": "震撼、滑稽、极度恐惧",
+          "key_actions": "洛仙挥剑在青石板斩出结霜剑痕，江凡炸毛护裆、秒怂求饶，并崩溃质问对方是否是自己写的小说女主。",
+          "notes": "出场人物：江凡、洛仙。视觉重点在地面上结满寒霜的深邃剑痕。",
+          "source": "场1-5",
+          "type": "scene",
+          "id": "scene_f66475378fc1",
+          "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185655796
+        },
+        {
+          "name": "法术收剑与震惊定格",
+          "location": "胡同深处",
+          "time": "夜",
+          "description": "夜色浓郁的胡同。白衣女子心念微动，手中的冰璃剑瞬间化作一道冰蓝色的流光，顺畅地钻入她的眉心消失不见。她白皙的赤足缓缓降落，轻轻踩在冰冷的青石板上，一步步走向前方。江凡张大嘴巴，整个人彻底石化，表情定格在惊恐与懵逼之中。",
+          "mood": "玄幻、震撼、余韵悠长",
+          "key_actions": "洛仙将长剑化作冰蓝流光收入眉心，赤足落地走向江凡；江凡彻底石化。",
+          "notes": "出场人物：江凡、洛仙。冰蓝色流光入眉心与赤足踩青石板是极具视觉冲击力的玄幻画面。",
+          "source": "场1-6",
+          "type": "scene",
+          "id": "scene_d7dede6839bd",
+          "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780185655796
+        }
+      ],
+      "updated_at": 1780185655796
+    },
+    "extract_character_aozo3er6zaoi": {
+      "node_id": "extract_character_aozo3er6zaoi",
+      "asset_type": "character",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取文中出现过的所有可单独识别的人物，包括“我”。每个角色必须且只能输出 name、aliases、description 三个字段；合并同一人物的不同叫法，description 必须包含年龄、性别、发色、发型、眼睛颜色、上身服装、下身服装。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "[\n  {\n    \"name\": \"江凡\",\n    \"aliases\": \"我\",\n    \"description\": \"一名约二十三岁的年轻男子，留着一头因剧烈运动而略显凌乱的黑色短发，拥有一双明亮的黑色眼睛。他上身穿着一件简约的灰色连帽卫衣，下身穿着一条深蓝色休闲牛仔裤，展现出普通都市青年的随性与活力。\"\n  },\n  {\n    \"name\": \"洛仙\",\n    \"aliases\": \"女鬼,女侠\",\n    \"description\": \"一名外表约十九岁的年轻女性，拥有一头及腰的黑色长直发和一双清冷孤傲的黑色眼睛。她上身穿着一件精致优雅的古风白色长衫，下身穿着一条轻盈飘逸的白色长裙，赤足悬空，散发着不食人间烟火的冰冷仙子气质。\"\n  }\n]",
+      "items": [
+        {
+          "name": "江凡",
+          "aliases": "我",
+          "description": "一名约二十三岁的年轻男子，留着一头因剧烈运动而略显凌乱的黑色短发，拥有一双明亮的黑色眼睛。他上身穿着一件简约的灰色连帽卫衣，下身穿着一条深蓝色休闲牛仔裤，展现出普通都市青年的随性与活力。",
+          "id": "character_3e122ed4e000",
+          "type": "character",
+          "extractor_node_id": "extract_character_aozo3er6zaoi",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780186373466
+        },
+        {
+          "name": "洛仙",
+          "aliases": "女鬼,女侠",
+          "description": "一名外表约十九岁的年轻女性，拥有一头及腰的黑色长直发和一双清冷孤傲的黑色眼睛。她上身穿着一件精致优雅的古风白色长衫，下身穿着一条轻盈飘逸的白色长裙，赤足悬空，散发着不食人间烟火的冰冷仙子气质。",
+          "id": "character_99385db05ced",
+          "type": "character",
+          "extractor_node_id": "extract_character_aozo3er6zaoi",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780186373466
+        }
+      ],
+      "updated_at": 1780186373466
+    },
+    "extract_character_llcps86sid74": {
+      "node_id": "extract_character_llcps86sid74",
+      "asset_type": "character",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取文中出现过的所有可单独识别的人物，包括“我”。每个角色必须且只能输出 name、aliases、description 三个字段；合并同一人物的不同叫法，description 必须包含年龄、性别、发色、发型、眼睛颜色、上身服装、下身服装。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "[\n  {\n    \"name\": \"江凡\",\n    \"aliases\": \"我\",\n    \"description\": \"一名二十三岁左右的年轻男子，留着一头黑色凌乱短发，拥有一双深褐色的眼睛，神色中常带着惊恐与疲惫。他上身穿着一件普通的灰色运动卫衣，下身穿着一条蓝色休闲牛仔裤，整体是个典型的年轻宅男作家的打扮。\"\n  },\n  {\n    \"name\": \"洛仙\",\n    \"aliases\": \"女仙,女鬼,女侠,女主\",\n    \"description\": \"一名看起来二十岁左右的年轻女子，拥有一头乌黑柔顺的及腰长发和一双冰冷深邃的淡蓝色双眸。她容貌绝美，气质清冷，上身穿着一件精致的古风白色对襟上衣，露出漂亮的锁骨，下身穿着一条轻盈的白色百褶长裙，赤着双脚，浑身散发着不食人间烟火的仙子气质。\"\n  }\n]",
+      "items": [
+        {
+          "name": "江凡",
+          "aliases": "我",
+          "description": "一名二十三岁左右的年轻男子，留着一头黑色凌乱短发，拥有一双深褐色的眼睛，神色中常带着惊恐与疲惫。他上身穿着一件普通的灰色运动卫衣，下身穿着一条蓝色休闲牛仔裤，整体是个典型的年轻宅男作家的打扮。",
+          "id": "character_538b4d8ed30b",
+          "type": "character",
+          "extractor_node_id": "extract_character_llcps86sid74",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187709798
+        },
+        {
+          "name": "洛仙",
+          "aliases": "女仙,女鬼,女侠,女主",
+          "description": "一名看起来二十岁左右的年轻女子，拥有一头乌黑柔顺的及腰长发和一双冰冷深邃的淡蓝色双眸。她容貌绝美，气质清冷，上身穿着一件精致的古风白色对襟上衣，露出漂亮的锁骨，下身穿着一条轻盈的白色百褶长裙，赤着双脚，浑身散发着不食人间烟火的仙子气质。",
+          "id": "character_809296d2a55e",
+          "type": "character",
+          "extractor_node_id": "extract_character_llcps86sid74",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187709798
+        }
+      ],
+      "updated_at": 1780187709798
+    },
+    "extract_scene_vlkt0m34k8ic": {
+      "node_id": "extract_scene_vlkt0m34k8ic",
+      "asset_type": "scene",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取文中出现过的所有主要场景。每个场景必须且只能输出 name、aliases、description 三个字段；合并同一场景的不同叫法，description 必须以场景可视化描述为主，不要出现人物、动作、情绪或对话。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "[\n  {\n    \"name\": \"老旧胡同巷口\",\n    \"aliases\": \"胡同巷口\",\n    \"description\": \"狭窄破旧的老旧胡同巷口空间。两侧分布着高耸斑驳的砖墙，墙面附着着成片的湿冷青苔。地面为凹凸不平的青石板路，在漆黑的夜色下显得极其幽暗。巷口拐角处仅有远处微弱的街灯余光，空气中弥漫着潮湿的夜雾，整体呈现出一种压抑、阴冷与神秘的深夜氛围。\"\n  },\n  {\n    \"name\": \"阴冷胡同深处\",\n    \"aliases\": \"胡同深处\",\n    \"description\": \"幽暗狭窄的胡同深处空间。两侧是紧密排列的灰砖老旧墙面，墙皮斑驳脱落，有些许皲裂的缝隙。地面由不规则的青石铺设，路面上留有一道焦黑且结满白霜的深邃裂痕。冷白色的电光在夜空中闪烁，瞬间照亮狭窄的通道，空气中充斥着冰冷的寒气，营造出冷冽、诡异且充满危机的肃杀氛围。\"\n  },\n  {\n    \"name\": \"都市简约书房\",\n    \"aliases\": \"电脑屏幕,作者书房\",\n    \"description\": \"现代简约风格的个人创作书房。室内一角摆放着一张深色木质电脑桌，桌上放置着一台亮着的液晶电脑显示器，屏幕上正显示着小说文本编辑界面。书桌上散落着机械键盘、水杯等日常杂物，室内光线主要来源于屏幕散发的幽蓝色微光，营造出安静、专注且略显杂乱的创作空间氛围。\"\n  }\n]",
+      "items": [
+        {
+          "name": "老旧胡同巷口",
+          "aliases": "胡同巷口",
+          "description": "狭窄破旧的老旧胡同巷口空间。两侧分布着高耸斑驳的砖墙，墙面附着着成片的湿冷青苔。地面为凹凸不平的青石板路，在漆黑的夜色下显得极其幽暗。巷口拐角处仅有远处微弱的街灯余光，空气中弥漫着潮湿的夜雾，整体呈现出一种压抑、阴冷与神秘的深夜氛围。",
+          "id": "scene_7e90c4355feb",
+          "type": "scene",
+          "extractor_node_id": "extract_scene_vlkt0m34k8ic",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187716598
+        },
+        {
+          "name": "阴冷胡同深处",
+          "aliases": "胡同深处",
+          "description": "幽暗狭窄的胡同深处空间。两侧是紧密排列的灰砖老旧墙面，墙皮斑驳脱落，有些许皲裂的缝隙。地面由不规则的青石铺设，路面上留有一道焦黑且结满白霜的深邃裂痕。冷白色的电光在夜空中闪烁，瞬间照亮狭窄的通道，空气中充斥着冰冷的寒气，营造出冷冽、诡异且充满危机的肃杀氛围。",
+          "id": "scene_706b188979aa",
+          "type": "scene",
+          "extractor_node_id": "extract_scene_vlkt0m34k8ic",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187716598
+        },
+        {
+          "name": "都市简约书房",
+          "aliases": "电脑屏幕,作者书房",
+          "description": "现代简约风格的个人创作书房。室内一角摆放着一张深色木质电脑桌，桌上放置着一台亮着的液晶电脑显示器，屏幕上正显示着小说文本编辑界面。书桌上散落着机械键盘、水杯等日常杂物，室内光线主要来源于屏幕散发的幽蓝色微光，营造出安静、专注且略显杂乱的创作空间氛围。",
+          "id": "scene_f79173d22b0c",
+          "type": "scene",
+          "extractor_node_id": "extract_scene_vlkt0m34k8ic",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187716598
+        }
+      ],
+      "updated_at": 1780187716598
+    },
+    "extract_prop_4txrfvudu9ab": {
+      "node_id": "extract_prop_4txrfvudu9ab",
+      "asset_type": "prop",
+      "source_node_ids": [
+        "script_m5uqkrdh86ca"
+      ],
+      "instruction": "提取文中后续可能需要展示、生成参考物、作为画面证据或影响分镜判断的关键物品。每个道具必须且只能输出 name、aliases、description 三个字段；description 必须描述物品类型、材质、颜色、形状、大小感、表面状态和主要用途。",
+      "provider": "custom-api-3",
+      "model": "gemini-3.5-flash",
+      "raw_text": "[\n  {\n    \"name\": \"手机\",\n    \"aliases\": \"智能手机,电话\",\n    \"description\": \"黑色长方形智能手机，屏幕在黑暗中散发微光，金属边框，表面有日常使用痕迹，主要用于拨打紧急电话和通讯。\"\n  },\n  {\n    \"name\": \"冰璃剑\",\n    \"aliases\": \"长剑,冰蓝色长剑\",\n    \"description\": \"一柄由寒冰材质制成的冰蓝色长剑，剑身呈半透明状，长约三尺，剑刃锋利且散发着刺骨的白雾与寒气，表面有若隐若现的冰晶纹路，是一件仙侠风格的致命武器。\"\n  },\n  {\n    \"name\": \"电脑\",\n    \"aliases\": \"电脑屏幕,显示器\",\n    \"description\": \"一套黑色的个人电脑设备，包括液晶显示器与键盘，屏幕呈现明亮的背光并显示着小说文本编辑界面，作为文字工作者的创作工具。\"\n  }\n]",
+      "items": [
+        {
+          "name": "手机",
+          "aliases": "智能手机,电话",
+          "description": "黑色长方形智能手机，屏幕在黑暗中散发微光，金属边框，表面有日常使用痕迹，主要用于拨打紧急电话和通讯。",
+          "id": "prop_ff37071029ee",
+          "type": "prop",
+          "extractor_node_id": "extract_prop_4txrfvudu9ab",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187801349
+        },
+        {
+          "name": "冰璃剑",
+          "aliases": "长剑,冰蓝色长剑",
+          "description": "一柄由寒冰材质制成的冰蓝色长剑，剑身呈半透明状，长约三尺，剑刃锋利且散发着刺骨的白雾与寒气，表面有若隐若现的冰晶纹路，是一件仙侠风格的致命武器。",
+          "id": "prop_c50ef3f4f87d",
+          "type": "prop",
+          "extractor_node_id": "extract_prop_4txrfvudu9ab",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187801349
+        },
+        {
+          "name": "电脑",
+          "aliases": "电脑屏幕,显示器",
+          "description": "一套黑色的个人电脑设备，包括液晶显示器与键盘，屏幕呈现明亮的背光并显示着小说文本编辑界面，作为文字工作者的创作工具。",
+          "id": "prop_cbe2576acdd6",
+          "type": "prop",
+          "extractor_node_id": "extract_prop_4txrfvudu9ab",
+          "source_node_ids": [
+            "script_m5uqkrdh86ca"
+          ],
+          "updated_at": 1780187801349
+        }
+      ],
+      "updated_at": 1780187801349
+    }
+  },
+  "assets": {
+    "character": [
+      {
+        "name": "江凡",
+        "aliases": [
+          "江江凡"
+        ],
+        "identity": "网文作家，小说《女主跑出来了怎么办？》的作者",
+        "appearance": "满头大汗，神色惊恐，穿着现代日常衣物。情绪变化剧烈，从惊恐狂奔、绝望、呆滞到嬉皮笑脸，最后秒怂崩溃。",
+        "personality": "有些胆小懦弱但反应极快，能屈能伸，擅长自我安慰和吐槽，带有一点现代青年的幽默感。",
+        "relationships": "洛仙的创作者（小说作者），目前正被洛仙持剑追杀。",
+        "key_actions": [
+          "深夜在胡同里躲避追杀并报警",
+          "认出洛仙和冰璃剑，起初以为是Cosplay并试图拨开剑尖",
+          "被洛仙的破坏力吓到后迅速求饶",
+          "确认洛仙是自己笔下的女主角并彻底石化"
+        ],
+        "visual_description": "一个20多岁的中国年轻男子，留着凌乱的黑色短发，脸上满是汗水，双眼因极度惊恐而圆睁。他靠在长满青苔的阴暗小巷墙壁上，穿着现代休闲卫衣，神情惊恐而绝望。",
+        "notes": "本故事的男主角，写的小说女主跑到了现实世界。",
+        "source": "《女主跑出来了怎么办？》第1集",
+        "type": "character",
+        "id": "character_25076d38f81e",
+        "extractor_node_id": "extract_character_2stgczi88v7z",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780136438570
+      },
+      {
+        "name": "洛仙",
+        "aliases": [
+          "女鬼",
+          "天生仙骨的洛仙",
+          "女侠"
+        ],
+        "identity": "江凡所著小说《女主跑出来了怎么办？》中的高冷女主角，天生仙骨，从书中实体化来到现实世界的修仙者。",
+        "appearance": "清冷绝世，五官精致，气质孤傲。赤足悬空，身穿一袭白裙，露出精致的锁骨和温润如玉的小腿。手持散发着凛冽寒气的‘冰璃剑’。",
+        "personality": "冷漠、孤傲、杀伐果断，视凡人如蝼蚁，脾气冰冷且不容侵犯，反感轻浮下流的言行。",
+        "relationships": "由江凡创造，但目前视江凡为目标或惩罚对象，正对其进行生命威胁。",
+        "key_actions": [
+          "如幽灵般赤足悬空逼近江凡",
+          "凭空凝聚出冰璃剑并直抵江凡咽喉",
+          "挥剑斩碎青石板地面，留下带寒霜的剑痕",
+          "将冰璃剑化作冰蓝色流光收回眉心",
+          "缓缓落地并赤足走向江凡"
+        ],
+        "visual_description": "一位清冷高绝、美若天仙的中国年轻女子，约二十岁。她身穿一袭纯白色的轻盈古装长裙，飘逸出尘。她赤足悬空半空，面无表情，眼神冰冷如霜。手中握着一柄散发着幽蓝色寒气和白色霜雾的半透明冰晶长剑。背景是雷雨交加的黑夜和狭窄、潮湿的胡同巷口。",
+        "notes": "配兵为‘冰璃剑’，可化为流光收纳于眉心。实力强大且冰冷无情。",
+        "source": "《女主跑出来了怎么办？》第1集",
+        "type": "character",
+        "id": "character_7b1facbad066",
+        "extractor_node_id": "extract_character_2stgczi88v7z",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780136438570
+      },
+      {
+        "name": "江凡",
+        "aliases": [
+          "江江凡"
+        ],
+        "description": "网文小说《女主跑出来了怎么办？》的作者，突然在现实中遇到了自己笔下的女主角洛仙，并面临生命威胁。",
+        "appearance": "出场时满头大汗，神色惊恐。在逃跑中显得有些狼狈，身穿现代日常服饰。",
+        "personality": "胆小怕死，求生欲极强，懂得认怂（“能屈能伸”），在紧张时刻会通过嬉皮笑脸和贫嘴来掩饰恐惧。",
+        "relationships": [
+          {
+            "character": "洛仙",
+            "relation": "自己笔下的小说女主角（创作者与虚构角色的关系），目前正被对方持剑追杀。"
+          }
+        ],
+        "notes": "设定了洛仙的武器“冰璃剑”及“天生仙骨”等背景。起初以为洛仙是玩Cosplay的书粉，确认其真实身份后彻底震惊。",
+        "source": "《女主跑出来了怎么办？》第1集",
+        "type": "character",
+        "id": "character_2e5785eca935",
+        "extractor_node_id": "extract_character_2zgxpfrbcihm",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185716769
+      },
+      {
+        "name": "洛仙",
+        "aliases": [],
+        "description": "江凡所著小说中的女主角，拥有“天生仙骨”的修仙者。不知为何从书中的世界来到了现实世界，并找到了作者江凡。",
+        "appearance": "清冷绝世。身穿一袭白裙，赤足悬空，拥有温润如玉的小腿和精致的锁骨。面无表情，眼神冰冷，自带强大气场。",
+        "personality": "冷漠无情，杀意凛然，高傲且居高临下，对江凡的行为感到厌恶和不屑，视其如蝼蚁。",
+        "relationships": [
+          {
+            "character": "江凡",
+            "relation": "创造自己的小说作者。对其态度冷酷，一见面便持剑逼问并意图杀之。"
+          }
+        ],
+        "notes": "拥有极强的超自然力量。能够凭空凝聚散发寒气的“冰璃剑”，一剑能将地面劈出深痕并使切口结霜，心念一动便可将剑化作流光收入眉心。",
+        "source": "《女主跑出来了怎么办？》第1集",
+        "type": "character",
+        "id": "character_7555db104875",
+        "extractor_node_id": "extract_character_2zgxpfrbcihm",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185716769
+      },
+      {
+        "name": "江凡",
+        "aliases": "我",
+        "description": "一名约二十三岁的年轻男子，留着一头因剧烈运动而略显凌乱的黑色短发，拥有一双明亮的黑色眼睛。他上身穿着一件简约的灰色连帽卫衣，下身穿着一条深蓝色休闲牛仔裤，展现出普通都市青年的随性与活力。",
+        "id": "character_3e122ed4e000",
+        "type": "character",
+        "extractor_node_id": "extract_character_aozo3er6zaoi",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780186373466
+      },
+      {
+        "name": "洛仙",
+        "aliases": "女鬼,女侠",
+        "description": "一名外表约十九岁的年轻女性，拥有一头及腰的黑色长直发和一双清冷孤傲的黑色眼睛。她上身穿着一件精致优雅的古风白色长衫，下身穿着一条轻盈飘逸的白色长裙，赤足悬空，散发着不食人间烟火的冰冷仙子气质。",
+        "id": "character_99385db05ced",
+        "type": "character",
+        "extractor_node_id": "extract_character_aozo3er6zaoi",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780186373466
+      },
+      {
+        "name": "江凡",
+        "aliases": "我",
+        "description": "一名二十三岁左右的年轻男子，留着一头黑色凌乱短发，拥有一双深褐色的眼睛，神色中常带着惊恐与疲惫。他上身穿着一件普通的灰色运动卫衣，下身穿着一条蓝色休闲牛仔裤，整体是个典型的年轻宅男作家的打扮。",
+        "id": "character_538b4d8ed30b",
+        "type": "character",
+        "extractor_node_id": "extract_character_llcps86sid74",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187709798
+      },
+      {
+        "name": "洛仙",
+        "aliases": "女仙,女鬼,女侠,女主",
+        "description": "一名看起来二十岁左右的年轻女子，拥有一头乌黑柔顺的及腰长发和一双冰冷深邃的淡蓝色双眸。她容貌绝美，气质清冷，上身穿着一件精致的古风白色对襟上衣，露出漂亮的锁骨，下身穿着一条轻盈的白色百褶长裙，赤着双脚，浑身散发着不食人间烟火的仙子气质。",
+        "id": "character_809296d2a55e",
+        "type": "character",
+        "extractor_node_id": "extract_character_llcps86sid74",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187709798
+      }
+    ],
+    "scene": [
+      {
+        "name": "胡同巷口",
+        "location": "胡同巷口",
+        "time": "夜晚",
+        "description": "漆黑幽暗的旧式胡同入口，光线极其微弱。两侧是高耸且陈旧的砖墙，墙面斑驳，长满了湿漉漉的绿色青苔。地面阴暗潮湿，充满压抑与惊悚的氛围。",
+        "mood": "恐怖、惊慌、绝望",
+        "key_actions": "江凡满头大汗、神色惊恐地狂奔，一边跑一边用手机报警，最后脚下滑倒，靠在满是青苔的墙壁上喘息。",
+        "notes": "关键道具：手机。环境质感：潮湿、斑驳青苔墙面。",
+        "source": "场1-1",
+        "type": "scene",
+        "id": "scene_de99484bf857",
+        "extractor_node_id": "extract_scene_s1xyyifwd4af",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780146850613
+      },
+      {
+        "name": "胡同深处",
+        "location": "幽深的胡同内部",
+        "time": "夜晚",
+        "description": "狭窄而幽深的古旧胡同，地面铺着斑驳不平的青石板。夜空有雷电交加，瞬间的闪光照亮四周。空气中因温度骤降而弥漫着白雾。青石板地面上有一道深不见底的裂痕，切口边缘结着厚厚的白霜，散发着森森寒气。",
+        "mood": "阴冷、诡异、剑拔弩张、奇幻",
+        "key_actions": "洛仙赤足悬空现身，手持散发寒气的冰璃剑指向江凡；洛仙挥剑在地面斩出冰冻裂痕；随后长剑化作冰蓝色流光缩入洛仙眉心，洛仙赤足落地走向江凡。",
+        "notes": "关键道具/特效：冰璃剑（散发寒气、凭空凝聚）、地面结霜的剑痕、眉心冰蓝色流光。视觉特征：女主赤足悬空、白裙、清冷绝世。",
+        "source": "场1-2至场1-6",
+        "type": "scene",
+        "id": "scene_e6f83857406c",
+        "extractor_node_id": "extract_scene_s1xyyifwd4af",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780146850613
+      },
+      {
+        "name": "胡同巷口惊慌奔跑",
+        "location": "胡同巷口",
+        "time": "夜",
+        "description": "漆黑幽暗的深夜胡同，下着微雨或空气潮湿，两侧是长满斑驳青苔的古旧砖墙。一个满头大汗、神色极度恐慌的年轻男子在狭窄的巷道中狂奔，身后的阴影重重。他脚下一滑，狼狈地靠在冰冷潮湿的墙壁上。",
+        "mood": "惊恐、绝望、阴暗、紧张",
+        "key_actions": "江凡在胡同狂奔，对着手机绝望大喊求救，最后滑倒靠在长满青苔的墙上。",
+        "notes": "出场人物：江凡。环境需要呈现出深夜老旧胡同的压抑与阴森感。",
+        "source": "场1-1",
+        "type": "scene",
+        "id": "scene_d87cedd316c0",
+        "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185655796
+      },
+      {
+        "name": "女主角飘然现身",
+        "location": "胡同深处",
+        "time": "夜",
+        "description": "幽深黑暗的胡同。一道惨白的闪电骤然划破夜空，照亮了一个无声逼近的白影。一名绝美清冷的女子赤足悬空，白裙飘飘，露出温润如玉的小腿与精致的锁骨。她面无表情，手中凭空凝聚出一把散发着森森寒气、半透明的冰蓝色长剑，剑尖直指前方男子的喉结，散发着缕缕白雾。",
+        "mood": "惊艳、唯美、肃杀、神秘",
+        "key_actions": "白影无声逼近，闪电照亮洛仙，洛仙凭空召唤冰璃剑直指江凡咽喉，江凡瞳孔地震。",
+        "notes": "出场人物：江凡、洛仙。特写镜头包含赤足、白裙、锁骨、清冷脸庞以及冰璃剑的寒气。",
+        "source": "场1-2",
+        "type": "scene",
+        "id": "scene_11c37927dce8",
+        "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185655796
+      },
+      {
+        "name": "冰刃逼问",
+        "location": "胡同深处",
+        "time": "夜",
+        "description": "寒风呼啸的胡同深处，空气仿佛凝结。一袭白衣的清冷女侠手持散发刺骨寒气的长剑，眼神如冰，步步紧逼。对面的年轻男子浑身发抖，蜷缩在墙角，满脸堆笑试图求饶，冷热对比强烈。",
+        "mood": "压迫感、冷酷、戏剧性紧张",
+        "key_actions": "洛仙持剑逼问江凡名字并释放杀意，江凡哆嗦结巴地解释并求饶。",
+        "notes": "出场人物：江凡、洛仙。着重刻画洛仙的冷酷杀意与江凡的秒怂对比。",
+        "source": "场1-3",
+        "type": "scene",
+        "id": "scene_d7dc392e5ad8",
+        "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185655796
+      },
+      {
+        "name": "质疑与挑衅",
+        "location": "胡同深处",
+        "time": "夜",
+        "description": "阴冷的胡同。画面穿插闪回：亮着的现代电脑屏幕，上面显示着小说文档，主角栏写着“洛仙”。现实中，江凡自以为是在做梦或遇到Cosplay，嬉皮笑脸地伸出手指去拨动那柄散发寒气的剑尖。白衣女子眼神一冷，手腕微抖挥剑。",
+        "mood": "荒诞、挑衅、转瞬即逝的轻松",
+        "key_actions": "闪回电脑小说文档，江凡试图用手拨开剑尖并开玩笑质疑，洛仙眼神一凛挥剑反击。",
+        "notes": "出场人物：江凡、洛仙。包含一个电脑屏幕的闪回画面。",
+        "source": "场1-4",
+        "type": "scene",
+        "id": "scene_0e339f9d743a",
+        "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185655796
+      },
+      {
+        "name": "剑气震慑与秒怂",
+        "location": "胡同深处",
+        "time": "夜",
+        "description": "古老胡同的青石板地面上，有一道被剑气斩出的深不见底的裂痕，切口边缘结满了厚厚的白霜，散发着寒气。江凡吓得面色苍白，滑稽地双手捂住裤裆，缩在墙根瑟瑟发抖。洛仙手持长剑，居高临下地俯视他，犹如看着蝼蚁。",
+        "mood": "震撼、滑稽、极度恐惧",
+        "key_actions": "洛仙挥剑在青石板斩出结霜剑痕，江凡炸毛护裆、秒怂求饶，并崩溃质问对方是否是自己写的小说女主。",
+        "notes": "出场人物：江凡、洛仙。视觉重点在地面上结满寒霜的深邃剑痕。",
+        "source": "场1-5",
+        "type": "scene",
+        "id": "scene_f66475378fc1",
+        "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185655796
+      },
+      {
+        "name": "法术收剑与震惊定格",
+        "location": "胡同深处",
+        "time": "夜",
+        "description": "夜色浓郁的胡同。白衣女子心念微动，手中的冰璃剑瞬间化作一道冰蓝色的流光，顺畅地钻入她的眉心消失不见。她白皙的赤足缓缓降落，轻轻踩在冰冷的青石板上，一步步走向前方。江凡张大嘴巴，整个人彻底石化，表情定格在惊恐与懵逼之中。",
+        "mood": "玄幻、震撼、余韵悠长",
+        "key_actions": "洛仙将长剑化作冰蓝流光收入眉心，赤足落地走向江凡；江凡彻底石化。",
+        "notes": "出场人物：江凡、洛仙。冰蓝色流光入眉心与赤足踩青石板是极具视觉冲击力的玄幻画面。",
+        "source": "场1-6",
+        "type": "scene",
+        "id": "scene_d7dede6839bd",
+        "extractor_node_id": "extract_scene_2sk3w1e2j38o",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780185655796
+      },
+      {
+        "name": "老旧胡同巷口",
+        "aliases": "胡同巷口",
+        "description": "狭窄破旧的老旧胡同巷口空间。两侧分布着高耸斑驳的砖墙，墙面附着着成片的湿冷青苔。地面为凹凸不平的青石板路，在漆黑的夜色下显得极其幽暗。巷口拐角处仅有远处微弱的街灯余光，空气中弥漫着潮湿的夜雾，整体呈现出一种压抑、阴冷与神秘的深夜氛围。",
+        "id": "scene_7e90c4355feb",
+        "type": "scene",
+        "extractor_node_id": "extract_scene_vlkt0m34k8ic",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187716598
+      },
+      {
+        "name": "阴冷胡同深处",
+        "aliases": "胡同深处",
+        "description": "幽暗狭窄的胡同深处空间。两侧是紧密排列的灰砖老旧墙面，墙皮斑驳脱落，有些许皲裂的缝隙。地面由不规则的青石铺设，路面上留有一道焦黑且结满白霜的深邃裂痕。冷白色的电光在夜空中闪烁，瞬间照亮狭窄的通道，空气中充斥着冰冷的寒气，营造出冷冽、诡异且充满危机的肃杀氛围。",
+        "id": "scene_706b188979aa",
+        "type": "scene",
+        "extractor_node_id": "extract_scene_vlkt0m34k8ic",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187716598
+      },
+      {
+        "name": "都市简约书房",
+        "aliases": "电脑屏幕,作者书房",
+        "description": "现代简约风格的个人创作书房。室内一角摆放着一张深色木质电脑桌，桌上放置着一台亮着的液晶电脑显示器，屏幕上正显示着小说文本编辑界面。书桌上散落着机械键盘、水杯等日常杂物，室内光线主要来源于屏幕散发的幽蓝色微光，营造出安静、专注且略显杂乱的创作空间氛围。",
+        "id": "scene_f79173d22b0c",
+        "type": "scene",
+        "extractor_node_id": "extract_scene_vlkt0m34k8ic",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187716598
+      }
+    ],
+    "prop": [
+      {
+        "name": "冰璃剑",
+        "description": "女主角洛仙的专属配剑，由极寒之气凝聚而成，威力巨大，散发着刺骨寒意。",
+        "owner": "洛仙",
+        "usage": "洛仙凭空凝聚此剑指向江凡进行威胁；挥剑在青石板上斩出深痕；最后化作冰蓝色流光没入洛仙眉心。",
+        "visual_details": "一把由半透明湛蓝冰晶构成的华美长剑。剑身修长，散发着淡淡的幽蓝色微光与白色寒气，剑刃锋利无比，表面隐隐有精致的冰霜纹路。当它挥动时，空气中会凝结出细小的雪花，切口处会瞬间结霜。",
+        "notes": "剧中的核心奇幻道具，是展现洛仙仙侠身份的关键视觉元素。",
+        "source": "第1集",
+        "type": "prop",
+        "id": "prop_7558780fe17c",
+        "extractor_node_id": "extract_prop_hf4c7mfijmew",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780147121252
+      },
+      {
+        "name": "智能手机",
+        "description": "江凡随身携带的现代通讯工具。",
+        "owner": "江凡",
+        "usage": "在胡同奔跑时用于拨打110报警求助。",
+        "visual_details": "一部普通的黑色触屏智能手机。在漆黑的胡同中，手机屏幕亮起，散发出微弱的白光照亮江凡惊恐的面容，屏幕上显示着“110 拨号中”或“通话中”的界面。",
+        "notes": "用于突出现代都市背景与突发灵异事件的对比冲突。",
+        "source": "第1集",
+        "type": "prop",
+        "id": "prop_56bd2d1fc973",
+        "extractor_node_id": "extract_prop_hf4c7mfijmew",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780147121252
+      },
+      {
+        "name": "创作电脑",
+        "description": "网络作家江凡用于撰写小说的电脑。",
+        "owner": "江凡",
+        "usage": "在闪回镜头中出现，显示江凡创作《女主跑出来了怎么办？》的文档界面。",
+        "visual_details": "一台亮着的液晶电脑显示器。屏幕上展示着文字排版软件，亮白色背景下有黑色宋体字，标题栏醒目地写着《女主跑出来了怎么办？》，主角栏写着“洛仙”，并有关于“冰璃剑”外形的详细文字描述。",
+        "notes": "打破第四面墙、揭示剧情设定（女主从书中走出来）的核心媒介道具。",
+        "source": "第1集",
+        "type": "prop",
+        "id": "prop_794e16b6f4c4",
+        "extractor_node_id": "extract_prop_hf4c7mfijmew",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780147121252
+      },
+      {
+        "name": "手机",
+        "aliases": "智能手机,电话",
+        "description": "黑色长方形智能手机，屏幕在黑暗中散发微光，金属边框，表面有日常使用痕迹，主要用于拨打紧急电话和通讯。",
+        "id": "prop_ff37071029ee",
+        "type": "prop",
+        "extractor_node_id": "extract_prop_4txrfvudu9ab",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187801349
+      },
+      {
+        "name": "冰璃剑",
+        "aliases": "长剑,冰蓝色长剑",
+        "description": "一柄由寒冰材质制成的冰蓝色长剑，剑身呈半透明状，长约三尺，剑刃锋利且散发着刺骨的白雾与寒气，表面有若隐若现的冰晶纹路，是一件仙侠风格的致命武器。",
+        "id": "prop_c50ef3f4f87d",
+        "type": "prop",
+        "extractor_node_id": "extract_prop_4txrfvudu9ab",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187801349
+      },
+      {
+        "name": "电脑",
+        "aliases": "电脑屏幕,显示器",
+        "description": "一套黑色的个人电脑设备，包括液晶显示器与键盘，屏幕呈现明亮的背光并显示着小说文本编辑界面，作为文字工作者的创作工具。",
+        "id": "prop_cbe2576acdd6",
+        "type": "prop",
+        "extractor_node_id": "extract_prop_4txrfvudu9ab",
+        "source_node_ids": [
+          "script_m5uqkrdh86ca"
+        ],
+        "updated_at": 1780187801349
+      }
+    ]
+  }
+}

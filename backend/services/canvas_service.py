@@ -20,6 +20,7 @@ from ..repositories import (
     list_canvases,
     list_conversations,
     list_deleted_canvases,
+    load_canvas_assets,
     load_asset_library,
     load_canvas,
     load_canvas_any,
@@ -30,8 +31,10 @@ from ..repositories import (
     now_ms,
     safe_user_id,
     sanitize_asset_name,
+    save_canvas_asset_extraction,
     save_asset_library,
     save_canvas,
+    delete_canvas_assets,
 )
 from ..schemas import (
     AssetLibraryAddRequest,
@@ -40,6 +43,7 @@ from ..schemas import (
     CanvasAssetCheckRequest,
     CanvasAssetDownloadRequest,
     CanvasCreateRequest,
+    CanvasExtractedAssetsSaveRequest,
     CanvasSaveRequest,
     ConversationCreateRequest,
     SmartCanvasGroupExportRequest,
@@ -104,6 +108,19 @@ async def get_canvas_meta(canvas_id: str):
 @app.get("/api/canvases/{canvas_id}")
 async def get_canvas(canvas_id: str):
     return {"canvas": load_canvas(canvas_id)}
+
+
+@app.get("/api/canvases/{canvas_id}/assets")
+async def get_canvas_extracted_assets(canvas_id: str):
+    load_canvas(canvas_id)
+    return {"assets": load_canvas_assets(canvas_id)}
+
+
+@app.put("/api/canvases/{canvas_id}/assets/{node_id}")
+async def save_canvas_extracted_assets(canvas_id: str, node_id: str, payload: CanvasExtractedAssetsSaveRequest):
+    load_canvas(canvas_id)
+    assets = save_canvas_asset_extraction(canvas_id, node_id, payload.dict())
+    return {"assets": assets, "extraction": assets.get("extractions", {}).get(node_id)}
 
 
 @app.post("/api/canvas-assets/check")
@@ -362,4 +379,5 @@ async def purge_canvas(canvas_id: str):
     path = canvas_path(canvas_id)
     if os.path.exists(path):
         os.remove(path)
+    delete_canvas_assets(canvas_id)
     return {"ok": True}

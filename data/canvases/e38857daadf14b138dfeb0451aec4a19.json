@@ -1,37 +1,37 @@
 {
-  "id": "cab0a0fd25f84ffd95c5b997eb4ad7fa",
-  "title": "11",
+  "id": "e38857daadf14b138dfeb0451aec4a19",
+  "title": "22",
   "icon": "sparkles",
   "kind": "smart",
-  "created_at": 1779936735433,
-  "updated_at": 1780025927456,
+  "created_at": 1780309776398,
+  "updated_at": 1780312139522,
   "nodes": [
     {
-      "id": "smart_mxiszqahdnca",
+      "id": "smart_9fxa4qh6ubaw",
       "type": "smart-image",
-      "x": 280,
-      "y": 159,
+      "x": -85.01142773269538,
+      "y": 75.3893437790012,
       "title": "上传卡片",
       "images": [],
-      "created_at": 1779936741226,
+      "created_at": 1780312073144,
       "scale": 2,
       "runSettings": {
         "engine": "api",
-        "apiKind": "video",
-        "provider_id": "custom-api",
-        "model": "gemini-2.5-flash-image",
-        "ratio": "square",
-        "resolution": "1k",
+        "apiKind": "image",
+        "provider_id": "custom-api-4",
+        "model": "gpt-image-2-all",
+        "ratio": "wide",
+        "resolution": "2k",
         "customRatio": "",
         "customRatioWidth": "",
         "customRatioHeight": "",
         "customSize": "",
         "customWidth": "",
         "customHeight": "",
-        "quality": "auto",
+        "quality": "high",
         "count": 1,
-        "videoProvider": "custom-api-5",
-        "videoModel": "grok-imagine-video",
+        "videoProvider": "",
+        "videoModel": "",
         "videoDuration": 5,
         "videoAspect": "16:9",
         "videoResolution": "",
@@ -69,9 +69,9 @@
   ],
   "connections": [],
   "viewport": {
-    "x": 0,
-    "y": 0,
-    "scale": 1
+    "x": 437.73147444754886,
+    "y": 63.9048902397268,
+    "scale": 0.8187307530779817
   },
   "logs": [],
   "settings": {
@@ -121,5 +121,6 @@
     "editUpscale": false,
     "editUpscaleRes": 2048,
     "promptH": 124
-  }
+  },
+  "deleted_at": 1780312139522
 }

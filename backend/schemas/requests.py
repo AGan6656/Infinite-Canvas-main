@@ -178,6 +178,16 @@ class CanvasSaveRequest(BaseModel):
     base_updated_at: int = 0
 
 
+class CanvasExtractedAssetsSaveRequest(BaseModel):
+    asset_type: str = "character"
+    source_node_ids: List[str] = []
+    instruction: str = ""
+    provider: str = ""
+    model: str = ""
+    raw_text: str = ""
+    items: List[Dict[str, Any]] = []
+
+
 class CanvasAssetCheckRequest(BaseModel):
     urls: List[str] = []
 

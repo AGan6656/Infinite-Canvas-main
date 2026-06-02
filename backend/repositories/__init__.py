@@ -19,6 +19,13 @@ from .canvas_repo import (
     normalize_canvas_kind,
     save_canvas,
 )
+from .canvas_asset_repo import (
+    canvas_assets_path,
+    delete_canvas_assets,
+    load_canvas_assets,
+    save_canvas_asset_extraction,
+    save_canvas_assets,
+)
 from .common import now_ms
 from .conversation_repo import (
     conversation_path,
@@ -32,16 +39,19 @@ from .conversation_repo import (
 
 __all__ = [
     "canvas_path",
+    "canvas_assets_path",
     "canvas_record",
     "cleanup_expired_canvas_trash",
     "conversation_path",
     "default_asset_library",
+    "delete_canvas_assets",
     "find_asset_category",
     "iter_canvas_records",
     "list_canvases",
     "list_conversations",
     "list_deleted_canvases",
     "load_asset_library",
+    "load_canvas_assets",
     "load_canvas",
     "load_canvas_any",
     "load_conversation",
@@ -53,6 +63,8 @@ __all__ = [
     "sanitize_asset_name",
     "save_asset_library",
     "save_canvas",
+    "save_canvas_asset_extraction",
+    "save_canvas_assets",
     "save_conversation",
     "sort_asset_library_items",
     "user_dir",

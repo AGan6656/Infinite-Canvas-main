@@ -138,11 +138,17 @@
     "image_edit_endpoint": "",
     "enabled": true,
     "primary": false,
-    "image_models": [],
-    "chat_models": [],
+    "image_models": [
+      "gpt-image-2-all"
+    ],
+    "chat_models": [
+      "deepseek-v4-flash"
+    ],
     "video_models": [
       "grok-video-3",
-      "grok-video-3-10s"
+      "grok-video-3-10s",
+      "veo3.1",
+      "veo3.1-fast"
     ],
     "ms_loras": [],
     "ms_defaults_version": 0,
