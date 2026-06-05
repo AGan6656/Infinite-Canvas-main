@@ -135,6 +135,28 @@
                 <button id="promptPresetSave" class="primary" type="button">保存修改</button>
             </div>
         </div>
+        <div id="instructionTemplatePanel" class="instruction-template-panel">
+            <div class="instruction-template-head">
+                <div>
+                    <span id="instructionTemplateTitle" data-i18n="smart.instructionTemplateLibrary">指令模板库</span>
+                    <em id="instructionTemplateScope"></em>
+                </div>
+                <button id="instructionTemplateClose" type="button" title="关闭" data-i18n-title="common.close"><i data-lucide="x"></i></button>
+            </div>
+            <div id="instructionTemplateStatus" class="instruction-template-status"></div>
+            <div class="instruction-template-fields">
+                <select id="instructionTemplateSelect"></select>
+                <input id="instructionTemplateName" type="text" placeholder="指令名称" data-i18n-placeholder="smart.instructionTemplateNamePlaceholder">
+                <textarea id="instructionTemplateText" placeholder="指令内容" data-i18n-placeholder="smart.instructionTemplateTextPlaceholder"></textarea>
+            </div>
+            <div class="instruction-template-actions">
+                <button id="instructionTemplateApply" class="primary" type="button" data-i18n="smart.instructionTemplateApply">启用指令</button>
+                <button id="instructionTemplateDelete" class="danger" type="button" data-i18n="common.delete">删除</button>
+                <span style="flex:1"></span>
+                <button id="instructionTemplateNew" type="button" data-i18n="smart.instructionTemplateNew">新建指令</button>
+                <button id="instructionTemplateSave" type="button" data-i18n="smart.instructionTemplateSave">保存指令</button>
+            </div>
+        </div>
         <div id="minimap" class="smart-minimap" aria-hidden="true">
             <div id="minimapContent" class="smart-minimap-content">
                 <div id="minimapViewport" class="smart-minimap-viewport"></div>
@@ -177,6 +199,19 @@
             <div class="asset-hover-name"></div>
         </div>
         <div id="selectionBox" class="selection-box"></div>
+        <div id="storyboardSettingsModal" class="storyboard-settings-modal">
+            <div class="storyboard-settings-panel">
+                <div class="storyboard-settings-head">
+                    <div id="storyboardSettingsTitle" class="storyboard-settings-title">分镜生成设置</div>
+                    <button id="storyboardSettingsClose" class="preview-icon-btn" type="button" title="关闭" data-i18n-title="common.close"><i data-lucide="x"></i></button>
+                </div>
+                <div class="storyboard-settings-tabs">
+                    <button type="button" data-storyboard-settings-mode="image"><i data-lucide="image"></i><span data-i18n="smart.storyboardImageSettings">生图设置</span></button>
+                    <button type="button" data-storyboard-settings-mode="video"><i data-lucide="film"></i><span data-i18n="smart.storyboardVideoSettings">生视频设置</span></button>
+                </div>
+                <div id="storyboardSettingsParams" class="storyboard-settings-params dynamic-params"></div>
+            </div>
+        </div>
         <div id="smartLogModal" class="log-modal" onclick="closeSmartCanvasLog()">
             <div class="log-panel" onclick="event.stopPropagation()">
                 <div class="log-head">

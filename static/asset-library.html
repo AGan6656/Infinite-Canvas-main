@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/images/logo.png" type="image/png">
+    <title>素材库</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') {
+                    document.documentElement.classList.add('studio-theme-dark');
+                    document.documentElement.classList.add('theme-dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="/static/vendor/js/lucide.js?v=2026.05.29.1"></script>
+    <script src="/static/js/theme.js?v=2026.05.29.1"></script>
+    <script src="/static/js/i18n.js?v=2026.05.29.1"></script>
+    <style>
+        @import url('/static/vendor/css/fonts.css?v=2026.05.29.1');
+        :root {
+            --bg:#f7f8fb;
+            --panel:rgba(255,255,255,.86);
+            --card:#fff;
+            --line:#e8edf3;
+            --text:#111827;
+            --muted:#64748b;
+            --faint:#94a3b8;
+            --strong:#111827;
+            --strong-text:#fff;
+            --soft:#f1f5f9;
+            --shadow:rgba(15,23,42,.08);
+        }
+        html.theme-dark, body.theme-dark {
+            --bg:#0f141d;
+            --panel:rgba(17,24,39,.88);
+            --card:#151d2a;
+            --line:#273244;
+            --text:#e5e7eb;
+            --muted:#a7b1c2;
+            --faint:#7b8798;
+            --strong:#f8fafc;
+            --strong-text:#0f172a;
+            --soft:#111827;
+            --shadow:rgba(0,0,0,.3);
+        }
+        * { box-sizing:border-box; }
+        body {
+            margin:0;
+            min-height:100vh;
+            background:var(--bg);
+            color:var(--text);
+            font-family:'Inter','Space Grotesk',system-ui,sans-serif;
+            overflow:hidden;
+        }
+        button,input,select { font:inherit; }
+        button { border:0; cursor:pointer; }
+        .asset-page { height:100vh; display:grid; grid-template-rows:auto minmax(0,1fr); gap:14px; padding:22px; }
+        .asset-top {
+            min-height:58px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            padding:14px 16px;
+            border:1px solid var(--line);
+            border-radius:18px;
+            background:var(--panel);
+            box-shadow:0 16px 42px var(--shadow);
+            backdrop-filter:blur(18px);
+        }
+        .title-wrap { min-width:0; display:flex; flex-direction:column; gap:4px; }
+        .title { display:flex; align-items:center; gap:9px; font-size:18px; line-height:1.1; font-weight:900; }
+        .title i,.title svg { width:19px; height:19px; }
+        .subtitle { color:var(--muted); font-size:12px; font-weight:650; }
+        .top-actions { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+        .icon-btn,.text-btn {
+            height:34px;
+            border-radius:11px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:7px;
+            border:1px solid var(--line);
+            background:var(--card);
+            color:var(--muted);
+            font-size:12px;
+            font-weight:800;
+        }
+        .icon-btn { width:34px; padding:0; }
+        .text-btn { padding:0 12px; }
+        .icon-btn:hover,.text-btn:hover { color:var(--text); border-color:var(--text); }
+        .text-btn.primary { background:var(--strong); color:var(--strong-text); border-color:var(--strong); }
+        .icon-btn i,.icon-btn svg,.text-btn i,.text-btn svg { width:15px; height:15px; }
+        .library-shell { min-height:0; display:grid; grid-template-columns:260px minmax(0,1fr); gap:14px; }
+        .panel {
+            min-height:0;
+            border:1px solid var(--line);
+            border-radius:18px;
+            background:var(--panel);
+            box-shadow:0 16px 42px var(--shadow);
+            backdrop-filter:blur(18px);
+            overflow:hidden;
+        }
+        .sidebar-panel { display:flex; flex-direction:column; }
+        .panel-head { height:52px; padding:0 13px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--line); }
+        .panel-title { font-size:12px; font-weight:900; color:var(--text); }
+        .category-list { min-height:0; overflow:auto; padding:10px; display:flex; flex-direction:column; gap:7px; }
+        .category-btn {
+            width:100%;
+            min-height:42px;
+            padding:8px 9px;
+            border-radius:12px;
+            border:1px solid transparent;
+            display:grid;
+            grid-template-columns:24px minmax(0,1fr) auto;
+            align-items:center;
+            gap:8px;
+            background:transparent;
+            color:var(--muted);
+            text-align:left;
+        }
+        .category-btn.active { background:var(--strong); color:var(--strong-text); border-color:var(--strong); }
+        .category-btn:not(.active):hover { background:var(--card); border-color:var(--line); color:var(--text); }
+        .category-btn i,.category-btn svg { width:16px; height:16px; }
+        .cat-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; font-weight:850; }
+        .cat-count { height:22px; min-width:24px; padding:0 7px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; background:var(--soft); color:var(--muted); font-size:10px; font-weight:900; }
+        .category-btn.active .cat-count { background:rgba(255,255,255,.16); color:inherit; }
+        .content-panel { display:flex; flex-direction:column; }
+        .content-head { min-height:52px; padding:0 13px; display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); }
+        .folder-meta { min-width:0; display:flex; align-items:center; gap:9px; }
+        .folder-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; font-weight:900; }
+        .folder-type { height:22px; padding:0 8px; border-radius:999px; background:var(--soft); color:var(--muted); display:inline-flex; align-items:center; font-size:10px; font-weight:900; }
+        .asset-grid { min-height:0; overflow:auto; padding:14px; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; align-content:start; }
+        .asset-card { min-width:0; border:1px solid var(--line); border-radius:14px; background:var(--card); overflow:hidden; }
+        .thumb { position:relative; width:100%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:var(--soft); overflow:hidden; }
+        .thumb img,.thumb video { width:100%; height:100%; object-fit:cover; display:block; background:#0f172a; }
+        .audio-thumb,.empty-thumb { color:var(--muted); flex-direction:column; gap:8px; font-size:12px; font-weight:850; }
+        .audio-thumb i,.audio-thumb svg,.empty-thumb i,.empty-thumb svg { width:26px; height:26px; }
+        .kind-badge {
+            position:absolute;
+            left:8px;
+            bottom:8px;
+            height:22px;
+            padding:0 8px;
+            border-radius:999px;
+            display:inline-flex;
+            align-items:center;
+            gap:4px;
+            background:rgba(15,23,42,.78);
+            color:#fff;
+            font-size:9px;
+            font-weight:900;
+            letter-spacing:.04em;
+        }
+        .asset-info { padding:9px; display:flex; flex-direction:column; gap:8px; }
+        .asset-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); font-size:12px; font-weight:850; }
+        .asset-actions { display:flex; gap:6px; }
+        .asset-actions .icon-btn { flex:1; width:auto; height:30px; border-radius:10px; }
+        .empty-state { grid-column:1/-1; min-height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; border:1px dashed var(--line); border-radius:18px; color:var(--faint); background:rgba(255,255,255,.28); text-align:center; padding:20px; }
+        .empty-state i,.empty-state svg { width:30px; height:30px; }
+        .status { min-height:18px; color:var(--muted); font-size:12px; font-weight:700; }
+        .modal { position:fixed; inset:0; z-index:40; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(15,23,42,.26); backdrop-filter:blur(14px); }
+        .modal.open { display:flex; }
+        .dialog { width:min(380px, calc(100vw - 48px)); border-radius:18px; border:1px solid var(--line); background:var(--panel); box-shadow:0 30px 80px rgba(15,23,42,.24); padding:14px; }
+        .dialog-title { font-size:14px; font-weight:900; margin-bottom:10px; }
+        .dialog input { width:100%; height:38px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--text); outline:none; padding:0 11px; font-size:13px; font-weight:700; }
+        .dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+        .preview-modal { position:fixed; inset:0; z-index:38; display:none; align-items:center; justify-content:center; padding:22px; background:rgba(15,23,42,.38); backdrop-filter:blur(16px); }
+        .preview-modal.open { display:flex; }
+        .preview-shell { width:min(980px, 94vw); max-height:92vh; border-radius:20px; background:var(--panel); border:1px solid var(--line); box-shadow:0 30px 90px rgba(15,23,42,.28); overflow:hidden; display:flex; flex-direction:column; }
+        .preview-head { height:48px; padding:0 12px 0 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .preview-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:900; }
+        .preview-body { min-height:260px; max-height:calc(92vh - 48px); display:flex; align-items:center; justify-content:center; background:var(--soft); }
+        .preview-body img,.preview-body video { max-width:100%; max-height:calc(92vh - 48px); object-fit:contain; display:block; }
+        .preview-body audio { width:min(680px, 86vw); }
+        @media (max-width:760px) {
+            body { overflow:auto; }
+            .asset-page { height:auto; min-height:100vh; padding:14px; }
+            .asset-top { align-items:flex-start; flex-direction:column; }
+            .library-shell { grid-template-columns:1fr; }
+            .sidebar-panel { min-height:220px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="asset-page">
+        <header class="asset-top">
+            <div class="title-wrap">
+                <div class="title"><i data-lucide="library"></i><span data-i18n="assetLibrary.title">素材库</span></div>
+                <div id="assetSubtitle" class="subtitle" data-i18n="assetLibrary.subtitle">集中查看智能画布保存的素材。</div>
+            </div>
+            <div class="top-actions">
+                <button id="refreshBtn" class="icon-btn" type="button" title="刷新" data-i18n-title="canvas.refresh"><i data-lucide="refresh-cw"></i></button>
+                <button id="newFolderBtn" class="text-btn primary" type="button"><i data-lucide="folder-plus"></i><span data-i18n="smart.assetNewFolder">新建文件夹</span></button>
+            </div>
+        </header>
+        <main class="library-shell">
+            <aside class="panel sidebar-panel">
+                <div class="panel-head">
+                    <div class="panel-title">文件夹</div>
+                    <div id="libraryStatus" class="status"></div>
+                </div>
+                <div id="categoryList" class="category-list"></div>
+            </aside>
+            <section class="panel content-panel">
+                <div class="content-head">
+                    <div class="folder-meta">
+                        <div id="activeFolderName" class="folder-name">素材库</div>
+                        <span id="activeFolderType" class="folder-type">image</span>
+                    </div>
+                    <div class="top-actions">
+                        <button id="renameFolderBtn" class="icon-btn" type="button" title="重命名文件夹" data-i18n-title="smart.assetRenameFolder"><i data-lucide="pencil"></i></button>
+                    </div>
+                </div>
+                <div id="assetGrid" class="asset-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="nameModal" class="modal">
+        <div class="dialog">
+            <div id="nameModalTitle" class="dialog-title">命名</div>
+            <input id="nameInput" type="text" autocomplete="off">
+            <div class="dialog-actions">
+                <button id="nameCancel" class="text-btn" type="button" data-i18n="common.cancel">取消</button>
+                <button id="nameOk" class="text-btn primary" type="button" data-i18n="common.confirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="previewModal" class="preview-modal">
+        <div class="preview-shell">
+            <div class="preview-head">
+                <div id="previewTitle" class="preview-title">Preview</div>
+                <button id="previewClose" class="icon-btn" type="button" title="关闭" data-i18n-title="common.close"><i data-lucide="x"></i></button>
+            </div>
+            <div id="previewBody" class="preview-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const categoryList = document.getElementById('categoryList');
+        const assetGrid = document.getElementById('assetGrid');
+        const libraryStatus = document.getElementById('libraryStatus');
+        const activeFolderName = document.getElementById('activeFolderName');
+        const activeFolderType = document.getElementById('activeFolderType');
+        const nameModal = document.getElementById('nameModal');
+        const nameModalTitle = document.getElementById('nameModalTitle');
+        const nameInput = document.getElementById('nameInput');
+        const nameCancel = document.getElementById('nameCancel');
+        const nameOk = document.getElementById('nameOk');
+        const previewModal = document.getElementById('previewModal');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewBody = document.getElementById('previewBody');
+        let library = {categories:[]};
+        let activeCategoryId = '';
+
+        function tr(key){
+            return window.StudioI18n?.t?.(key) || key;
+        }
+        function escapeHtml(value){
+            return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function mediaKind(item){
+            if(item?.kind === 'video' || item?.type === 'video') return 'video';
+            if(item?.kind === 'audio' || item?.type === 'audio') return 'audio';
+            const url = String(item?.url || '').toLowerCase().split('?')[0];
+            if(/\.(mp4|webm|mov|m4v|avi|mkv)$/.test(url)) return 'video';
+            if(/\.(mp3|wav|m4a|aac|ogg|flac)$/.test(url)) return 'audio';
+            return 'image';
+        }
+        function activeCategory(){
+            const cats = library.categories || [];
+            if(!cats.length) return null;
+            return cats.find(cat => cat.id === activeCategoryId) || cats[0];
+        }
+        function setStatus(text=''){
+            libraryStatus.textContent = text;
+        }
+        async function loadLibrary(){
+            setStatus(tr('common.loading'));
+            try {
+                const data = await fetch('/api/asset-library', {cache:'no-store'}).then(r => r.json());
+                library = data.library || {categories:[]};
+                if(!activeCategoryId || !(library.categories || []).some(cat => cat.id === activeCategoryId)){
+                    activeCategoryId = library.categories?.[0]?.id || '';
+                }
+                render();
+                setStatus('');
+            } catch(e) {
+                setStatus('加载失败');
+            }
+        }
+        function renderCategories(){
+            const cats = library.categories || [];
+            categoryList.innerHTML = cats.length ? cats.map(cat => {
+                const count = Array.isArray(cat.items) ? cat.items.length : 0;
+                const icon = cat.type === 'workflow' ? 'workflow' : 'folder';
+                return `<button class="category-btn ${cat.id === activeCategoryId ? 'active' : ''}" type="button" data-category="${escapeHtml(cat.id)}">
+                    <i data-lucide="${icon}"></i>
+                    <span class="cat-name">${escapeHtml(cat.name || tr('smart.assetFolder'))}</span>
+                    <span class="cat-count">${count}</span>
+                </button>`;
+            }).join('') : `<div class="empty-state"><i data-lucide="folder-open"></i><span>暂无文件夹</span></div>`;
+            categoryList.querySelectorAll('[data-category]').forEach(btn => {
+                btn.onclick = () => {
+                    activeCategoryId = btn.dataset.category || '';
+                    render();
+                };
+            });
+        }
+        function thumbHtml(item){
+            const url = escapeHtml(item.url || '');
+            const kind = mediaKind(item);
+            if(kind === 'video') return `<video src="${url}" muted preload="metadata" playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video><span class="kind-badge"><i data-lucide="film"></i>VIDEO</span>`;
+            if(kind === 'audio') return `<div class="audio-thumb"><i data-lucide="file-audio"></i><span>AUDIO</span></div>`;
+            return `<img src="${url}" alt="">`;
+        }
+        function renderAssets(){
+            const cat = activeCategory();
+            activeFolderName.textContent = cat?.name || tr('assetLibrary.title');
+            activeFolderType.textContent = cat?.type || 'image';
+            const items = cat?.items || [];
+            if(!cat){
+                assetGrid.innerHTML = `<div class="empty-state"><i data-lucide="library"></i><span>素材库为空</span></div>`;
+                return;
+            }
+            if(cat.type === 'workflow'){
+                assetGrid.innerHTML = `<div class="empty-state"><i data-lucide="workflow"></i><span>${escapeHtml(tr('smart.assetWorkflowEmpty'))}</span></div>`;
+                return;
+            }
+            assetGrid.innerHTML = items.length ? items.map(item => `
+                <article class="asset-card" data-item="${escapeHtml(item.id)}">
+                    <button class="thumb" type="button" data-preview="${escapeHtml(item.id)}">${thumbHtml(item)}</button>
+                    <div class="asset-info">
+                        <div class="asset-name" title="${escapeHtml(item.name || '')}">${escapeHtml(item.name || 'asset')}</div>
+                        <div class="asset-actions">
+                            <button class="icon-btn" type="button" data-rename="${escapeHtml(item.id)}" title="${escapeHtml(tr('smart.assetRename'))}"><i data-lucide="pencil"></i></button>
+                            <button class="icon-btn" type="button" data-delete="${escapeHtml(item.id)}" title="${escapeHtml(tr('common.delete'))}"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+                </article>
+            `).join('') : `<div class="empty-state"><i data-lucide="image"></i><span>${escapeHtml(tr('smart.assetEmpty'))}</span></div>`;
+            assetGrid.querySelectorAll('[data-preview]').forEach(btn => {
+                btn.onclick = () => previewItem(btn.dataset.preview);
+            });
+            assetGrid.querySelectorAll('[data-rename]').forEach(btn => {
+                btn.onclick = async () => renameItem(btn.dataset.rename);
+            });
+            assetGrid.querySelectorAll('[data-delete]').forEach(btn => {
+                btn.onclick = async () => deleteItem(btn.dataset.delete);
+            });
+        }
+        function render(){
+            renderCategories();
+            renderAssets();
+            window.lucide?.createIcons();
+        }
+        function itemById(id){
+            for(const cat of library.categories || []){
+                const item = (cat.items || []).find(x => x.id === id);
+                if(item) return item;
+            }
+            return null;
+        }
+        function openNameDialog({title='', value='' }={}){
+            return new Promise(resolve => {
+                nameModalTitle.textContent = title || '命名';
+                nameInput.value = value || '';
+                nameModal.classList.add('open');
+                nameInput.focus();
+                nameInput.select();
+                const done = result => {
+                    nameModal.classList.remove('open');
+                    nameOk.onclick = null;
+                    nameCancel.onclick = null;
+                    nameInput.onkeydown = null;
+                    nameModal.onmousedown = null;
+                    resolve(result);
+                };
+                nameOk.onclick = () => done(nameInput.value.trim());
+                nameCancel.onclick = () => done('');
+                nameInput.onkeydown = event => {
+                    if(event.key === 'Enter') done(nameInput.value.trim());
+                    if(event.key === 'Escape') done('');
+                };
+                nameModal.onmousedown = event => { if(event.target === nameModal) done(''); };
+            });
+        }
+        async function createCategory(){
+            const name = await openNameDialog({title:tr('smart.assetNewFolder'), value:tr('smart.assetFolder')});
+            if(!name) return;
+            const data = await fetch('/api/asset-library/categories', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({name, type:'image'})
+            }).then(r => r.json());
+            library = data.library || library;
+            activeCategoryId = data.category?.id || activeCategoryId;
+            render();
+        }
+        async function renameCategory(){
+            const cat = activeCategory();
+            if(!cat || cat.type === 'workflow') return;
+            const name = await openNameDialog({title:tr('smart.assetRenameFolder'), value:cat.name || ''});
+            if(!name) return;
+            const data = await fetch(`/api/asset-library/categories/${encodeURIComponent(cat.id)}`, {
+                method:'PATCH',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({name})
+            }).then(r => r.json());
+            library = data.library || library;
+            render();
+        }
+        async function renameItem(id){
+            const item = itemById(id);
+            if(!item) return;
+            const name = await openNameDialog({title:tr('smart.assetRename'), value:item.name || ''});
+            if(!name) return;
+            const data = await fetch(`/api/asset-library/items/${encodeURIComponent(id)}`, {
+                method:'PATCH',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({name})
+            }).then(r => r.json());
+            library = data.library || library;
+            render();
+        }
+        async function deleteItem(id){
+            if(!confirm(tr('smart.assetDeleteConfirm'))) return;
+            const data = await fetch(`/api/asset-library/items/${encodeURIComponent(id)}`, {method:'DELETE'}).then(r => r.json());
+            library = data.library || library;
+            render();
+        }
+        function previewItem(id){
+            const item = itemById(id);
+            if(!item?.url) return;
+            const kind = mediaKind(item);
+            previewTitle.textContent = item.name || 'asset';
+            if(kind === 'video') previewBody.innerHTML = `<video src="${escapeHtml(item.url)}" controls autoplay playsinline></video>`;
+            else if(kind === 'audio') previewBody.innerHTML = `<audio src="${escapeHtml(item.url)}" controls autoplay></audio>`;
+            else previewBody.innerHTML = `<img src="${escapeHtml(item.url)}" alt="">`;
+            previewModal.classList.add('open');
+        }
+        function closePreview(){
+            previewModal.classList.remove('open');
+            previewBody.innerHTML = '';
+        }
+        document.getElementById('refreshBtn').onclick = loadLibrary;
+        document.getElementById('newFolderBtn').onclick = createCategory;
+        document.getElementById('renameFolderBtn').onclick = renameCategory;
+        document.getElementById('previewClose').onclick = closePreview;
+        previewModal.addEventListener('mousedown', event => { if(event.target === previewModal) closePreview(); });
+        document.addEventListener('keydown', event => {
+            if(event.key === 'Escape') closePreview();
+        });
+        window.addEventListener('message', event => {
+            if(event.data?.type === 'studio-theme') window.StudioTheme?.set?.(event.data.theme || 'light');
+            if(event.data?.type === 'studio-lang' && window.StudioI18n) window.StudioI18n.set(event.data.lang || 'zh');
+        });
+        window.addEventListener('studio-theme-change', event => {
+            document.body.classList.toggle('theme-dark', event.detail?.theme === 'dark');
+        });
+        window.addEventListener('studio-lang-change', () => {
+            render();
+        });
+        window.addEventListener('DOMContentLoaded', () => {
+            window.StudioI18n?.apply?.();
+            loadLibrary();
+        });
+    </script>
+</body>
+</html>

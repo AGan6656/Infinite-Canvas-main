@@ -25,6 +25,7 @@ from ..repositories import (
     load_canvas,
     load_canvas_any,
     load_conversation,
+    load_instruction_templates,
     new_canvas,
     new_conversation,
     normalize_canvas_kind,
@@ -34,6 +35,7 @@ from ..repositories import (
     save_canvas_asset_extraction,
     save_asset_library,
     save_canvas,
+    save_instruction_templates,
     delete_canvas_assets,
 )
 from ..schemas import (
@@ -46,9 +48,10 @@ from ..schemas import (
     CanvasExtractedAssetsSaveRequest,
     CanvasSaveRequest,
     ConversationCreateRequest,
+    InstructionTemplateSaveRequest,
     SmartCanvasGroupExportRequest,
 )
-from .media_storage import output_file_from_url
+from .media_storage import content_type_for_path, output_file_from_url
 
 
 @app.get("/api/conversations")
@@ -243,6 +246,16 @@ async def get_asset_library():
     return {"library": load_asset_library()}
 
 
+@app.get("/api/instruction-templates")
+async def get_instruction_templates():
+    return load_instruction_templates()
+
+
+@app.put("/api/instruction-templates")
+async def put_instruction_templates(payload: InstructionTemplateSaveRequest):
+    return save_instruction_templates(payload.templates)
+
+
 @app.post("/api/asset-library/categories")
 async def create_asset_library_category(payload: AssetLibraryCategoryRequest):
     lib = load_asset_library()
@@ -287,17 +300,33 @@ async def add_asset_library_item(payload: AssetLibraryAddRequest):
         raise HTTPException(status_code=400, detail="This category does not support image assets")
     src = output_file_from_url(payload.url)
     if not src:
-        raise HTTPException(status_code=400, detail="Only local /assets or /output images can be saved")
-    ext = os.path.splitext(src)[1].lower() or ".png"
-    if ext not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
-        ext = ".png"
+        raise HTTPException(status_code=400, detail="Only local /assets or /output media can be saved")
+    content_type = content_type_for_path(src)
+    if content_type.startswith("video/"):
+        kind = "video"
+        fallback_ext = ".mp4"
+    elif content_type.startswith("audio/"):
+        kind = "audio"
+        fallback_ext = ".mp3"
+    elif content_type.startswith("image/"):
+        kind = "image"
+        fallback_ext = ".png"
+    else:
+        raise HTTPException(status_code=400, detail="Only local image, video, or audio assets can be saved")
+    ext = os.path.splitext(src)[1].lower() or fallback_ext
     safe_name = sanitize_asset_name(payload.name or os.path.basename(src), "asset")
     if not os.path.splitext(safe_name)[1]:
         safe_name += ext
     dest_name = f"lib_{uuid.uuid4().hex[:12]}_{safe_name}"
     dest_path = os.path.join(ASSET_LIBRARY_DIR, dest_name)
     shutil.copy2(src, dest_path)
-    item = {"id": f"asset_{uuid.uuid4().hex[:12]}", "name": os.path.splitext(safe_name)[0][:120], "url": f"/assets/library/{dest_name}", "created_at": now_ms()}
+    item = {
+        "id": f"asset_{uuid.uuid4().hex[:12]}",
+        "name": os.path.splitext(safe_name)[0][:120],
+        "url": f"/assets/library/{dest_name}",
+        "kind": kind,
+        "created_at": now_ms(),
+    }
     cat.setdefault("items", []).append(item)
     save_asset_library(lib)
     return {"library": lib, "item": item}

@@ -5,15 +5,60 @@ import re
 from .common import ASSET_LIBRARY_PATH, DATA_DIR, now_ms
 
 
+DEFAULT_IMAGE_CATEGORIES = (
+    {"id": "characters", "name": "角色", "type": "image", "items": []},
+    {"id": "scenes", "name": "场景", "type": "image", "items": []},
+)
+DEFAULT_WORKFLOW_CATEGORY = {"id": "workflows", "name": "工作流", "type": "workflow", "items": []}
+
+
+def _default_category(cat):
+    return {**cat, "items": []}
+
+
 def default_asset_library():
     return {
-        "categories": [
-            {"id": "characters", "name": "角色", "type": "image", "items": []},
-            {"id": "scenes", "name": "场景", "type": "image", "items": []},
-            {"id": "workflows", "name": "工作流", "type": "workflow", "items": []},
-        ],
+        "categories": [_default_category(cat) for cat in (*DEFAULT_IMAGE_CATEGORIES, DEFAULT_WORKFLOW_CATEGORY)],
         "updated_at": now_ms(),
     }
+
+
+def _int_ms(value, fallback=None):
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return now_ms() if fallback is None else fallback
+
+
+def _clean_category(cat):
+    if not isinstance(cat, dict):
+        return None
+    cat_type = "workflow" if str(cat.get("type") or "").lower() == "workflow" else "image"
+    clean = dict(cat)
+    clean["id"] = str(clean.get("id") or "").strip()[:80]
+    if not clean["id"]:
+        return None
+    clean["name"] = sanitize_asset_name(clean.get("name"), "工作流" if cat_type == "workflow" else "素材")
+    clean["type"] = cat_type
+    clean["items"] = clean.get("items") if isinstance(clean.get("items"), list) else []
+    return clean
+
+
+def normalize_asset_library(lib):
+    if not isinstance(lib, dict):
+        lib = default_asset_library()
+    cats = [
+        clean
+        for clean in (_clean_category(cat) for cat in (lib.get("categories") or []))
+        if clean
+    ]
+    if not any(cat.get("type") == "image" for cat in cats):
+        cats.extend(_default_category(cat) for cat in DEFAULT_IMAGE_CATEGORIES)
+    if not any(cat.get("type") == "workflow" for cat in cats):
+        cats.append(_default_category(DEFAULT_WORKFLOW_CATEGORY))
+    lib["categories"] = cats
+    lib["updated_at"] = _int_ms(lib.get("updated_at"))
+    return lib
 
 
 def load_asset_library():
@@ -26,11 +71,7 @@ def load_asset_library():
             lib = json.load(f)
     except Exception:
         lib = default_asset_library()
-    cats = lib.get("categories") if isinstance(lib.get("categories"), list) else []
-    if not any(c.get("type") == "workflow" for c in cats):
-        cats.append({"id": "workflows", "name": "工作流", "type": "workflow", "items": []})
-    lib["categories"] = cats
-    lib["updated_at"] = int(lib.get("updated_at") or now_ms())
+    lib = normalize_asset_library(lib)
     sort_asset_library_items(lib)
     return lib
 
@@ -52,6 +93,7 @@ def sort_asset_library_items(lib):
 
 
 def save_asset_library(lib):
+    lib = normalize_asset_library(lib)
     sort_asset_library_items(lib)
     lib["updated_at"] = now_ms()
     os.makedirs(DATA_DIR, exist_ok=True)

@@ -10,7 +10,15 @@
       "id": "scenes",
       "name": "场景",
       "type": "image",
-      "items": []
+      "items": [
+        {
+          "id": "asset_649bedf85e04",
+          "name": "Image 1",
+          "url": "/assets/library/lib_fdf8e5f729df_Image 1.png",
+          "kind": "image",
+          "created_at": 1780656013521
+        }
+      ]
     },
     {
       "id": "workflows",
@@ -19,5 +27,5 @@
       "items": []
     }
   ],
-  "updated_at": 1779932877957
+  "updated_at": 1780656013521
 }

@@ -7,6 +7,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 CONVERSATION_DIR = os.path.join(DATA_DIR, "conversations")
 CANVAS_DIR = os.path.join(DATA_DIR, "canvases")
 ASSET_LIBRARY_PATH = os.path.join(DATA_DIR, "asset_library.json")
+INSTRUCTION_TEMPLATES_PATH = os.path.join(DATA_DIR, "instruction_templates.json")
 CANVAS_TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
 
 

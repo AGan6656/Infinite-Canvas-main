@@ -550,6 +550,14 @@
                     </svg>
                     <span class="nav-text" data-i18n="nav.gpt">GPT 对话</span>
                 </div>
+                <div class="nav-item" onclick="switchUI(this, 'asset-library')">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 6l2 2h3a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 2z"></path>
+                        <path d="M8 13h8"></path>
+                        <path d="M8 17h5"></path>
+                    </svg>
+                    <span class="nav-text" data-i18n="assetLibrary.title">素材库</span>
+                </div>
                 <div class="nav-item" onclick="switchUI(this, 'canvas')">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="7" height="7"></rect>
@@ -639,6 +647,7 @@
             <iframe id="frame-angle" data-src="/static/angle.html?v=2026.05.29.1" scrolling="yes"></iframe>
             <iframe id="frame-online" data-src="/static/online.html?v=2026.05.29.1" scrolling="yes"></iframe>
             <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=2026.05.29.1" scrolling="yes"></iframe>
+            <iframe id="frame-asset-library" data-src="/static/asset-library.html?v=2026.05.29.1" scrolling="yes"></iframe>
             <iframe id="frame-canvas" data-src="/static/canvas.html?v=2026.05.29.1" scrolling="yes"></iframe>
             <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=2026.05.29.1" scrolling="yes"></iframe>
             <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=2026.05.29.1" scrolling="yes"></iframe>
@@ -673,7 +682,7 @@
         localStorage.setItem("client_id", CID);
         const ACTIVE_PAGE_KEY = 'studio_active_page';
         const DEFAULT_PAGE_ID = 'zimage';
-        const PAGE_IDS = ['zimage','enhance','klein','angle','online','gpt-chat','canvas','api-settings','comfyui-settings'];
+        const PAGE_IDS = ['zimage','enhance','klein','angle','online','gpt-chat','asset-library','canvas','api-settings','comfyui-settings'];
         let appInfo = { version:'', version_url:'https://github.com/AGan6656/Infinite-Canvas-main/main/VERSION' };
 
         function switchUI(el, id, options = {}) {

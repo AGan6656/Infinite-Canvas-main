@@ -230,6 +230,10 @@ class AssetLibraryRenameRequest(BaseModel):
     name: str = ""
 
 
+class InstructionTemplateSaveRequest(BaseModel):
+    templates: List[Dict[str, Any]] = []
+
+
 class TestConnectionPayload(BaseModel):
     base_url: str = ""
     api_key: str = ""

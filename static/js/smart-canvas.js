@@ -44,6 +44,22 @@ const promptPresetApply = document.getElementById('promptPresetApply');
 const promptPresetDelete = document.getElementById('promptPresetDelete');
 const promptPresetNew = document.getElementById('promptPresetNew');
 const promptPresetSave = document.getElementById('promptPresetSave');
+const instructionTemplatePanel = document.getElementById('instructionTemplatePanel');
+const instructionTemplateTitle = document.getElementById('instructionTemplateTitle');
+const instructionTemplateScope = document.getElementById('instructionTemplateScope');
+const instructionTemplateClose = document.getElementById('instructionTemplateClose');
+const instructionTemplateStatus = document.getElementById('instructionTemplateStatus');
+const instructionTemplateSelect = document.getElementById('instructionTemplateSelect');
+const instructionTemplateName = document.getElementById('instructionTemplateName');
+const instructionTemplateText = document.getElementById('instructionTemplateText');
+const instructionTemplateApply = document.getElementById('instructionTemplateApply');
+const instructionTemplateDelete = document.getElementById('instructionTemplateDelete');
+const instructionTemplateNew = document.getElementById('instructionTemplateNew');
+const instructionTemplateSave = document.getElementById('instructionTemplateSave');
+const storyboardSettingsModal = document.getElementById('storyboardSettingsModal');
+const storyboardSettingsTitle = document.getElementById('storyboardSettingsTitle');
+const storyboardSettingsClose = document.getElementById('storyboardSettingsClose');
+const storyboardSettingsParams = document.getElementById('storyboardSettingsParams');
 let minimapViewport = document.getElementById('minimapViewport');
 let canvas = null;
 let nodes = [];
@@ -77,9 +93,12 @@ const ASSET_EXTRACTION_PROMPT_URLS = {
 };
 const STORYBOARD_PROMPT_URL = '/static/prompts/storyboard/default.txt';
 let promptPresets = [];
+let instructionTemplates = [];
 let assetExtractionPromptTemplates = {};
 let storyboardPromptTemplate = '';
+let storyboardSettingsState = {nodeId:'', mode:'image'};
 let promptPresetDeleteArmed = false;
+let instructionTemplateDeleteArmed = false;
 let createMenuPoint = {x:0, y:0};
 let createMenuContext = null;
 let nodeClipboard = null;
@@ -577,8 +596,8 @@ function storyboardShotNodeLayoutSize(node){
     return {width:Math.round(width), height:Math.round(height)};
 }
 function storyboardOutputNodeLayoutSize(node){
-    const width = Math.max(520, Number(node?.w) || 560);
-    const height = Math.max(480, Number(node?.h) || 640);
+    const width = Math.max(720, Number(node?.w) || 760);
+    const height = Math.max(560, Number(node?.h) || 680);
     return {width:Math.round(width), height:Math.round(height)};
 }
 function imageLayout(images, scale=1, node=null){
@@ -1679,6 +1698,161 @@ function editPromptPresetForNode(node){
     if(!promptPresets.length) savePromptNodeAsPreset(node);
     else openPromptPresetPanel(node?.id || '', node?.promptPresetId || '');
 }
+async function loadInstructionTemplates(){
+    try {
+        const data = await fetch('/api/instruction-templates', {cache:'no-store'}).then(r => r.json());
+        const list = Array.isArray(data?.templates) ? data.templates : [];
+        instructionTemplates = Array.isArray(list)
+            ? list.filter(item => item?.id && item.scope && typeof item.text === 'string')
+            : [];
+    } catch(e) {
+        instructionTemplates = [];
+        toast(tr('smart.instructionTemplateLoadFailed'));
+    }
+}
+function saveInstructionTemplates(){
+    return fetch('/api/instruction-templates', {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({templates:instructionTemplates})
+    }).then(async r => {
+        if(!r.ok) throw new Error(await r.text());
+        const data = await r.json();
+        instructionTemplates = Array.isArray(data?.templates) ? data.templates : instructionTemplates;
+        return data;
+    }).catch(e => {
+        toast((e.message || tr('smart.instructionTemplateSaveFailed')).slice(0, 180));
+        return null;
+    });
+}
+function instructionTemplateScopeForNode(node){
+    if(node?.type === 'smart-storyboard') return 'storyboard';
+    if(node?.type === 'smart-asset-extractor') return `asset:${normalizeAssetExtractorType(node.assetType)}`;
+    return '';
+}
+function instructionTemplateScopeLabel(scope){
+    if(scope === 'storyboard') return tr('smart.storyboardNodeTitle');
+    const match = String(scope || '').match(/^asset:(character|scene|prop)$/);
+    if(match) return tr(assetExtractorTypeMeta(match[1]).titleKey);
+    return tr('smart.instructionTemplateScope');
+}
+function instructionTemplatesForScope(scope){
+    return instructionTemplates.filter(item => item.scope === scope);
+}
+function currentInstructionTemplate(id){
+    return instructionTemplates.find(item => item.id === id) || null;
+}
+function instructionTemplatePanelNode(){
+    return nodes.find(n => n.id === instructionTemplatePanel?.dataset.nodeId) || null;
+}
+function instructionTemplateTextForNode(node){
+    if(!node) return '';
+    if(node.type === 'smart-asset-extractor') ensureAssetExtractorInstructionTemplate(node);
+    if(node.type === 'smart-storyboard' && !String(node.instruction || '').trim()) node.instruction = defaultStoryboardInstruction();
+    return String(node.instruction || '').trim();
+}
+function defaultInstructionTemplateName(text, scope=''){
+    const first = String(text || '').trim().split(/\r?\n/).map(line => line.trim()).filter(Boolean)[0] || '';
+    return (first || `${instructionTemplateScopeLabel(scope)} ${tr('smart.instructionTemplateDefault')}`).slice(0, 32);
+}
+function setInstructionTemplateStatus(text='', tone=''){
+    if(!instructionTemplateStatus) return;
+    instructionTemplateStatus.textContent = text;
+    instructionTemplateStatus.classList.toggle('warn', tone === 'warn');
+    instructionTemplateStatus.classList.toggle('ok', tone === 'ok');
+}
+function resetInstructionTemplateDeleteState(){
+    instructionTemplateDeleteArmed = false;
+    if(instructionTemplateDelete){
+        instructionTemplateDelete.textContent = tr('common.delete');
+        instructionTemplateDelete.classList.remove('confirm-danger');
+    }
+}
+async function createInstructionTemplateFromNode(node, options={}){
+    const scope = options.scope || instructionTemplateScopeForNode(node);
+    const text = String(options.text ?? instructionTemplateTextForNode(node) ?? '').trim();
+    if(!scope || !text){
+        setInstructionTemplateStatus(tr('smart.instructionTemplateRequired'), 'warn');
+        return null;
+    }
+    const name = String(options.name || '').trim() || defaultInstructionTemplateName(text, scope);
+    const preset = {id:uid('instruction_template'), scope, name, text, createdAt:Date.now(), updatedAt:Date.now()};
+    const previous = instructionTemplates.slice();
+    instructionTemplates.unshift(preset);
+    const saved = await saveInstructionTemplates();
+    if(!saved){
+        instructionTemplates = previous;
+        renderInstructionTemplatePanel('', tr('smart.instructionTemplateSaveFailed'), 'warn');
+        return null;
+    }
+    render();
+    scheduleSave();
+    openInstructionTemplatePanel(node?.id || '', preset.id, {status:tr('smart.instructionTemplateSavedNew'), tone:'ok'});
+    return preset;
+}
+function renderInstructionTemplatePanel(selectedId='', message='', tone=''){
+    if(!instructionTemplatePanel || !instructionTemplateSelect) return;
+    resetInstructionTemplateDeleteState();
+    const node = instructionTemplatePanelNode();
+    const scope = instructionTemplatePanel.dataset.scope || instructionTemplateScopeForNode(node);
+    const scoped = instructionTemplatesForScope(scope);
+    const preferredId = selectedId || node?.instructionTemplateId || '';
+    const preset = scoped.find(item => item.id === preferredId) || scoped[0] || null;
+    if(instructionTemplateTitle) instructionTemplateTitle.textContent = tr('smart.instructionTemplateLibrary');
+    if(instructionTemplateScope) instructionTemplateScope.textContent = instructionTemplateScopeLabel(scope);
+    instructionTemplateSelect.innerHTML = scoped.length
+        ? scoped.map(item => `<option value="${escapeHtml(item.id)}" ${preset?.id === item.id ? 'selected' : ''}>${escapeHtml(item.name || tr('smart.instructionTemplateUnnamed'))}${node?.instructionTemplateId === item.id ? ` · ${escapeHtml(tr('smart.instructionTemplateActive'))}` : ''}</option>`).join('')
+        : `<option value="">${escapeHtml(tr('smart.instructionTemplateNone'))}</option>`;
+    if(preset && instructionTemplateSelect.value !== preset.id) instructionTemplateSelect.value = preset.id;
+    const fallbackText = instructionTemplateTextForNode(node);
+    instructionTemplateName.value = preset?.name || defaultInstructionTemplateName(fallbackText, scope);
+    instructionTemplateText.value = preset?.text || fallbackText;
+    const hasPreset = Boolean(preset);
+    instructionTemplateApply.disabled = !hasPreset;
+    instructionTemplateDelete.disabled = !hasPreset;
+    instructionTemplateSave.disabled = !hasPreset;
+    instructionTemplateNew.disabled = !node && !String(instructionTemplateText.value || '').trim();
+    setInstructionTemplateStatus(message || (hasPreset ? tr('smart.instructionTemplatePanelHint') : tr('smart.instructionTemplatePanelEmpty')), tone);
+}
+function openInstructionTemplatePanel(nodeId='', templateId='', options={}){
+    if(!instructionTemplatePanel) return;
+    const node = nodes.find(n => n.id === nodeId);
+    const scope = instructionTemplateScopeForNode(node);
+    if(!node || !scope) return;
+    closePromptPresetPanel();
+    instructionTemplatePanel.dataset.nodeId = nodeId;
+    instructionTemplatePanel.dataset.scope = scope;
+    renderInstructionTemplatePanel(templateId || node.instructionTemplateId || '', options.status || '', options.tone || '');
+    const nodeEl = world.querySelector(`.image-node[data-id="${CSS.escape(nodeId)}"]`);
+    const rect = nodeEl?.getBoundingClientRect();
+    const shellRect = shell.getBoundingClientRect();
+    const maxLeft = Math.max(18, shellRect.width - 530);
+    const maxTop = Math.max(18, shellRect.height - 430);
+    const left = rect ? Math.min(maxLeft, Math.max(18, rect.left - shellRect.left)) : 80;
+    const top = rect ? Math.min(maxTop, Math.max(18, rect.bottom - shellRect.top + 12)) : 80;
+    instructionTemplatePanel.style.left = `${left}px`;
+    instructionTemplatePanel.style.top = `${top}px`;
+    instructionTemplatePanel.classList.add('open');
+    refreshIcons();
+}
+function closeInstructionTemplatePanel(){
+    instructionTemplatePanel?.classList.remove('open');
+    resetInstructionTemplateDeleteState();
+}
+function applyInstructionTemplateToNode(node, preset, textOverride=null){
+    const text = String(textOverride ?? preset?.text ?? '').trim();
+    if(!node || !text){
+        setInstructionTemplateStatus(tr('smart.instructionTemplateRequired'), 'warn');
+        return;
+    }
+    node.instruction = text;
+    node.instructionMode = 'template';
+    node.instructionTemplateId = preset?.id || '';
+    node.instructionOpen = true;
+    render();
+    scheduleSave();
+    renderInstructionTemplatePanel(preset?.id || '', tr('smart.instructionTemplateApplied'), 'ok');
+}
 function assetCategories(type='image'){
     return (assetLibrary.categories || []).filter(cat => (cat.type || 'image') === type);
 }
@@ -2201,16 +2375,19 @@ function createStoryboardShotNode(storyboard, shot, index, x, y){
         created_at:Date.now()
     };
 }
-function storyboardOutputShotData(storyboard, shot, index, existingShot=null){
+function storyboardOutputShotData(storyboard, shot, index, existingShot=null, outputMode='image'){
     const copy = shot && typeof shot === 'object' ? JSON.parse(JSON.stringify(shot)) : {text:String(shot || '')};
     const refs = storyboardShotReferenceImages(storyboard, copy).map(ref => stripImageGenerationMeta({...ref}));
     copy.reference_images = uniqueReferenceImages(refs);
     copy.sourceShotIndex = index;
+    copy.mode = existingShot?.mode === 'video' || (!existingShot && outputMode === 'video') ? 'video' : 'image';
+    if(existingShot?.generatedImage) copy.generatedImage = stripImageGenerationMeta({...existingShot.generatedImage});
+    if(existingShot?.generatedVideo) copy.generatedVideo = stripImageGenerationMeta({...existingShot.generatedVideo});
     if(existingShot?.textEdited){
         copy.outputText = String(existingShot.outputText || existingShot.text || storyboardShotNodeText(existingShot)).trim();
         copy.textEdited = true;
     } else {
-        copy.outputText = storyboardShotNodeText(copy);
+        copy.outputText = storyboardShotPrompt(copy) || storyboardShotNodeText(copy);
         copy.textEdited = false;
     }
     if(existingShot && Object.prototype.hasOwnProperty.call(existingShot, 'open')) copy.open = Boolean(existingShot.open);
@@ -2218,15 +2395,20 @@ function storyboardOutputShotData(storyboard, shot, index, existingShot=null){
 }
 function createStoryboardOutputNode(storyboard, x, y, existingShots=[]){
     const shots = Array.isArray(storyboard?.shots) ? storyboard.shots : [];
+    const mode = storyboardOutputModeValue(settings.apiKind);
     return {
         id:uid('storyboard_output'),
         type:'smart-storyboard-output',
         x,
         y,
-        w:560,
-        h:640,
+        w:760,
+        h:680,
         title:tr('smart.storyboardOutputNodeTitle'),
-        shots:shots.map((shot, index) => storyboardOutputShotData(storyboard, shot, index, existingShots[index])),
+        generationMode:mode,
+        imageSettings:normalizeStoryboardOutputRunSettings(settings, 'image'),
+        videoSettings:normalizeStoryboardOutputRunSettings(settings, 'video'),
+        batchConcurrency:5,
+        shots:shots.map((shot, index) => storyboardOutputShotData(storyboard, shot, index, existingShots[index], mode)),
         sourceStoryboardId:storyboard?.id || '',
         sourceNodeIds:storyboard?.id ? [storyboard.id] : [],
         created_at:Date.now()
@@ -2249,6 +2431,7 @@ function cloneSmartNode(node, dx=0, dy=0){
     copy.y = (Number(node.y) || 0) + dy;
     copy.running = false;
     copy.pending = 0;
+    delete copy.batchRunning;
     delete copy.runStartedAt;
     delete copy.runFinishedAt;
     delete copy.runElapsedMs;
@@ -2592,8 +2775,8 @@ function smartRunRequestMeta(run){
     if(run?.kind === 'video') return {provider_id:s.videoProvider || '', model:s.videoModel || '', duration:s.videoDuration || '', aspect_ratio:s.videoAspect || '', resolution:s.videoResolution || ''};
     return {provider_id:s.provider_id || '', model:s.model || '', size:run?.size || '', quality:s.quality || '', n:s.count || 1};
 }
-function smartRunSnapshot(node, prompt, refs=[], kind='image'){
-    const settingsSnapshot = cloneSmartSettings(settings);
+function smartRunSnapshot(node, prompt, refs=[], kind='image', runSettings=settings){
+    const settingsSnapshot = cloneSmartSettings(runSettings);
     return {
         nodeId:node?.id || '',
         nodeType:node?.type || 'smart-image',
@@ -2601,7 +2784,7 @@ function smartRunSnapshot(node, prompt, refs=[], kind='image'){
         settings:settingsSnapshot,
         prompt:prompt || '',
         refs:(refs || []).map(ref => ({url:ref.url || '', name:ref.name || 'image', kind:ref.kind || ''})).filter(ref => ref.url),
-        size: kind === 'image' && settingsSnapshot.engine === 'api' ? sizeForRun() : ''
+        size: kind === 'image' && settingsSnapshot.engine === 'api' ? sizeForRun(settingsSnapshot) : ''
     };
 }
 function addSmartGenerationLog({run, outputs=[], runMs=0, error=''}) {
@@ -2778,6 +2961,34 @@ function assetValuePreview(value){
     }
     return String(value || '').trim();
 }
+function assetAliasList(value, name=''){
+    const mainName = String(name || '').trim().toLowerCase();
+    const seen = new Set();
+    const emptyWords = new Set(['无','暂无','没有','none','null','nil','n/a','na','-']);
+    return assetValuePreview(value)
+        .split(/[，,、/|；;]+/)
+        .map(item => item.trim())
+        .filter(item => {
+            const key = item.toLowerCase();
+            if(!item || emptyWords.has(key) || key === mainName || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+}
+function assetAliasesText(item, name=''){
+    return assetAliasList(item?.aliases ?? item?.alias ?? '', name).join('，');
+}
+function assetDescriptionText(item){
+    return assetValuePreview(
+        item?.description ||
+        item?.visual_description ||
+        item?.appearance ||
+        item?.visual_details ||
+        item?.location ||
+        item?.usage ||
+        ''
+    ).trim();
+}
 function normalizeAssetExtractionItem(item, assetType, index=0){
     const clean = item && typeof item === 'object' && !Array.isArray(item) ? {...item} : {description:String(item || '')};
     clean.name = assetExtractorItemName(clean, assetType, index);
@@ -2786,7 +2997,7 @@ function normalizeAssetExtractionItem(item, assetType, index=0){
         return {
             name:clean.name,
             aliases:assetValuePreview(clean.aliases || clean.alias || '').trim(),
-            description:assetValuePreview(clean.description || clean.appearance || clean.visual_details || clean.location || clean.usage || '').trim()
+            description:assetDescriptionText(clean)
         };
     }
     clean.type = cleanType;
@@ -2845,26 +3056,49 @@ function assetExtractorItemSummary(item, assetType){
         .filter(Boolean);
     return values.join(' · ').slice(0, 180);
 }
+function assetExtractorOutputLine(item, assetType, index=0){
+    const cleanType = normalizeAssetExtractorType(assetType);
+    const label = tr(assetExtractorTypeMeta(cleanType).labelKey);
+    const name = assetExtractorItemName(item, cleanType, index);
+    const aliases = assetAliasesText(item, name);
+    const description = assetDescriptionText(item);
+    const parts = [
+        `类型：${label}`,
+        `名称：${name || `${label}${index + 1}`}`,
+        `别名：${aliases || '无'}`,
+        `描述：${description}`
+    ];
+    return parts.join('；');
+}
 function assetExtractorOutputItemsFor(node){
     const items = Array.isArray(node?.items) ? node.items : [];
     if(!items.length) return [];
-    return items.map(item => assetValuePreview(item?.description).trim());
     const assetType = normalizeAssetExtractorType(node.assetType);
-    const label = tr(assetExtractorTypeMeta(assetType).labelKey);
-    const skipKeys = new Set(['id','type','extractor_node_id','source_node_ids','updated_at']);
-    return items.map((item, index) => {
-        const description = assetValuePreview(item?.description).trim();
-        if(description) return description;
-        const name = assetExtractorItemName(item, assetType, index);
-        const lines = [`${label} ${index + 1}: ${name}`];
-        Object.entries(item || {}).forEach(([key, value]) => {
-            if(skipKeys.has(key)) return;
-            if(['name','title','角色名','场景名','道具名','名称'].includes(key)) return;
-            const preview = assetValuePreview(value);
-            if(preview) lines.push(`${key}: ${preview}`);
-        });
-        return lines.join('\n');
-    }).filter(Boolean);
+    return items.map((item, index) => assetExtractorOutputLine(item, assetType, index)).filter(Boolean);
+}
+function structuredAssetTextField(text, label){
+    const source = String(text || '');
+    const re = new RegExp(`${label}\\s*[:：]\\s*([\\s\\S]*?)(?=\\s*[；;]\\s*(?:类型|名称|别名|描述)\\s*[:：]|$)`);
+    return String(source.match(re)?.[1] || '').trim();
+}
+function parseAssetOutputStructuredText(text){
+    const source = String(text || '').trim();
+    if(!source) return {};
+    return {
+        typeLabel:structuredAssetTextField(source, '类型'),
+        name:structuredAssetTextField(source, '名称'),
+        aliases:structuredAssetTextField(source, '别名'),
+        description:structuredAssetTextField(source, '描述')
+    };
+}
+function ensureAssetOutputStructuredText(node){
+    if(!node || node.type !== 'smart-asset-output' || node.editing) return;
+    const item = node.item && typeof node.item === 'object' ? node.item : null;
+    if(!item) return;
+    const current = String(node.text || '').trim();
+    const legacyDescription = assetDescriptionText(item);
+    if(current && current !== legacyDescription) return;
+    node.text = assetExtractorOutputLine(item, node.assetType, Number(node.sourceItemIndex) || 0);
 }
 function assetExtractorOutputTextFor(node){
     return assetExtractorOutputItemsFor(node).join('\n\n');
@@ -2964,30 +3198,82 @@ function storyboardAssetTypeLabel(type){
     if(type === 'image') return '图片';
     return tr('smart.assetTypeCharacter');
 }
+function storyboardEntryFromExtractorItem(extractor, item, index=0, url=''){
+    const assetType = normalizeAssetExtractorType(extractor?.assetType);
+    const name = assetExtractorItemName(item, assetType, index);
+    return {
+        type:assetType,
+        name,
+        aliases:assetAliasList(item?.aliases ?? item?.alias ?? '', name),
+        description:assetDescriptionText(item),
+        url:url || assetItemUrl(item),
+        sourceNodeId:extractor?.id || ''
+    };
+}
+function storyboardEntryFromAssetOutput(input, url=''){
+    const assetType = normalizeAssetExtractorType(input?.assetType);
+    const item = input?.item && typeof input.item === 'object' ? input.item : {};
+    const parsed = parseAssetOutputStructuredText(input?.text);
+    const name = parsed.name || assetExtractorItemName(item, assetType, Number(input?.sourceItemIndex) || 0);
+    return {
+        type:assetType,
+        name,
+        aliases:assetAliasList(parsed.aliases || item?.aliases || item?.alias || '', name),
+        description:parsed.description || assetDescriptionText(item),
+        url:url || assetItemUrl(item),
+        sourceNodeId:input?.id || ''
+    };
+}
+function mapAssetEntriesToImageUrls(entries, imageRefs){
+    const refs = (imageRefs || []).filter(img => img?.url);
+    if(!refs.length) return entries;
+    return (entries || []).map((entry, index) => {
+        const ref = refs.length === 1 ? refs[0] : refs[Math.min(index, refs.length - 1)];
+        return {...entry, url:ref?.url || entry.url, imageSourceNodeId:ref?.nodeId || entry.imageSourceNodeId || ''};
+    });
+}
+function imageBackedAssetEntriesFor(imageNode, depth=0){
+    if(!imageNode || imageNode.type !== 'smart-image' || depth > 4) return [];
+    const imageRefs = imagesForNode(imageNode).filter(img => img?.url);
+    const baseEntries = [];
+    inputNodesFor(imageNode).forEach(input => {
+        if(input.type === 'smart-asset-output'){
+            baseEntries.push(storyboardEntryFromAssetOutput(input));
+        } else if(input.type === 'smart-asset-extractor'){
+            (input.items || []).forEach((item, index) => {
+                baseEntries.push(storyboardEntryFromExtractorItem(input, item, index));
+            });
+        } else if(input.type === 'smart-image'){
+            baseEntries.push(...imageBackedAssetEntriesFor(input, depth + 1));
+        }
+    });
+    return mapAssetEntriesToImageUrls(baseEntries, imageRefs)
+        .filter(entry => entry.name || entry.description || entry.url);
+}
 function storyboardAssetEntriesFor(node){
     const entries = [];
     storyboardInputNodes(node).forEach(input => {
         if(input.type === 'smart-asset-extractor'){
-            const assetType = normalizeAssetExtractorType(input.assetType);
             (input.items || []).forEach((item, index) => {
-                const name = assetExtractorItemName(item, assetType, index);
-                entries.push({type:assetType, name, description:assetExtractorItemSummary(item, assetType) || assetValuePreview(item?.description), url:assetItemUrl(item), sourceNodeId:input.id});
+                entries.push(storyboardEntryFromExtractorItem(input, item, index));
             });
         } else if(input.type === 'smart-asset-output'){
-            const assetType = normalizeAssetExtractorType(input.assetType);
-            const item = input.item && typeof input.item === 'object' ? input.item : {description:input.text || ''};
-            const name = assetExtractorItemName(item, assetType, Number(input.sourceItemIndex) || 0);
-            entries.push({type:assetType, name, description:String(input.text || assetValuePreview(item.description) || '').trim(), url:assetItemUrl(item), sourceNodeId:input.id});
+            entries.push(storyboardEntryFromAssetOutput(input));
         } else if(input.type === 'smart-image'){
-            imagesForNode(input).forEach((img, index) => {
-                entries.push({
-                    type:'image',
-                    name:img.name || `Image ${index + 1}`,
-                    description:img.name || '',
-                    url:imageUrlValue(img),
-                    sourceNodeId:input.id
+            const backedEntries = imageBackedAssetEntriesFor(input);
+            if(backedEntries.length){
+                entries.push(...backedEntries);
+            } else {
+                imagesForNode(input).forEach((img, index) => {
+                    entries.push({
+                        type:'image',
+                        name:img.name || `Image ${index + 1}`,
+                        description:img.name || '',
+                        url:imageUrlValue(img),
+                        sourceNodeId:input.id
+                    });
                 });
-            });
+            }
         }
     });
     return entries.filter(entry => entry.name || entry.description || entry.url);
@@ -2997,6 +3283,8 @@ function storyboardAssetContextFor(node){
     if(!entries.length) return '无';
     return entries.map(entry => {
         const parts = [`类型：${storyboardAssetTypeLabel(entry.type)}`, `名称：${entry.name || '未命名'}`];
+        const aliases = assetAliasList(entry.aliases, entry.name).join('，');
+        if(aliases) parts.push(`别名：${aliases}`);
         if(entry.description) parts.push(`描述：${entry.description}`);
         if(entry.url) parts.push(`图片：${entry.url}`);
         return `- ${parts.join('；')}`;
@@ -3060,16 +3348,31 @@ function storyboardPromptFor(node, scriptText){
     if(!hasDuration) text += `\n\n### 总时长与分镜数量\n${storyboardDurationContextFor(node)}`;
     return text.trim();
 }
+function storyboardFirstText(...values){
+    for(const value of values){
+        const text = String(value == null ? '' : value).trim();
+        if(text) return text;
+    }
+    return '';
+}
 function storyboardShotPrompt(shot){
-    return String(shot?.prompt || shot?.text || shot?.description || shot?.title || '').trim();
+    return storyboardFirstText(
+        shot?.video_promet,
+        shot?.video_prompt,
+        shot?.videoPrompt,
+        shot?.prompt,
+        shot?.text,
+        shot?.description,
+        shot?.title
+    );
 }
 function storyboardShotNodeText(shot){
     const lines = [];
     const title = String(shot?.title || shot?.name || '').trim();
     const shotType = String(shot?.shot || shot?.shot_type || shot?.frame || '').trim();
     const camera = String(shot?.camera || shot?.camera_movement || shot?.lens || '').trim();
-    const text = String(shot?.text || shot?.content || shot?.description || '').trim();
-    const prompt = String(shot?.prompt || '').trim();
+    const text = storyboardFirstText(shot?.text, shot?.content, shot?.description);
+    const prompt = storyboardShotPrompt(shot);
     if(title) lines.push(title);
     if(shotType || camera) lines.push([shotType, camera].filter(Boolean).join(' / '));
     if(text) lines.push(text);
@@ -3090,8 +3393,9 @@ function normalizeStoryboardShot(item, index){
     shot.title = String(shot.title || shot.name || `分镜 ${shot.index}`).trim();
     shot.shot = String(shot.shot || shot.shot_type || shot.frame || '').trim();
     shot.camera = String(shot.camera || shot.camera_movement || shot.lens || '').trim();
-    shot.text = String(shot.text || shot.content || shot.description || '').trim();
+    shot.text = storyboardFirstText(shot.text, shot.content, shot.description);
     shot.prompt = storyboardShotPrompt(shot);
+    if(shot.prompt && !storyboardFirstText(shot.video_promet)) shot.video_promet = shot.prompt;
     shot.characters = toList(shot.characters || shot.roles || shot.character || '');
     shot.scene = String(Array.isArray(shot.scene) ? shot.scene[0] : (shot.scene || shot.location || '')).trim();
     shot.props = toList(shot.props || shot.prop || shot.items || '');
@@ -3123,7 +3427,7 @@ function storyboardShotText(shot){
     if(shot.shot || shot.camera) lines.push([shot.shot, shot.camera].filter(Boolean).join(' / '));
     if(shot.text) lines.push(shot.text);
     if(shot.prompt) lines.push(`Prompt: ${shot.prompt}`);
-    const assets = [...(shot.characters || []), shot.scene, ...(shot.props || [])].filter(Boolean);
+    const assets = [...(shot.characters || []), shot.scene, ...(shot.props || []), ...(shot.asset_refs || [])].filter(Boolean);
     if(assets.length) lines.push(`资产: ${assets.join('、')}`);
     return lines.join('\n');
 }
@@ -3141,6 +3445,131 @@ function storyboardEditableShotText(shot){
 function storyboardOutputShotImages(shot){
     return uniqueReferenceImages((shot?.reference_images || []).map(ref => normalizeReferenceImageValue(ref, shot?.title || 'shot-ref')).filter(Boolean));
 }
+function storyboardOutputModeValue(mode='image'){
+    return mode === 'video' ? 'video' : 'image';
+}
+function storyboardOutputMode(node){
+    if(node?.generationMode === 'video') return 'video';
+    if(node?.generationMode === 'image') return 'image';
+    const shots = Array.isArray(node?.shots) ? node.shots : [];
+    return shots.length && shots.every(shot => shot?.mode === 'video') ? 'video' : 'image';
+}
+function storyboardOutputSettingsKey(mode='image'){
+    return storyboardOutputModeValue(mode) === 'video' ? 'videoSettings' : 'imageSettings';
+}
+function clampStoryboardBatchConcurrency(value){
+    return Math.max(1, Math.min(20, Math.round(Number(value) || 5)));
+}
+function normalizeStoryboardOutputRunSettings(source={}, mode='image'){
+    const runMode = storyboardOutputModeValue(mode);
+    const next = {
+        ...cloneSmartSettings(canvasDefaultSmartSettings || initialSmartSettings),
+        ...cloneSmartSettings(source || {})
+    };
+    next.engine = 'api';
+    next.apiKind = runMode;
+    if(runMode === 'video'){
+        next.videoDuration = Math.max(1, Math.min(60, Number(next.videoDuration) || 5));
+        next.videoAspect = next.videoAspect || '16:9';
+        normalizeVideoSelection(next);
+    } else {
+        next.ratio = next.ratio || 'square';
+        next.resolution = next.resolution || '1k';
+        next.quality = next.quality || 'auto';
+        next.count = 1;
+        ensureApiImageSelection(next);
+    }
+    return next;
+}
+function ensureStoryboardOutputSettings(node, mode='image'){
+    if(!node) return normalizeStoryboardOutputRunSettings(settings, mode);
+    const runMode = storyboardOutputModeValue(mode);
+    const key = storyboardOutputSettingsKey(runMode);
+    const source = node[key] && Object.keys(node[key] || {}).length ? node[key] : settings;
+    const normalized = normalizeStoryboardOutputRunSettings(source, runMode);
+    node[key] = cloneSmartSettings(normalized);
+    return normalized;
+}
+function normalizeStoryboardOutputNode(node){
+    if(!node || node.type !== 'smart-storyboard-output') return null;
+    const mode = storyboardOutputMode(node);
+    node.generationMode = mode;
+    node.batchConcurrency = clampStoryboardBatchConcurrency(node.batchConcurrency);
+    ensureStoryboardOutputSettings(node, 'image');
+    ensureStoryboardOutputSettings(node, 'video');
+    (node.shots || []).forEach(shot => {
+        if(shot && !['image','video'].includes(shot.mode)) shot.mode = mode;
+    });
+    return mode;
+}
+function storyboardOutputRunSettings(node, mode='image'){
+    return cloneSmartSettings(ensureStoryboardOutputSettings(node, mode));
+}
+function storyboardBatchSettingsControlHtml(node){
+    const value = clampStoryboardBatchConcurrency(node?.batchConcurrency);
+    return `<label class="storyboard-batch-setting">
+        <span>${escapeHtml(tr('smart.storyboardBatchConcurrency'))}</span>
+        <input type="number" min="1" max="20" step="1" data-storyboard-batch-concurrency value="${value}">
+    </label>`;
+}
+function renderWithSmartSettings(tempSettings, renderFn){
+    const previous = settings;
+    settings = tempSettings;
+    try { return renderFn(); }
+    finally { settings = previous; }
+}
+function storyboardOutputSettingsControlsHtml(node, mode='image'){
+    const runMode = storyboardOutputModeValue(mode);
+    const runSettings = ensureStoryboardOutputSettings(node, runMode);
+    return renderWithSmartSettings(runSettings, () => {
+        if(runMode === 'video'){
+            const providers = videoApiProviders();
+            const models = providerVideoModels(settings.videoProvider);
+            return [
+                storyboardBatchSettingsControlHtml(node),
+                renderVideoProviderControl(providers),
+                renderVideoModelControl(models),
+                renderVideoResolutionControl(),
+                renderVideoAspectControl(),
+                renderVideoDurationControl(),
+                renderVideoToggleControl('videoEnhancePrompt', tr('smart.videoEnhancePrompt')),
+                renderVideoToggleControl('videoEnableUpsample', tr('smart.videoUpsample')),
+                renderVideoToggleControl('videoGenerateAudio', tr('smart.videoGenerateAudio')),
+                renderVideoToggleControl('videoCameraFixed', tr('smart.videoCameraFixed')),
+                renderVideoToggleControl('videoWatermark', tr('smart.videoWatermark'))
+            ].join('');
+        }
+        const providers = imageProviders();
+        const models = providerImageModels(settings.provider_id);
+        return [
+            storyboardBatchSettingsControlHtml(node),
+            renderProviderControl(providers),
+            renderModelControl(models),
+            renderResolutionControl(''),
+            renderRatioControl('', false),
+            renderInlineCustomSizeFields(''),
+            renderInlineCustomRatioFields(''),
+            renderQualityControl()
+        ].join('');
+    });
+}
+function storyboardShotAssetRefsHtml(shot){
+    const refs = storyboardOutputShotImages(shot);
+    if(!refs.length) return `<div class="storyboard-shot-assets empty">${escapeHtml(tr('smart.storyboardNoRefs'))}</div>`;
+    return `<div class="storyboard-shot-assets">${refs.map(ref => `<span class="storyboard-asset-orb" title="${escapeAttr(ref.name || ref.url || '')}">${ref.url ? `<img src="${escapeHtml(ref.url)}" alt="">` : `<i data-lucide="image"></i>`}</span>`).join('')}</div>`;
+}
+function storyboardShotMediaItem(shot){
+    return (shot?.mode === 'video' ? shot.generatedVideo : shot.generatedImage) || shot?.generatedVideo || shot?.generatedImage || null;
+}
+function storyboardShotMediaHtml(shot){
+    const media = storyboardShotMediaItem(shot);
+    if(media?.url){
+        return mediaKindForItem(media) === 'video'
+            ? `<video src="${escapeHtml(media.url)}" data-url="${escapeHtml(media.url)}" controls muted preload="metadata" playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video>`
+            : `<img src="${escapeHtml(media.url)}" draggable="false" alt="">`;
+    }
+    return `<div class="storyboard-media-empty"><i data-lucide="image-plus"></i><span>${escapeHtml(tr('smart.storyboardMediaEmpty'))}</span></div>`;
+}
 function storyboardOutputShotMetaHtml(shot){
     const parts = [
         shot.duration ? `${shot.duration}s` : '',
@@ -3152,13 +3581,30 @@ function storyboardOutputShotMetaHtml(shot){
 }
 function storyboardOutputNodeBodyHtml(node){
     const shots = Array.isArray(node.shots) ? node.shots : [];
+    const outputMode = normalizeStoryboardOutputNode(node) || 'image';
+    const batchRunning = Boolean(node.batchRunning);
+    const batchLabel = outputMode === 'video' ? tr('smart.storyboardBatchGenerateVideo') : tr('smart.storyboardBatchGenerateImage');
     return `<div class="storyboard-output-card">
-        <div class="asset-output-head"><span><i data-lucide="list-video"></i>${escapeHtml(tr('smart.storyboardOutputNodeTitle'))}</span><em>${escapeHtml(trf('smart.storyboardOutputCount', {n:shots.length}))}</em></div>
+        <div class="asset-output-head storyboard-output-head">
+            <span class="storyboard-output-head-main"><i data-lucide="list-video"></i>${escapeHtml(tr('smart.storyboardOutputNodeTitle'))}</span>
+            <div class="storyboard-output-head-actions">
+                <div class="storyboard-output-mode" role="group" aria-label="${escapeAttr(tr('smart.storyboardMode'))}">
+                    <button class="${outputMode !== 'video' ? 'active' : ''}" type="button" data-storyboard-output-mode="image"><i data-lucide="image"></i><span>${escapeHtml(tr('smart.storyboardModeImage'))}</span></button>
+                    <button class="${outputMode === 'video' ? 'active' : ''}" type="button" data-storyboard-output-mode="video"><i data-lucide="film"></i><span>${escapeHtml(tr('smart.storyboardModeVideo'))}</span></button>
+                </div>
+                <button class="storyboard-output-batch" type="button" data-storyboard-batch-run ${batchRunning || !shots.length ? 'disabled' : ''}>
+                    <i data-lucide="${batchRunning ? 'loader-2' : (outputMode === 'video' ? 'film' : 'images')}"></i>
+                    <span>${escapeHtml(batchRunning ? tr('smart.storyboardBatchRunning') : batchLabel)}</span>
+                </button>
+                <button class="storyboard-output-settings" type="button" data-storyboard-output-settings title="${escapeAttr(tr('smart.storyboardSettings'))}" aria-label="${escapeAttr(tr('smart.storyboardSettings'))}"><i data-lucide="settings"></i></button>
+                <em>${escapeHtml(trf('smart.storyboardOutputCount', {n:shots.length}))}</em>
+            </div>
+        </div>
         <div class="storyboard-output-scroll">
             ${shots.length ? shots.map((shot, index) => {
                 const refs = storyboardOutputShotImages(shot);
                 const text = storyboardEditableShotText(shot) || storyboardShotNodeText(shot);
-                const summary = storyboardShotPrompt(shot) || shot.description || shot.action || shot.text || '';
+                const summary = storyboardEditableShotText(shot) || storyboardShotPrompt(shot) || shot.description || shot.action || shot.text || '';
                 const open = shot.open !== false && (shot.open || index === 0);
                 return `<details class="storyboard-output-shot" data-shot-index="${index}" ${open ? 'open' : ''}>
                     <summary>
@@ -3170,14 +3616,180 @@ function storyboardOutputNodeBodyHtml(node){
                         <span class="storyboard-output-ref-count">${escapeHtml(refs.length ? trf('smart.storyboardRefCount', {n:refs.length}) : tr('smart.storyboardNoRefs'))}</span>
                     </summary>
                     <div class="storyboard-output-shot-body">
-                        ${storyboardOutputShotMetaHtml(shot)}
-                        ${smartNodeInputThumbsHtml(refs, {labelPrefix:'Ref '})}
-                        <textarea class="storyboard-output-shot-text" data-shot-index="${index}" placeholder="${escapeHtml(tr('smart.storyboardShotPlaceholder'))}">${escapeHtml(text)}</textarea>
+                        <div class="storyboard-shot-workspace">
+                            <div class="storyboard-shot-media">
+                                <div class="storyboard-shot-media-frame ${shot.running ? 'running' : ''}">${storyboardShotMediaHtml(shot)}</div>
+                            </div>
+                            <div class="storyboard-shot-script">
+                                ${storyboardOutputShotMetaHtml(shot)}
+                                <textarea class="storyboard-output-shot-text" data-shot-index="${index}" placeholder="${escapeHtml(tr('smart.storyboardShotPlaceholder'))}">${escapeHtml(text)}</textarea>
+                                ${storyboardShotAssetRefsHtml(shot)}
+                            </div>
+                        </div>
+                        <div class="storyboard-shot-bottom-controls">
+                            <div class="storyboard-shot-controls">
+                                <div class="storyboard-shot-mode" role="group" aria-label="${escapeAttr(tr('smart.storyboardMode'))}">
+                                    <button class="${shot.mode !== 'video' ? 'active' : ''}" type="button" data-storyboard-shot-mode="image" data-shot-index="${index}"><i data-lucide="image"></i><span>${escapeHtml(tr('smart.storyboardModeImage'))}</span></button>
+                                    <button class="${shot.mode === 'video' ? 'active' : ''}" type="button" data-storyboard-shot-mode="video" data-shot-index="${index}"><i data-lucide="film"></i><span>${escapeHtml(tr('smart.storyboardModeVideo'))}</span></button>
+                                </div>
+                                <button class="storyboard-shot-generate" type="button" data-storyboard-shot-run="${index}" ${shot.running ? 'disabled' : ''}><i data-lucide="${shot.running ? 'loader-2' : 'sparkles'}"></i><span>${escapeHtml(shot.running ? tr('common.running') : (shot.mode === 'video' ? tr('smart.storyboardGenerateVideo') : tr('smart.storyboardGenerateImage')))}</span></button>
+                            </div>
+                        </div>
                     </div>
                 </details>`;
             }).join('') : `<div class="asset-extractor-empty">${escapeHtml(tr('smart.storyboardOutputEmpty'))}</div>`}
         </div>
     </div>`;
+}
+function setStoryboardOutputMode(outputNodeId, mode){
+    const node = nodes.find(n => n.id === outputNodeId && n.type === 'smart-storyboard-output');
+    if(!node) return;
+    const nextMode = storyboardOutputModeValue(mode);
+    node.generationMode = nextMode;
+    ensureStoryboardOutputSettings(node, nextMode);
+    (node.shots || []).forEach(shot => {
+        if(shot) shot.mode = nextMode;
+    });
+    render();
+    scheduleSave();
+}
+function setStoryboardShotMode(outputNodeId, shotIndex, mode){
+    const node = nodes.find(n => n.id === outputNodeId && n.type === 'smart-storyboard-output');
+    const index = Number(shotIndex);
+    if(!node || !Number.isFinite(index) || !node.shots?.[index]) return;
+    const shot = node.shots[index];
+    if(shot.running) return;
+    const nextMode = storyboardOutputModeValue(mode);
+    shot.mode = nextMode;
+    shot.open = true;
+    ensureStoryboardOutputSettings(node, nextMode);
+    render();
+    scheduleSave();
+}
+function activeStoryboardSettingsNode(){
+    return nodes.find(n => n.id === storyboardSettingsState.nodeId && n.type === 'smart-storyboard-output') || null;
+}
+function openStoryboardSettings(outputNodeId, mode=''){
+    const node = nodes.find(n => n.id === outputNodeId && n.type === 'smart-storyboard-output');
+    if(!node || !storyboardSettingsModal) return;
+    normalizeStoryboardOutputNode(node);
+    storyboardSettingsState = {
+        nodeId:node.id,
+        mode:storyboardOutputModeValue(mode || node.generationMode)
+    };
+    selectedId = node.id;
+    selectedIds = [];
+    selectedImage = {nodeId:'', index:-1};
+    storyboardSettingsModal.classList.add('open');
+    renderStoryboardSettingsPanel();
+    render();
+}
+function closeStoryboardSettings(){
+    storyboardSettingsModal?.classList.remove('open');
+    storyboardSettingsState = {nodeId:'', mode:'image'};
+}
+function renderStoryboardSettingsPanel(){
+    const node = activeStoryboardSettingsNode();
+    if(!node || !storyboardSettingsParams){
+        closeStoryboardSettings();
+        return;
+    }
+    const mode = storyboardOutputModeValue(storyboardSettingsState.mode || node.generationMode);
+    storyboardSettingsState.mode = mode;
+    ensureStoryboardOutputSettings(node, mode);
+    if(storyboardSettingsTitle) storyboardSettingsTitle.textContent = tr('smart.storyboardSettings');
+    storyboardSettingsModal?.querySelectorAll('[data-storyboard-settings-mode]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.storyboardSettingsMode === mode);
+    });
+    storyboardSettingsParams.innerHTML = storyboardOutputSettingsControlsHtml(node, mode);
+    bindStoryboardSettingsPanelControls();
+    if(window.lucide) lucide.createIcons();
+}
+function setStoryboardSettingsValue(key, value, rerender=true){
+    const node = activeStoryboardSettingsNode();
+    if(!node) return;
+    const mode = storyboardOutputModeValue(storyboardSettingsState.mode || node.generationMode);
+    const settingsKey = storyboardOutputSettingsKey(mode);
+    const target = normalizeStoryboardOutputRunSettings(node[settingsKey] || {}, mode);
+    const numericKeys = new Set(['count','width','height','videoDuration','enhanceStrength','enhanceUpscaleRes','editUpscaleRes','customRatioWidth','customRatioHeight','customWidth','customHeight','msCustomRatioWidth','msCustomRatioHeight','msCustomWidth','msCustomHeight']);
+    target[key] = numericKeys.has(key) && value !== '' ? Number(value) : value;
+    if(key === 'provider_id') target.model = '';
+    if(key === 'videoProvider') target.videoModel = '';
+    if(key === 'resolution'){
+        if(target.resolution === 'custom') target.ratio = '';
+        else if(!target.ratio) target.ratio = 'square';
+    }
+    if(key === 'customRatioWidth' || key === 'customRatioHeight') target.customRatio = target.customRatioWidth && target.customRatioHeight ? `${target.customRatioWidth}:${target.customRatioHeight}` : '';
+    if(key === 'customWidth' || key === 'customHeight') target.customSize = target.customWidth && target.customHeight ? `${target.customWidth}x${target.customHeight}` : '';
+    node[settingsKey] = normalizeStoryboardOutputRunSettings(target, mode);
+    scheduleSave();
+    if(rerender) renderStoryboardSettingsPanel();
+}
+function bindStoryboardSettingsPanelControls(){
+    if(!storyboardSettingsModal || !storyboardSettingsParams) return;
+    storyboardSettingsModal.querySelectorAll('[data-storyboard-settings-mode]').forEach(btn => {
+        btn.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            storyboardSettingsState.mode = storyboardOutputModeValue(btn.dataset.storyboardSettingsMode);
+            renderStoryboardSettingsPanel();
+        };
+    });
+    storyboardSettingsParams.querySelectorAll('.smart-control > .smart-pill').forEach(pill => {
+        pill.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const ctrl = pill.parentElement;
+            const wasPinned = ctrl.classList.contains('pinned');
+            storyboardSettingsParams.querySelectorAll('.smart-control.pinned').forEach(item => item.classList.remove('pinned'));
+            if(!wasPinned) ctrl.classList.add('pinned');
+        };
+    });
+    storyboardSettingsParams.querySelectorAll('[data-smart-param]').forEach(btn => {
+        btn.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            setStoryboardSettingsValue(btn.dataset.smartParam, btn.dataset.smartValue, true);
+        };
+    });
+    storyboardSettingsParams.querySelectorAll('[data-param]').forEach(input => {
+        input.onclick = event => event.stopPropagation();
+        input.oninput = input.onchange = event => {
+            event?.stopPropagation?.();
+            setStoryboardSettingsValue(input.dataset.param, input.value, event?.type === 'change');
+        };
+    });
+    storyboardSettingsParams.querySelectorAll('[data-storyboard-batch-concurrency]').forEach(input => {
+        input.onclick = event => event.stopPropagation();
+        input.oninput = input.onchange = event => {
+            event?.stopPropagation?.();
+            const node = activeStoryboardSettingsNode();
+            if(!node) return;
+            node.batchConcurrency = clampStoryboardBatchConcurrency(input.value);
+            input.value = node.batchConcurrency;
+            scheduleSave();
+        };
+    });
+    storyboardSettingsParams.querySelectorAll('[data-toggle-param]').forEach(btn => {
+        btn.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const node = activeStoryboardSettingsNode();
+            if(!node) return;
+            const mode = storyboardOutputModeValue(storyboardSettingsState.mode || node.generationMode);
+            const settingsKey = storyboardOutputSettingsKey(mode);
+            const target = normalizeStoryboardOutputRunSettings(node[settingsKey] || {}, mode);
+            target[btn.dataset.toggleParam] = !Boolean(target[btn.dataset.toggleParam]);
+            node[settingsKey] = normalizeStoryboardOutputRunSettings(target, mode);
+            scheduleSave();
+            renderStoryboardSettingsPanel();
+        };
+    });
+}
+function storyboardAssetMatchTerms(entry){
+    return [entry?.name, ...assetAliasList(entry?.aliases, entry?.name)]
+        .map(value => String(value || '').trim().toLowerCase())
+        .filter(Boolean);
 }
 function storyboardShotReferenceImages(storyboard, shot){
     const refs = [];
@@ -3188,7 +3800,7 @@ function storyboardShotReferenceImages(storyboard, shot){
     const entries = storyboardAssetEntriesFor(storyboard);
     const names = new Set([...(shot?.characters || []), shot?.scene, ...(shot?.props || []), ...(shot?.asset_refs || [])].filter(Boolean).map(v => String(v).trim().toLowerCase()));
     entries.forEach(entry => {
-        if(entry.url && names.has(String(entry.name || '').trim().toLowerCase())) refs.push({url:entry.url, name:entry.name, kind:'image'});
+        if(entry.url && storyboardAssetMatchTerms(entry).some(term => names.has(term))) refs.push({url:entry.url, name:entry.name, kind:'image'});
     });
     return uniqueReferenceImages(refs);
 }
@@ -3227,6 +3839,7 @@ function storyboardShotBodyHtml(node){
     </div>`;
 }
 function assetOutputNodeBodyHtml(node){
+    ensureAssetOutputStructuredText(node);
     const assetType = normalizeAssetExtractorType(node.assetType);
     const meta = assetExtractorTypeMeta(assetType);
     const text = String(node.text || '').trim();
@@ -3483,6 +4096,9 @@ function render(){
         const isPending = node.pending && imgs.length === 0;
         const body = nodeBodyHtml(node, layout);
         const deleteBtn = `<button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button>`;
+        const instructionTemplateBtn = (isAssetExtractor || isStoryboard)
+            ? `<button class="node-template-library" type="button" data-instruction-template="${escapeHtml(node.id)}" title="${escapeHtml(tr('smart.instructionTemplateLibrary'))}" aria-label="${escapeHtml(tr('smart.instructionTemplateLibrary'))}"><i data-lucide="library"></i><span>${escapeHtml(tr('smart.instructionTemplateLibrary'))}</span></button>`
+            : '';
         const hint = isStoryboard ? escapeHtml(tr('smart.storyboardHint')) : isStoryboardOutput ? escapeHtml(tr('smart.storyboardOutputHint')) : isStoryboardShot ? escapeHtml(tr('smart.storyboardShotHint')) : isAssetExtractor ? escapeHtml(tr('smart.assetExtractorHint')) : isScript ? escapeHtml(tr('smart.scriptNodeHint')) : isPending ? escapeHtml(tr('smart.hintPending')) : (imgs.length > 1 ? escapeHtml(tr('smart.hintMulti')) : imgs.length ? escapeHtml(tr('smart.hintSingle')) : escapeHtml(tr('smart.hintEmpty')));
         const displayHint = isAssetOutput ? escapeHtml(tr('smart.assetOutputHint')) : hint;
         const html = `<div class="image-node ${isEmpty ? 'empty-node' : ''} ${isGroup ? 'group-node' : ''} ${isPrompt ? 'prompt-smart-node' : ''} ${isScript ? 'script-smart-node' : ''} ${isAssetExtractor ? 'asset-extractor-node' : ''} ${isAssetOutput ? 'asset-output-node' : ''} ${isStoryboard ? 'storyboard-node' : ''} ${isStoryboardOutput ? 'storyboard-output-node' : ''} ${isStoryboardShot ? 'storyboard-shot-node' : ''} ${isLoop ? 'loop-smart-node' : ''} ${isNodeSelected(node.id) ? 'selected' : ''} ${(dragState?.groupIds?.includes(node.id) || dragState?.id === node.id) ? 'dragging' : ''} ${node.running ? 'node-running' : ''} ${isPending ? 'node-pending' : ''}" data-id="${escapeHtml(node.id)}" style="left:${node.x || 0}px;top:${node.y || 0}px;width:${layout.width}px;height:${layout.height}px">
@@ -3490,6 +4106,7 @@ function render(){
             ${!isEmpty ? `<div class="floating-node-actions"><button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button></div>` : ''}
             ${runTimePillHtml(node)}
             <div class="node-body">${body}</div>
+            ${instructionTemplateBtn}
             <div class="node-hint">${displayHint}</div>
             ${imgs.length || node.pending || isPrompt || isScript || isAssetExtractor || isAssetOutput || isStoryboard || isStoryboardOutput || isStoryboardShot || isLoop ? '<div class="node-resize-handle" data-resize="1"></div>' : ''}
             <div class="node-port port-in" data-port="in" title="input"></div>
@@ -3869,13 +4486,16 @@ function bindStoryboardShotControls(el, node){
         textEl.oninput = e => {
             node.text = e.target.value;
             node.textEdited = true;
-            if(node.shot && typeof node.shot === 'object') node.shot.prompt = e.target.value;
+            if(node.shot && typeof node.shot === 'object'){
+                node.shot.prompt = e.target.value;
+                node.shot.video_promet = e.target.value;
+            }
             scheduleSave();
         };
     }
 }
 function bindStoryboardOutputControls(el, node){
-    el.querySelectorAll('.storyboard-output-scroll, .storyboard-output-shot, .storyboard-output-shot summary, .storyboard-output-shot-text').forEach(control => {
+    el.querySelectorAll('.storyboard-output-scroll, .storyboard-output-shot, .storyboard-output-shot summary, .storyboard-output-shot-text, .storyboard-output-head-actions, .storyboard-output-mode button, .storyboard-output-settings, .storyboard-shot-controls, .storyboard-shot-mode button, .storyboard-shot-generate, .storyboard-output-batch').forEach(control => {
         control.addEventListener('mousedown', e => e.stopPropagation());
         control.addEventListener('click', e => e.stopPropagation());
         control.addEventListener('dblclick', e => e.stopPropagation());
@@ -3897,7 +4517,43 @@ function bindStoryboardOutputControls(el, node){
             shot.outputText = e.target.value;
             shot.textEdited = true;
             shot.prompt = e.target.value;
+            shot.video_promet = e.target.value;
             scheduleSave();
+        };
+    });
+    el.querySelectorAll('[data-storyboard-output-mode]').forEach(btn => {
+        btn.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            setStoryboardOutputMode(node.id, btn.dataset.storyboardOutputMode);
+        };
+    });
+    el.querySelectorAll('[data-storyboard-output-settings]').forEach(btn => {
+        btn.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            openStoryboardSettings(node.id, node.generationMode);
+        };
+    });
+    el.querySelectorAll('[data-storyboard-shot-mode]').forEach(btn => {
+        btn.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            setStoryboardShotMode(node.id, btn.dataset.shotIndex, btn.dataset.storyboardShotMode);
+        };
+    });
+    el.querySelectorAll('[data-storyboard-shot-run]').forEach(btn => {
+        btn.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            runStoryboardShotGeneration(node.id, Number(btn.dataset.storyboardShotRun));
+        };
+    });
+    el.querySelectorAll('[data-storyboard-batch-run]').forEach(btn => {
+        btn.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            runStoryboardBatchGeneration(node.id);
         };
     });
 }
@@ -4173,6 +4829,16 @@ function bindNodeEvents(){
             btn.addEventListener('click', e => {
                 e.preventDefault(); e.stopPropagation();
                 deleteNodeFromButton(id);
+            });
+        });
+        el.querySelectorAll('[data-instruction-template]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                selectedId = id;
+                selectedIds = [];
+                selectedImage = {nodeId:'', index:-1};
+                openInstructionTemplatePanel(id);
             });
         });
         el.querySelectorAll('.image-delete').forEach(btn => {
@@ -5656,8 +6322,9 @@ async function handleFiles(files, targetId='', opts={}){
         scheduleSave();
     } catch(e) { toast(e.message || tr('smart.toastUploadFail')); }
 }
-function sizeForRun(){
-    return apiImageSize(settings.ratio || 'square', settings.resolution || '1k', settings.customRatio || '', settings.customSize || '') || '1024x1024';
+function sizeForRun(runSettings=settings){
+    const s = runSettings || settings;
+    return apiImageSize(s.ratio || 'square', s.resolution || '1k', s.customRatio || '', s.customSize || '') || '1024x1024';
 }
 function expectedOutputSize(){
     if(settings.engine === 'comfy'){
@@ -7101,17 +7768,22 @@ function outputStoryboardShots(nodeId){
     const y = sourceRect.y;
     if(output){
         const existingShots = Array.isArray(output.shots) ? output.shots : [];
-        output.shots = shots.map((shot, index) => storyboardOutputShotData(storyboard, shot, index, existingShots[index]));
+        const mode = storyboardOutputMode(output);
+        output.generationMode = mode;
+        output.imageSettings = normalizeStoryboardOutputRunSettings(output.imageSettings || settings, 'image');
+        output.videoSettings = normalizeStoryboardOutputRunSettings(output.videoSettings || settings, 'video');
+        output.shots = shots.map((shot, index) => storyboardOutputShotData(storyboard, shot, index, existingShots[index], mode));
         output.title = tr('smart.storyboardOutputNodeTitle');
         output.sourceNodeIds = [storyboard.id];
         output.x = x;
         output.y = y;
-        output.w = Math.max(520, Number(output.w) || 560);
-        output.h = Math.max(480, Number(output.h) || 640);
+        output.w = Math.max(720, Number(output.w) || 760);
+        output.h = Math.max(560, Number(output.h) || 680);
     } else {
         output = createStoryboardOutputNode(storyboard, x, y);
         nodes.push(output);
     }
+    normalizeStoryboardOutputNode(output);
     connectInputNode(storyboard.id, output.id);
     removeNodesSilently(nodes.filter(node => node.type === 'smart-storyboard-shot' && node.sourceStoryboardId === storyboard.id).map(node => node.id));
     selectedIds = [];
@@ -7120,6 +7792,148 @@ function outputStoryboardShots(nodeId){
     render();
     scheduleSave();
     toast(trf('smart.storyboardOutputDone', {n:shots.length}));
+}
+function ensureApiImageSelection(target){
+    const providers = imageProviders();
+    if(!providers.some(p => p.id === target.provider_id)) target.provider_id = providers[0]?.id || '';
+    const models = providerImageModels(target.provider_id);
+    if(!models.includes(target.model)) target.model = models[0] || '';
+    return target;
+}
+function storyboardShotGenerationPrompt(shot, refs=[], mode='image'){
+    const prompt = (storyboardEditableShotText(shot) || storyboardShotPrompt(shot) || storyboardShotNodeText(shot)).trim();
+    const namedRefs = (refs || []).filter(ref => ref?.url && ref.name);
+    if(!prompt || !namedRefs.length) return prompt;
+    const roleText = mode === 'video' && shot?.generatedImage?.url
+        ? '首张参考图为分镜图首帧，其余参考图为匹配资产。请保持角色、场景和道具一致。'
+        : '参考图为当前分镜匹配到的角色、场景和道具资产。请保持资产外观一致。';
+    const refText = namedRefs.map((ref, index) => `图${index + 1}：${ref.name}`).join('\n');
+    return `${prompt}\n\n${roleText}\n${refText}`.trim();
+}
+async function runStoryboardShotGeneration(outputNodeId, shotIndex, options={}){
+    const silent = Boolean(options.silent);
+    const skipUndo = Boolean(options.skipUndo);
+    const node = nodes.find(n => n.id === outputNodeId && n.type === 'smart-storyboard-output');
+    const index = Number(shotIndex);
+    if(!node || !Number.isFinite(index) || !node.shots?.[index]) return;
+    const shot = node.shots[index];
+    if(shot.running) return;
+    const mode = shot.mode === 'video' ? 'video' : 'image';
+    let refs = storyboardOutputShotImages(shot);
+    if(mode === 'video' && shot.generatedImage?.url){
+        refs = uniqueReferenceImages([
+            {...stripImageGenerationMeta({...shot.generatedImage}), name:shot.generatedImage.name || `${shot.title || 'shot'} first frame`, kind:'image', role:'first_frame'},
+            ...refs
+        ]);
+    }
+    const prompt = storyboardShotGenerationPrompt(shot, refs, mode);
+    if(!prompt){
+        if(!silent) toast(tr('smart.toastNeedPrompt'));
+        if(!silent) return false;
+        throw new Error(tr('smart.toastNeedPrompt'));
+    }
+    const nextSettings = storyboardOutputRunSettings(node, mode);
+    if(mode === 'video'){
+        nextSettings.videoUseFrameRoles = Boolean(shot.generatedImage?.url);
+        normalizeVideoSelection(nextSettings);
+    } else {
+        nextSettings.count = 1;
+        ensureApiImageSelection(nextSettings);
+    }
+    const undoBeforeRun = skipUndo ? null : snapshotForUndo();
+    const runLog = smartRunSnapshot(node, prompt, refs, mode, nextSettings);
+    const runLogStart = nowMs();
+    shot.mode = mode;
+    shot.running = true;
+    shot.open = true;
+    shot.runStartedAt = nowMs();
+    delete shot.runFinishedAt;
+    delete shot.runElapsedMs;
+    node.running = true;
+    selectedId = node.id;
+    selectedIds = [];
+    selectedImage = {nodeId:'', index:-1};
+    render();
+    try {
+        if(mode === 'video'){
+            const outVideos = await runApiVideoGeneration(prompt, refs, nextSettings);
+            if(!outVideos.length) throw new Error(tr('smart.errNoOutVideos'));
+            if(undoBeforeRun) pushUndoSnapshot(undoBeforeRun);
+            shot.generatedVideo = stripImageGenerationMeta({url:outVideos[0], name:`shot-${index + 1}.mp4`, kind:'video', generatedResult:true});
+            addSmartGenerationLog({run:runLog, outputs:outVideos, runMs:nowMs() - runLogStart});
+        } else {
+            const outImages = await runApiGeneration(prompt, refs, nextSettings);
+            if(!outImages.length) throw new Error(tr('smart.errNoOutImages'));
+            if(undoBeforeRun) pushUndoSnapshot(undoBeforeRun);
+            shot.generatedImage = stripImageGenerationMeta({url:outImages[0], name:`shot-${index + 1}.png`, kind:'image', generatedResult:true});
+            addSmartGenerationLog({run:{...runLog, kind:'image'}, outputs:outImages, runMs:nowMs() - runLogStart});
+        }
+        shot.runFinishedAt = nowMs();
+        shot.runElapsedMs = Math.max(0, shot.runFinishedAt - Number(shot.runStartedAt || shot.runFinishedAt));
+        if(!silent) toast(tr('chat.generated'));
+        scheduleSave();
+        return true;
+    } catch(e) {
+        addSmartGenerationLog({run:runLog, outputs:[], runMs:nowMs() - runLogStart, error:e.message || String(e)});
+        if(!silent) toast((e.message || tr('smart.errRunFailed')).slice(0, 160));
+        if(!silent) return false;
+        throw e;
+    } finally {
+        shot.running = false;
+        node.running = (node.shots || []).some(item => item?.running);
+        render();
+        scheduleSave();
+    }
+}
+async function runStoryboardBatchGeneration(outputNodeId){
+    const node = nodes.find(n => n.id === outputNodeId && n.type === 'smart-storyboard-output');
+    if(!node || node.batchRunning) return;
+    const shots = Array.isArray(node.shots) ? node.shots : [];
+    if(!shots.length){ toast(tr('smart.storyboardOutputEmpty')); return; }
+    const mode = storyboardOutputMode(node);
+    const concurrency = clampStoryboardBatchConcurrency(node.batchConcurrency);
+    const indices = shots.map((_, index) => index);
+    let cursor = 0;
+    let success = 0;
+    const failures = [];
+    const undoBeforeBatch = snapshotForUndo();
+    node.batchConcurrency = concurrency;
+    node.batchRunning = true;
+    node.running = true;
+    shots.forEach(shot => {
+        if(shot){
+            shot.mode = mode;
+            shot.open = true;
+        }
+    });
+    render();
+    scheduleSave();
+    const worker = async () => {
+        while(cursor < indices.length){
+            const index = indices[cursor++];
+            try {
+                await runStoryboardShotGeneration(outputNodeId, index, {silent:true, skipUndo:true});
+                success += 1;
+            } catch(e) {
+                failures.push({index, error:e});
+            }
+        }
+    };
+    try {
+        const workers = Array.from({length:Math.min(concurrency, indices.length)}, worker);
+        await Promise.all(workers);
+        if(success || failures.length) pushUndoSnapshot(undoBeforeBatch);
+        if(failures.length){
+            toast(trf('smart.storyboardBatchDoneWithErrors', {success, failed:failures.length}));
+        } else {
+            toast(trf('smart.storyboardBatchDone', {n:success}));
+        }
+    } finally {
+        node.batchRunning = false;
+        node.running = (node.shots || []).some(item => item?.running);
+        render();
+        scheduleSave();
+    }
 }
 async function runAssetExtractorNode(nodeId){
     const node = nodes.find(n => n.id === nodeId);
@@ -7205,10 +8019,18 @@ function comfyFieldKind(field){
     if(field?.type === 'textarea' || /prompt|text|提示词|正向|负向/.test(key)) return 'prompt';
     return 'setting';
 }
-async function runApiGeneration(prompt, refs){
-    if(!settings.provider_id || !settings.model) throw new Error(tr('smart.errNoApiModel'));
-    const count = Math.max(1, Math.min(8, Number(settings.count || 1)));
-    const payload = {prompt, provider_id:settings.provider_id, model:settings.model, size:sizeForRun(), quality:settings.quality || 'auto', n:count, reference_images:imageRefsOnly(refs)};
+async function runApiGeneration(prompt, refs, runSettings=settings){
+    const s = runSettings || settings;
+    if(!s.provider_id || !s.model) throw new Error(tr('smart.errNoApiModel'));
+    const count = Math.max(1, Math.min(8, Number(s.count || 1)));
+    const referenceImages = imageRefsOnly(refs)
+        .map((ref, index) => ({
+            url:ref.url || '',
+            name:ref.name || `参考图${index + 1}`,
+            role:ref.role || ''
+        }))
+        .filter(ref => ref.url);
+    const payload = {prompt, provider_id:s.provider_id, model:s.model, size:sizeForRun(s), quality:s.quality || 'auto', n:count, reference_images:referenceImages};
     const task = await fetch('/api/canvas-image-tasks', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).then(async r => {
         if(!r.ok) throw new Error(await r.text());
         return r.json();
@@ -7216,31 +8038,35 @@ async function runApiGeneration(prompt, refs){
     const result = await pollTask(task.task_id);
     return (result?.images || []).filter(Boolean);
 }
-async function runApiVideoGeneration(prompt, refs){
-    if(!settings.videoModel) throw new Error(tr('smart.errNoVideoModel'));
-    const refImages = imageRefsOnly(refs).map((ref, i) => {
+async function runApiVideoGeneration(prompt, refs, runSettings=settings){
+    const s = runSettings || settings;
+    if(!s.videoModel) throw new Error(tr('smart.errNoVideoModel'));
+    const images = imageRefsOnly(refs);
+    const hasExplicitFrameRoles = images.some(ref => ['first_frame','last_frame'].includes(String(ref.role || '')));
+    const refImages = images.map((ref, i) => {
         const item = {url:ref.url, name:ref.name || `图${i + 1}`};
-        if(settings.videoUseFrameRoles){
-            if(i === 0) item.role = 'first_frame';
-            else if(i === 1) item.role = 'last_frame';
+        if(s.videoUseFrameRoles){
+            if(hasExplicitFrameRoles && ['first_frame','last_frame'].includes(String(ref.role || ''))) item.role = ref.role;
+            else if(!hasExplicitFrameRoles && i === 0) item.role = 'first_frame';
+            else if(!hasExplicitFrameRoles && i === 1) item.role = 'last_frame';
         }
         return item;
     });
     const refVideos = videoRefsOnly(refs).map(ref => ref.url);
     const payload = {
         prompt,
-        provider_id: settings.videoProvider || '',
-        model: settings.videoModel,
-        duration: Math.max(1, Math.min(60, Number(settings.videoDuration) || 5)),
-        aspect_ratio: settings.videoAspect || '16:9',
-        resolution: settings.videoResolution || '',
+        provider_id: s.videoProvider || '',
+        model: s.videoModel,
+        duration: Math.max(1, Math.min(60, Number(s.videoDuration) || 5)),
+        aspect_ratio: s.videoAspect || '16:9',
+        resolution: s.videoResolution || '',
         images: refImages,
         videos: refVideos,
-        enhance_prompt: Boolean(settings.videoEnhancePrompt),
-        enable_upsample: Boolean(settings.videoEnableUpsample),
-        watermark: Boolean(settings.videoWatermark),
-        camerafixed: Boolean(settings.videoCameraFixed),
-        generate_audio: Boolean(settings.videoGenerateAudio)
+        enhance_prompt: Boolean(s.videoEnhancePrompt),
+        enable_upsample: Boolean(s.videoEnableUpsample),
+        watermark: Boolean(s.videoWatermark),
+        camerafixed: Boolean(s.videoCameraFixed),
+        generate_audio: Boolean(s.videoGenerateAudio)
     };
     const result = await fetch('/api/canvas-video', {
         method:'POST',
@@ -7427,9 +8253,20 @@ async function pollTask(taskId){
         await new Promise(resolve => setTimeout(resolve, 2000));
         const task = await fetch(`/api/canvas-image-tasks/${encodeURIComponent(taskId)}`).then(r => r.json());
         if(task.status === 'succeeded') return task.result;
-        if(task.status === 'failed') throw new Error(task.error || tr('smart.errRunFailed'));
+        if(task.status === 'failed') throw new Error(formatCanvasTaskError(task.error || tr('smart.errRunFailed')));
     }
     throw new Error(tr('smart.errRunTimeout'));
+}
+function formatCanvasTaskError(error){
+    const text = String(error || '').trim();
+    const lower = text.toLowerCase();
+    if(lower.includes('no available image quota')){
+        return '上游图片额度不足：GPT-Image-2 带参考图会走 /images/edits 编辑接口，当前平台返回 no available image quota。请给该平台补图片/编辑额度，或在分镜设置里切换到还有额度的生图服务商/模型。';
+    }
+    if(lower.includes('/images/edits failed')){
+        return `参考图已传入后端，生图走编辑接口失败：${text}`;
+    }
+    return text || tr('smart.errRunFailed');
 }
 function updateSelectionBox(event){
     if(!selectionState) return;
@@ -7897,7 +8734,7 @@ window.onmouseup = e => {
     }
 };
 shell.addEventListener('wheel', e => {
-    if(e.target.closest('.composer,.smart-back,.image-edit-modal,.asset-panel,.asset-toggle,.smart-log-toggle,.log-modal')) return;
+    if(e.target.closest('.composer,.smart-back,.image-edit-modal,.asset-panel,.asset-toggle,.smart-log-toggle,.log-modal,.instruction-template-panel')) return;
     e.preventDefault();
     const rect = shell.getBoundingClientRect();
     const sx = e.clientX - rect.left;
@@ -8059,11 +8896,30 @@ promptPresetPanel?.addEventListener('pointerdown', e => e.stopPropagation());
 promptPresetPanel?.addEventListener('mousedown', e => e.stopPropagation());
 promptPresetPanel?.addEventListener('click', e => e.stopPropagation());
 if(promptPresetClose) promptPresetClose.onclick = closePromptPresetPanel;
+instructionTemplatePanel?.addEventListener('pointerdown', e => e.stopPropagation());
+instructionTemplatePanel?.addEventListener('mousedown', e => e.stopPropagation());
+instructionTemplatePanel?.addEventListener('click', e => e.stopPropagation());
+if(instructionTemplateClose) instructionTemplateClose.onclick = closeInstructionTemplatePanel;
+storyboardSettingsModal?.addEventListener('pointerdown', e => e.stopPropagation());
+storyboardSettingsModal?.addEventListener('mousedown', e => e.stopPropagation());
+storyboardSettingsModal?.addEventListener('click', e => {
+    e.stopPropagation();
+    if(e.target === storyboardSettingsModal) closeStoryboardSettings();
+});
+storyboardSettingsModal?.addEventListener('wheel', e => e.stopPropagation(), {passive:false});
+if(storyboardSettingsClose) storyboardSettingsClose.onclick = closeStoryboardSettings;
 if(promptPresetSelect) promptPresetSelect.onchange = () => renderPromptPresetPanel(promptPresetSelect.value);
+if(instructionTemplateSelect) instructionTemplateSelect.onchange = () => renderInstructionTemplatePanel(instructionTemplateSelect.value);
 [promptPresetName, promptPresetText].forEach(input => {
     input?.addEventListener('input', () => {
         resetPromptPresetDeleteState();
         setPromptPresetStatus(tr('smart.promptPresetEditing'));
+    });
+});
+[instructionTemplateName, instructionTemplateText].forEach(input => {
+    input?.addEventListener('input', () => {
+        resetInstructionTemplateDeleteState();
+        setInstructionTemplateStatus(tr('smart.instructionTemplateEditing'));
     });
 });
 if(promptPresetApply) promptPresetApply.onclick = () => {
@@ -8116,6 +8972,67 @@ if(promptPresetDelete) promptPresetDelete.onclick = () => {
     savePromptPresets();
     renderPromptPresetPanel(promptPresets[0]?.id || '', tr('smart.promptPresetDeleted'));
     setPromptPresetStatus(tr('smart.promptPresetDeleted'), 'ok');
+    render();
+    scheduleSave();
+};
+if(instructionTemplateApply) instructionTemplateApply.onclick = () => {
+    const preset = currentInstructionTemplate(instructionTemplateSelect.value);
+    const node = instructionTemplatePanelNode();
+    applyInstructionTemplateToNode(node, preset, instructionTemplateText.value);
+};
+if(instructionTemplateSave) instructionTemplateSave.onclick = async () => {
+    const preset = currentInstructionTemplate(instructionTemplateSelect.value);
+    if(!preset) return;
+    const name = String(instructionTemplateName.value || '').trim();
+    const text = String(instructionTemplateText.value || '').trim();
+    if(!name || !text){ setInstructionTemplateStatus(tr('smart.instructionTemplateRequired'), 'warn'); return; }
+    const idx = instructionTemplates.findIndex(item => item.id === preset.id);
+    const previous = instructionTemplates.slice();
+    if(idx >= 0) instructionTemplates[idx] = {...instructionTemplates[idx], name, text, updatedAt:Date.now()};
+    const saved = await saveInstructionTemplates();
+    if(!saved){
+        instructionTemplates = previous;
+        renderInstructionTemplatePanel(preset.id, tr('smart.instructionTemplateSaveFailed'), 'warn');
+        return;
+    }
+    const savedPreset = currentInstructionTemplate(preset.id) || preset;
+    const node = instructionTemplatePanelNode();
+    if(node?.instructionTemplateId === preset.id){
+        node.instruction = savedPreset.text || text;
+        node.instructionMode = 'template';
+        node.instructionOpen = true;
+    }
+    renderInstructionTemplatePanel(savedPreset.id || preset.id, tr('smart.instructionTemplateSaved'), 'ok');
+    render();
+    scheduleSave();
+};
+if(instructionTemplateNew) instructionTemplateNew.onclick = async () => {
+    const node = instructionTemplatePanelNode();
+    const scope = instructionTemplatePanel?.dataset.scope || instructionTemplateScopeForNode(node);
+    const text = String(instructionTemplateText?.value || instructionTemplateTextForNode(node) || '').trim();
+    const name = String(instructionTemplateName?.value || '').trim();
+    await createInstructionTemplateFromNode(node, {scope, name, text});
+};
+if(instructionTemplateDelete) instructionTemplateDelete.onclick = async () => {
+    const preset = currentInstructionTemplate(instructionTemplateSelect.value);
+    if(!preset) return;
+    if(!instructionTemplateDeleteArmed){
+        instructionTemplateDeleteArmed = true;
+        instructionTemplateDelete.textContent = tr('smart.promptPresetDeleteAgain');
+        instructionTemplateDelete.classList.add('confirm-danger');
+        setInstructionTemplateStatus(tr('smart.instructionTemplateDeleteConfirm').replace('{name}', preset.name || tr('smart.instructionTemplateUnnamed')), 'warn');
+        return;
+    }
+    const previous = instructionTemplates.slice();
+    instructionTemplates = instructionTemplates.filter(item => item.id !== preset.id);
+    const saved = await saveInstructionTemplates();
+    if(!saved){
+        instructionTemplates = previous;
+        renderInstructionTemplatePanel(preset.id, tr('smart.instructionTemplateSaveFailed'), 'warn');
+        return;
+    }
+    nodes.forEach(node => { if(node.instructionTemplateId === preset.id) node.instructionTemplateId = ''; });
+    renderInstructionTemplatePanel('', tr('smart.instructionTemplateDeleted'), 'ok');
     render();
     scheduleSave();
 };
@@ -8249,9 +9166,10 @@ document.addEventListener('click', event => {
     if(!event.target.closest('.smart-control')) closeAllSmartPopovers();
     if(!event.target.closest('.mention-picker') && !event.target.closest('#promptInput')) closeMentionPicker();
     if(!event.target.closest('.prompt-preset-panel') && !event.target.closest('.prompt-preset-edit') && !event.target.closest('.prompt-preset-save')) closePromptPresetPanel();
+    if(!event.target.closest('.instruction-template-panel') && !event.target.closest('.node-template-library')) closeInstructionTemplatePanel();
 });
 document.addEventListener('keydown', event => {
-    if(event.key === 'Escape') { closeAllSmartPopovers(); closeCreateMenu(); closeSmartCanvasLog(); closePromptPresetPanel(); }
+    if(event.key === 'Escape') { closeAllSmartPopovers(); closeCreateMenu(); closeSmartCanvasLog(); closePromptPresetPanel(); closeInstructionTemplatePanel(); closeStoryboardSettings(); }
 });
 document.getElementById('cropBox').addEventListener('mousedown', event => beginCropDrag(event, 'move'));
 document.getElementById('cropHandle').addEventListener('mousedown', event => beginCropDrag(event, 'resize'));
@@ -8417,6 +9335,8 @@ window.addEventListener('studio-lang-change', () => {
     renderDynamicParams();
     renderInputThumbsRow(selectedNode());
     renderAssetLibrary();
+    if(instructionTemplatePanel?.classList.contains('open')) renderInstructionTemplatePanel(instructionTemplateSelect?.value || '');
+    if(storyboardSettingsModal?.classList.contains('open')) renderStoryboardSettingsPanel();
     if(document.getElementById('imageEditModal')?.classList.contains('open')){
         setImageEditMode(imageEditMode);
     }
@@ -8427,6 +9347,7 @@ window.onload = async () => {
     loadPromptPresets();
     if(window.StudioI18n) window.StudioI18n.apply();
     if(window.lucide) lucide.createIcons();
+    await loadInstructionTemplates();
     await loadAssetExtractionPromptTemplates();
     await loadStoryboardPromptTemplate();
     await loadConfig();

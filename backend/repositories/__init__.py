@@ -36,6 +36,10 @@ from .conversation_repo import (
     save_conversation,
     user_dir,
 )
+from .instruction_template_repo import (
+    load_instruction_templates,
+    save_instruction_templates,
+)
 
 __all__ = [
     "canvas_path",
@@ -55,6 +59,7 @@ __all__ = [
     "load_canvas",
     "load_canvas_any",
     "load_conversation",
+    "load_instruction_templates",
     "new_canvas",
     "new_conversation",
     "normalize_canvas_kind",
@@ -66,6 +71,7 @@ __all__ = [
     "save_canvas_asset_extraction",
     "save_canvas_assets",
     "save_conversation",
+    "save_instruction_templates",
     "sort_asset_library_items",
     "user_dir",
 ]

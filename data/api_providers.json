@@ -198,5 +198,49 @@
     "ms_defaults_version": 0,
     "rh_apps": [],
     "rh_workflows": []
+  },
+  {
+    "id": "custom-api-2",
+    "name": "FREEAPI",
+    "base_url": "https://aiapi1.cc.cd",
+    "protocol": "openai",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [
+      "gpt-image-2"
+    ],
+    "chat_models": [
+      "claude-opus-4-6",
+      "gpt-5.5"
+    ],
+    "video_models": [],
+    "ms_loras": [],
+    "ms_defaults_version": 0,
+    "rh_apps": [],
+    "rh_workflows": []
+  },
+  {
+    "id": "custom-api-6",
+    "name": "aliyun",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "protocol": "openai",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [
+      "z-image-turbo"
+    ],
+    "chat_models": [
+      "qwen3.6-plus",
+      "qwen3.7-plus"
+    ],
+    "video_models": [],
+    "ms_loras": [],
+    "ms_defaults_version": 0,
+    "rh_apps": [],
+    "rh_workflows": []
   }
 ]

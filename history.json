@@ -1,5 +1,41 @@
 [
     {
+        "prompt": "shot-1\n全景 / 关系镜头 / 推 / 平拍 / 广角焦距\n幽暗的现代简约书房，室内唯一的光源是电脑屏幕散发的幽蓝色微光，桌面略显杂乱。江凡背对镜头坐在电脑前，身体微微前倾。\n江凡背对镜头坐在夜晚的都市简约书房中，屏幕发出幽蓝微光，全景，平视缓慢推镜头，广角，安静专注的现代悬疑短剧质感\n\n参考图为当前分镜匹配到的角色、场景和道具资产。请保持资产外观一致。\n图1：shot-1",
+        "images": [
+            "/assets/output/online_700e3bfd03.png"
+        ],
+        "timestamp": 1780411823.9244554,
+        "type": "online",
+        "model": "gpt-image-2-all",
+        "provider_id": "custom-api-4",
+        "provider_name": "yunwu2",
+        "task_id": null,
+        "request_id": null,
+        "params": {
+            "provider_id": "custom-api-4",
+            "model": "gpt-image-2-all",
+            "size": "1536x864",
+            "quality": "auto",
+            "n": 1,
+            "reference_images": [
+                {
+                    "url": "/assets/output/online_367c773a78.png",
+                    "name": "shot-1",
+                    "role": "image_1"
+                }
+            ]
+        },
+        "raw_usage": {
+            "total_tokens": 7591,
+            "input_tokens": 1341,
+            "output_tokens": 6250,
+            "input_tokens_details": {
+                "text_tokens": 236,
+                "image_tokens": 1105
+            }
+        }
+    },
+    {
         "prompt": "高度工业化的次世代3D游戏CG与国风虚拟偶像渲染风格，电影级游戏 CG 质感，高精度超写实角色，Unreal Engine 5引擎渲染 ，\n极致的PBR物理渲染，超真实的材质。真实的皮肤材质，皮肤采用次表面散射（SSS）技术，赋予角色通透细腻红润白皙的真实质感。\n毛发采用分层渲染每一根发丝都清晰可见且具有自然的动态光泽。全局光照，体积光，柔和冷调自然光，8K 超高清，单角色角色设定图，白色纯背景，左侧为面部特写，右侧为全身三视图（正面、侧面、背面），人物完整入画，无遮挡，站姿自然\n\n一名二十三岁左右的年轻男子，留着一头黑色凌乱短发，拥有一双深褐色的眼睛，神色中常带着惊恐与疲惫。他上身穿着一件普通的灰色运动卫衣，下身穿着一条蓝色休闲牛仔裤，整体是个典型的年轻宅男作家的打扮。",
         "images": [
             "/assets/output/online_03bd9f1599.png"
