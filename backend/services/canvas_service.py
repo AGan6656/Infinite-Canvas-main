@@ -8,8 +8,9 @@ import urllib.parse
 import uuid
 import zipfile
 from io import BytesIO
+from typing import List
 
-from fastapi import Header, HTTPException, Request
+from fastapi import File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.responses import Response
 
 from ..core import ASSET_LIBRARY_DIR, OUTPUT_DIR, app, manager
@@ -330,6 +331,58 @@ async def add_asset_library_item(payload: AssetLibraryAddRequest):
     cat.setdefault("items", []).append(item)
     save_asset_library(lib)
     return {"library": lib, "item": item}
+
+
+@app.post("/api/asset-library/upload")
+async def upload_asset_library_images(category_id: str = Form(...), files: List[UploadFile] = File(...)):
+    lib = load_asset_library()
+    cat = find_asset_category(lib, category_id)
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found")
+    if cat.get("type") != "image":
+        raise HTTPException(status_code=400, detail="This category does not support image uploads")
+
+    image_exts = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"}
+    image_type_exts = {
+        "image/png": ".png",
+        "image/jpeg": ".jpg",
+        "image/webp": ".webp",
+        "image/gif": ".gif",
+        "image/bmp": ".bmp",
+    }
+    uploaded = []
+    os.makedirs(ASSET_LIBRARY_DIR, exist_ok=True)
+    for file in files or []:
+        content = await file.read()
+        if not content:
+            continue
+        ext = os.path.splitext(file.filename or "")[1].lower()
+        content_type = (file.content_type or "").lower()
+        if ext not in image_exts:
+            ext = image_type_exts.get(content_type, "")
+            if ext not in image_exts:
+                continue
+        safe_name = sanitize_asset_name(file.filename or f"asset{ext}", "asset")
+        if os.path.splitext(safe_name)[1].lower() not in image_exts:
+            safe_name = f"{os.path.splitext(safe_name)[0] or 'asset'}{ext}"
+        dest_name = f"lib_{uuid.uuid4().hex[:12]}_{safe_name}"
+        dest_path = os.path.join(ASSET_LIBRARY_DIR, dest_name)
+        with open(dest_path, "wb") as f:
+            f.write(content)
+        item = {
+            "id": f"asset_{uuid.uuid4().hex[:12]}",
+            "name": os.path.splitext(safe_name)[0][:120],
+            "url": f"/assets/library/{dest_name}",
+            "kind": "image",
+            "created_at": now_ms(),
+        }
+        cat.setdefault("items", []).append(item)
+        uploaded.append(item)
+
+    if not uploaded:
+        raise HTTPException(status_code=400, detail="No supported image files uploaded")
+    save_asset_library(lib)
+    return {"library": lib, "items": uploaded}
 
 
 @app.patch("/api/asset-library/items/{item_id}")

@@ -4,13 +4,28 @@
       "id": "characters",
       "name": "角色",
       "type": "image",
-      "items": []
+      "items": [
+        {
+          "id": "asset_b3816e9c6db6",
+          "name": "6a1ce84fdc8348ec0f89c8bb",
+          "url": "/assets/library/lib_a316cecfa310_6a1ce84fdc8348ec0f89c8bb.webp",
+          "kind": "image",
+          "created_at": 1780658353601
+        }
+      ]
     },
     {
       "id": "scenes",
       "name": "场景",
       "type": "image",
       "items": [
+        {
+          "id": "asset_c500eb7e60a3",
+          "name": "Image 2",
+          "url": "/assets/library/lib_d3c94f836e5f_Image 2.png",
+          "kind": "image",
+          "created_at": 1780658361650
+        },
         {
           "id": "asset_649bedf85e04",
           "name": "Image 1",
@@ -27,5 +42,5 @@
       "items": []
     }
   ],
-  "updated_at": 1780656013521
+  "updated_at": 1780658361651
 }

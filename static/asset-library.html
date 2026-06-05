@@ -22,32 +22,41 @@
     <style>
         @import url('/static/vendor/css/fonts.css?v=2026.05.29.1');
         :root {
-            --bg:#f7f8fb;
-            --panel:rgba(255,255,255,.86);
-            --card:#fff;
-            --line:#e8edf3;
+            --bg:#f5f7fb;
+            --panel:#ffffff;
+            --panel-soft:#f8fafc;
+            --line:#dfe6ef;
+            --line-strong:#c7d2e1;
             --text:#111827;
-            --muted:#64748b;
-            --faint:#94a3b8;
-            --strong:#111827;
-            --strong-text:#fff;
-            --soft:#f1f5f9;
+            --muted:#667085;
+            --faint:#98a2b3;
+            --accent:#111827;
+            --accent-text:#ffffff;
+            --blue:#2563eb;
+            --green:#059669;
+            --amber:#b45309;
+            --danger:#dc2626;
             --shadow:rgba(15,23,42,.08);
         }
         html.theme-dark, body.theme-dark {
             --bg:#0f141d;
-            --panel:rgba(17,24,39,.88);
-            --card:#151d2a;
-            --line:#273244;
+            --panel:#151d2a;
+            --panel-soft:#111827;
+            --line:#2a3546;
+            --line-strong:#3b475a;
             --text:#e5e7eb;
             --muted:#a7b1c2;
             --faint:#7b8798;
-            --strong:#f8fafc;
-            --strong-text:#0f172a;
-            --soft:#111827;
-            --shadow:rgba(0,0,0,.3);
+            --accent:#f8fafc;
+            --accent-text:#0f172a;
+            --blue:#60a5fa;
+            --green:#34d399;
+            --amber:#f59e0b;
+            --danger:#f87171;
+            --shadow:rgba(0,0,0,.28);
         }
         * { box-sizing:border-box; }
+        html, body { height:100%; }
         body {
             margin:0;
             min-height:100vh;
@@ -56,64 +65,137 @@
             font-family:'Inter','Space Grotesk',system-ui,sans-serif;
             overflow:hidden;
         }
-        button,input,select { font:inherit; }
+        button,input,select,textarea { font:inherit; }
         button { border:0; cursor:pointer; }
-        .asset-page { height:100vh; display:grid; grid-template-rows:auto minmax(0,1fr); gap:14px; padding:22px; }
+        .asset-page {
+            height:100vh;
+            display:grid;
+            grid-template-rows:auto minmax(0,1fr);
+            gap:12px;
+            padding:18px;
+        }
         .asset-top {
             min-height:58px;
             display:flex;
             align-items:center;
             justify-content:space-between;
             gap:16px;
-            padding:14px 16px;
+            padding:12px 14px;
             border:1px solid var(--line);
-            border-radius:18px;
+            border-radius:8px;
             background:var(--panel);
-            box-shadow:0 16px 42px var(--shadow);
-            backdrop-filter:blur(18px);
+            box-shadow:0 12px 34px var(--shadow);
         }
         .title-wrap { min-width:0; display:flex; flex-direction:column; gap:4px; }
         .title { display:flex; align-items:center; gap:9px; font-size:18px; line-height:1.1; font-weight:900; }
-        .title i,.title svg { width:19px; height:19px; }
+        .title svg { width:19px; height:19px; }
         .subtitle { color:var(--muted); font-size:12px; font-weight:650; }
         .top-actions { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
         .icon-btn,.text-btn {
             height:34px;
-            border-radius:11px;
+            border-radius:8px;
             display:inline-flex;
             align-items:center;
             justify-content:center;
             gap:7px;
             border:1px solid var(--line);
-            background:var(--card);
+            background:var(--panel);
             color:var(--muted);
             font-size:12px;
-            font-weight:800;
+            font-weight:850;
+            white-space:nowrap;
         }
         .icon-btn { width:34px; padding:0; }
         .text-btn { padding:0 12px; }
-        .icon-btn:hover,.text-btn:hover { color:var(--text); border-color:var(--text); }
-        .text-btn.primary { background:var(--strong); color:var(--strong-text); border-color:var(--strong); }
-        .icon-btn i,.icon-btn svg,.text-btn i,.text-btn svg { width:15px; height:15px; }
-        .library-shell { min-height:0; display:grid; grid-template-columns:260px minmax(0,1fr); gap:14px; }
-        .panel {
+        .icon-btn:hover,.text-btn:hover { color:var(--text); border-color:var(--line-strong); background:var(--panel-soft); }
+        .text-btn.primary { background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
+        .text-btn.danger,.icon-btn.danger { color:var(--danger); }
+        .icon-btn svg,.text-btn svg { width:15px; height:15px; }
+        .library-workspace {
+            min-height:0;
+            display:grid;
+            grid-template-columns:minmax(150px,190px) minmax(190px,260px) minmax(320px,1fr) minmax(300px,370px);
+            gap:12px;
+        }
+        .pane {
             min-height:0;
             border:1px solid var(--line);
-            border-radius:18px;
+            border-radius:8px;
             background:var(--panel);
-            box-shadow:0 16px 42px var(--shadow);
-            backdrop-filter:blur(18px);
+            box-shadow:0 12px 34px var(--shadow);
             overflow:hidden;
+            display:flex;
+            flex-direction:column;
         }
-        .sidebar-panel { display:flex; flex-direction:column; }
-        .panel-head { height:52px; padding:0 13px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--line); }
-        .panel-title { font-size:12px; font-weight:900; color:var(--text); }
-        .category-list { min-height:0; overflow:auto; padding:10px; display:flex; flex-direction:column; gap:7px; }
-        .category-btn {
+        .pane-head {
+            min-height:48px;
+            padding:0 12px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:8px;
+            border-bottom:1px solid var(--line);
+            flex:0 0 auto;
+        }
+        .pane-title {
+            min-width:0;
+            display:flex;
+            align-items:center;
+            gap:7px;
+            font-size:12px;
+            font-weight:900;
+            color:var(--text);
+        }
+        .pane-title svg { width:15px; height:15px; }
+        .status { min-height:18px; color:var(--muted); font-size:12px; font-weight:750; }
+        .rail-list,.group-list,.content-list {
+            min-height:0;
+            overflow:auto;
+            padding:10px;
+        }
+        .rail-list { display:flex; flex-direction:column; gap:8px; }
+        .library-btn {
             width:100%;
-            min-height:42px;
+            min-height:82px;
+            padding:11px;
+            border-radius:8px;
+            border:1px solid transparent;
+            background:transparent;
+            color:var(--muted);
+            text-align:left;
+            display:grid;
+            grid-template-columns:28px minmax(0,1fr);
+            gap:9px;
+            align-items:start;
+        }
+        .library-btn.active {
+            background:var(--accent);
+            color:var(--accent-text);
+            border-color:var(--accent);
+        }
+        .library-btn:not(.active):hover { background:var(--panel-soft); border-color:var(--line); color:var(--text); }
+        .library-icon {
+            width:28px;
+            height:28px;
+            border-radius:8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:var(--panel-soft);
+            color:var(--text);
+        }
+        .library-btn.active .library-icon { background:rgba(255,255,255,.16); color:inherit; }
+        .library-icon svg { width:16px; height:16px; }
+        .library-copy { min-width:0; display:flex; flex-direction:column; gap:5px; }
+        .library-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:900; }
+        .library-desc { color:inherit; opacity:.72; font-size:11px; line-height:1.35; font-weight:650; }
+        .library-count { color:inherit; opacity:.84; font-size:10px; font-weight:900; letter-spacing:.02em; }
+        .group-list { display:flex; flex-direction:column; gap:7px; }
+        .group-btn {
+            width:100%;
+            min-height:46px;
             padding:8px 9px;
-            border-radius:12px;
+            border-radius:8px;
             border:1px solid transparent;
             display:grid;
             grid-template-columns:24px minmax(0,1fr) auto;
@@ -123,27 +205,85 @@
             color:var(--muted);
             text-align:left;
         }
-        .category-btn.active { background:var(--strong); color:var(--strong-text); border-color:var(--strong); }
-        .category-btn:not(.active):hover { background:var(--card); border-color:var(--line); color:var(--text); }
-        .category-btn i,.category-btn svg { width:16px; height:16px; }
-        .cat-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; font-weight:850; }
-        .cat-count { height:22px; min-width:24px; padding:0 7px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; background:var(--soft); color:var(--muted); font-size:10px; font-weight:900; }
-        .category-btn.active .cat-count { background:rgba(255,255,255,.16); color:inherit; }
-        .content-panel { display:flex; flex-direction:column; }
-        .content-head { min-height:52px; padding:0 13px; display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); }
-        .folder-meta { min-width:0; display:flex; align-items:center; gap:9px; }
-        .folder-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; font-weight:900; }
-        .folder-type { height:22px; padding:0 8px; border-radius:999px; background:var(--soft); color:var(--muted); display:inline-flex; align-items:center; font-size:10px; font-weight:900; }
-        .asset-grid { min-height:0; overflow:auto; padding:14px; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; align-content:start; }
-        .asset-card { min-width:0; border:1px solid var(--line); border-radius:14px; background:var(--card); overflow:hidden; }
-        .thumb { position:relative; width:100%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:var(--soft); overflow:hidden; }
+        .group-btn.active { background:var(--panel-soft); color:var(--text); border-color:var(--line-strong); }
+        .group-btn:not(.active):hover { background:var(--panel-soft); border-color:var(--line); color:var(--text); }
+        .group-btn svg { width:16px; height:16px; }
+        .group-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; font-weight:850; }
+        .group-meta { display:flex; flex-direction:column; gap:2px; min-width:0; }
+        .group-type { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; color:var(--faint); font-weight:750; }
+        .count-pill {
+            height:22px;
+            min-width:24px;
+            padding:0 7px;
+            border-radius:999px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            background:var(--panel);
+            border:1px solid var(--line);
+            color:var(--muted);
+            font-size:10px;
+            font-weight:900;
+        }
+        .content-toolbar {
+            min-height:48px;
+            padding:0 12px;
+            border-bottom:1px solid var(--line);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            flex:0 0 auto;
+        }
+        .active-path { min-width:0; display:flex; flex-direction:column; gap:2px; }
+        .active-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:900; color:var(--text); }
+        .active-subtitle { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:11px; font-weight:700; }
+        .content-list.images {
+            display:grid;
+            grid-template-columns:repeat(auto-fill, minmax(142px, 1fr));
+            gap:10px;
+            align-content:start;
+        }
+        .asset-card {
+            min-width:0;
+            border:1px solid var(--line);
+            border-radius:8px;
+            background:var(--panel);
+            overflow:hidden;
+            text-align:left;
+            color:var(--text);
+            padding:0;
+        }
+        .asset-card.active { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset; }
+        .asset-card:hover { border-color:var(--line-strong); background:var(--panel-soft); }
+        .thumb {
+            position:relative;
+            width:100%;
+            aspect-ratio:1/1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:var(--panel-soft);
+            overflow:hidden;
+        }
         .thumb img,.thumb video { width:100%; height:100%; object-fit:cover; display:block; background:#0f172a; }
-        .audio-thumb,.empty-thumb { color:var(--muted); flex-direction:column; gap:8px; font-size:12px; font-weight:850; }
-        .audio-thumb i,.audio-thumb svg,.empty-thumb i,.empty-thumb svg { width:26px; height:26px; }
+        .audio-thumb,.empty-thumb {
+            width:100%;
+            height:100%;
+            color:var(--muted);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            font-size:12px;
+            font-weight:850;
+        }
+        .audio-thumb svg,.empty-thumb svg { width:28px; height:28px; }
         .kind-badge {
             position:absolute;
-            left:8px;
-            bottom:8px;
+            left:7px;
+            bottom:7px;
             height:22px;
             padding:0 8px;
             border-radius:999px;
@@ -156,33 +296,176 @@
             font-weight:900;
             letter-spacing:.04em;
         }
-        .asset-info { padding:9px; display:flex; flex-direction:column; gap:8px; }
+        .kind-badge svg { width:12px; height:12px; }
+        .asset-info { padding:8px; display:flex; flex-direction:column; gap:5px; }
         .asset-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); font-size:12px; font-weight:850; }
-        .asset-actions { display:flex; gap:6px; }
-        .asset-actions .icon-btn { flex:1; width:auto; height:30px; border-radius:10px; }
-        .empty-state { grid-column:1/-1; min-height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; border:1px dashed var(--line); border-radius:18px; color:var(--faint); background:rgba(255,255,255,.28); text-align:center; padding:20px; }
-        .empty-state i,.empty-state svg { width:30px; height:30px; }
-        .status { min-height:18px; color:var(--muted); font-size:12px; font-weight:700; }
-        .modal { position:fixed; inset:0; z-index:40; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(15,23,42,.26); backdrop-filter:blur(14px); }
+        .asset-meta { color:var(--muted); font-size:10px; font-weight:800; text-transform:uppercase; }
+        .prompt-list { display:flex; flex-direction:column; gap:8px; }
+        .prompt-row {
+            width:100%;
+            min-height:70px;
+            padding:10px;
+            border-radius:8px;
+            border:1px solid var(--line);
+            background:var(--panel);
+            color:var(--text);
+            display:grid;
+            grid-template-columns:minmax(0,1fr) auto;
+            gap:10px;
+            text-align:left;
+        }
+        .prompt-row.active { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset; }
+        .prompt-row:hover { border-color:var(--line-strong); background:var(--panel-soft); }
+        .prompt-main { min-width:0; display:flex; flex-direction:column; gap:5px; }
+        .prompt-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:900; }
+        .prompt-snippet {
+            min-width:0;
+            overflow:hidden;
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            color:var(--muted);
+            font-size:11px;
+            line-height:1.45;
+            font-weight:650;
+        }
+        .prompt-date { color:var(--faint); font-size:10px; font-weight:800; white-space:nowrap; }
+        .preview-content {
+            min-height:0;
+            overflow:auto;
+            padding:12px;
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+        }
+        .preview-empty,.empty-state {
+            min-height:220px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            border:1px dashed var(--line-strong);
+            border-radius:8px;
+            color:var(--faint);
+            background:var(--panel-soft);
+            text-align:center;
+            padding:18px;
+            font-size:12px;
+            font-weight:750;
+        }
+        .empty-state { grid-column:1/-1; min-height:260px; }
+        .preview-empty svg,.empty-state svg { width:30px; height:30px; }
+        .preview-media {
+            width:100%;
+            min-height:220px;
+            max-height:48vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border:1px solid var(--line);
+            border-radius:8px;
+            background:var(--panel-soft);
+            overflow:hidden;
+        }
+        .preview-media img,.preview-media video { max-width:100%; max-height:48vh; object-fit:contain; display:block; }
+        .preview-media audio { width:92%; }
+        .preview-name { font-size:15px; font-weight:950; line-height:1.35; word-break:break-word; }
+        .preview-actions { display:flex; flex-wrap:wrap; gap:8px; }
+        .meta-list {
+            margin:0;
+            border:1px solid var(--line);
+            border-radius:8px;
+            overflow:hidden;
+        }
+        .meta-row {
+            min-height:34px;
+            display:grid;
+            grid-template-columns:82px minmax(0,1fr);
+            border-top:1px solid var(--line);
+        }
+        .meta-row:first-child { border-top:0; }
+        .meta-key,.meta-value {
+            padding:8px 10px;
+            font-size:11px;
+            line-height:1.45;
+            font-weight:750;
+        }
+        .meta-key { color:var(--muted); background:var(--panel-soft); }
+        .meta-value { color:var(--text); word-break:break-word; }
+        .template-preview {
+            border:1px solid var(--line);
+            border-radius:8px;
+            background:var(--panel-soft);
+            padding:12px;
+            color:var(--text);
+            font-size:12px;
+            line-height:1.65;
+            white-space:pre-wrap;
+            word-break:break-word;
+            margin:0;
+            max-height:52vh;
+            overflow:auto;
+        }
+        .modal {
+            position:fixed;
+            inset:0;
+            z-index:40;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding:22px;
+            background:rgba(15,23,42,.36);
+            backdrop-filter:blur(12px);
+        }
         .modal.open { display:flex; }
-        .dialog { width:min(380px, calc(100vw - 48px)); border-radius:18px; border:1px solid var(--line); background:var(--panel); box-shadow:0 30px 80px rgba(15,23,42,.24); padding:14px; }
-        .dialog-title { font-size:14px; font-weight:900; margin-bottom:10px; }
-        .dialog input { width:100%; height:38px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--text); outline:none; padding:0 11px; font-size:13px; font-weight:700; }
+        .dialog {
+            width:min(420px, calc(100vw - 44px));
+            border-radius:8px;
+            border:1px solid var(--line);
+            background:var(--panel);
+            box-shadow:0 30px 80px rgba(15,23,42,.24);
+            padding:14px;
+        }
+        .template-dialog { width:min(720px, calc(100vw - 44px)); }
+        .dialog-title { font-size:14px; font-weight:950; margin-bottom:12px; }
+        .field-stack { display:flex; flex-direction:column; gap:10px; }
+        .field-label { display:flex; flex-direction:column; gap:6px; color:var(--muted); font-size:11px; font-weight:850; }
+        .dialog input,.dialog select,.dialog textarea {
+            width:100%;
+            border-radius:8px;
+            border:1px solid var(--line);
+            background:var(--panel-soft);
+            color:var(--text);
+            outline:none;
+            padding:0 10px;
+            font-size:13px;
+            font-weight:700;
+        }
+        .dialog input,.dialog select { height:38px; }
+        .dialog textarea {
+            min-height:260px;
+            padding:10px;
+            resize:vertical;
+            line-height:1.6;
+            font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+        }
+        .dialog input:focus,.dialog select:focus,.dialog textarea:focus { border-color:var(--accent); }
         .dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
-        .preview-modal { position:fixed; inset:0; z-index:38; display:none; align-items:center; justify-content:center; padding:22px; background:rgba(15,23,42,.38); backdrop-filter:blur(16px); }
-        .preview-modal.open { display:flex; }
-        .preview-shell { width:min(980px, 94vw); max-height:92vh; border-radius:20px; background:var(--panel); border:1px solid var(--line); box-shadow:0 30px 90px rgba(15,23,42,.28); overflow:hidden; display:flex; flex-direction:column; }
-        .preview-head { height:48px; padding:0 12px 0 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px; }
-        .preview-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:900; }
-        .preview-body { min-height:260px; max-height:calc(92vh - 48px); display:flex; align-items:center; justify-content:center; background:var(--soft); }
-        .preview-body img,.preview-body video { max-width:100%; max-height:calc(92vh - 48px); object-fit:contain; display:block; }
-        .preview-body audio { width:min(680px, 86vw); }
-        @media (max-width:760px) {
+        .dialog-status { min-height:18px; margin-top:8px; color:var(--danger); font-size:12px; font-weight:800; }
+        @media (max-width:1180px) {
             body { overflow:auto; }
-            .asset-page { height:auto; min-height:100vh; padding:14px; }
+            .asset-page { height:auto; min-height:100vh; }
+            .library-workspace { grid-template-columns:minmax(150px,190px) minmax(190px,260px) minmax(320px,1fr); }
+            .preview-pane { grid-column:1 / -1; min-height:420px; }
+        }
+        @media (max-width:820px) {
+            .asset-page { padding:12px; }
             .asset-top { align-items:flex-start; flex-direction:column; }
-            .library-shell { grid-template-columns:1fr; }
-            .sidebar-panel { min-height:220px; }
+            .top-actions { width:100%; flex-wrap:wrap; }
+            .library-workspace { grid-template-columns:1fr; }
+            .pane { min-height:220px; }
+            .content-list.images { grid-template-columns:repeat(auto-fill, minmax(132px, 1fr)); }
         }
     </style>
 </head>
@@ -190,34 +473,50 @@
     <div class="asset-page">
         <header class="asset-top">
             <div class="title-wrap">
-                <div class="title"><i data-lucide="library"></i><span data-i18n="assetLibrary.title">素材库</span></div>
-                <div id="assetSubtitle" class="subtitle" data-i18n="assetLibrary.subtitle">集中查看智能画布保存的素材。</div>
+                <div class="title"><i data-lucide="library"></i><span id="pageTitle">素材库</span></div>
+                <div id="pageSubtitle" class="subtitle">按库、分组、内容、预览管理图片资产与提示词模板。</div>
             </div>
             <div class="top-actions">
-                <button id="refreshBtn" class="icon-btn" type="button" title="刷新" data-i18n-title="canvas.refresh"><i data-lucide="refresh-cw"></i></button>
-                <button id="newFolderBtn" class="text-btn primary" type="button"><i data-lucide="folder-plus"></i><span data-i18n="smart.assetNewFolder">新建文件夹</span></button>
+                <button id="refreshBtn" class="icon-btn" type="button" title="刷新"><i data-lucide="refresh-cw"></i></button>
+                <button id="newGroupBtn" class="text-btn primary" type="button"><i data-lucide="folder-plus"></i><span id="newGroupText">新建分组</span></button>
+                <button id="uploadImageBtn" class="text-btn primary" type="button"><i data-lucide="upload"></i><span id="uploadImageText">上传图片</span></button>
+                <button id="newTemplateBtn" class="text-btn primary" type="button"><i data-lucide="file-plus-2"></i><span id="newTemplateText">新建提示词</span></button>
+                <input id="imageUploadInput" type="file" accept="image/*" multiple hidden>
             </div>
         </header>
-        <main class="library-shell">
-            <aside class="panel sidebar-panel">
-                <div class="panel-head">
-                    <div class="panel-title">文件夹</div>
+        <main class="library-workspace">
+            <aside class="pane">
+                <div class="pane-head">
+                    <div class="pane-title"><i data-lucide="boxes"></i><span id="libraryPaneTitle">库</span></div>
+                </div>
+                <div id="libraryRail" class="rail-list"></div>
+            </aside>
+
+            <aside class="pane">
+                <div class="pane-head">
+                    <div class="pane-title"><i data-lucide="folder-tree"></i><span id="groupPaneTitle">分组</span></div>
+                    <button id="renameGroupBtn" class="icon-btn" type="button" title="重命名分组"><i data-lucide="pencil"></i></button>
+                </div>
+                <div id="groupList" class="group-list"></div>
+            </aside>
+
+            <section class="pane">
+                <div class="content-toolbar">
+                    <div class="active-path">
+                        <div id="contentTitle" class="active-title">内容</div>
+                        <div id="contentSubtitle" class="active-subtitle"></div>
+                    </div>
                     <div id="libraryStatus" class="status"></div>
                 </div>
-                <div id="categoryList" class="category-list"></div>
-            </aside>
-            <section class="panel content-panel">
-                <div class="content-head">
-                    <div class="folder-meta">
-                        <div id="activeFolderName" class="folder-name">素材库</div>
-                        <span id="activeFolderType" class="folder-type">image</span>
-                    </div>
-                    <div class="top-actions">
-                        <button id="renameFolderBtn" class="icon-btn" type="button" title="重命名文件夹" data-i18n-title="smart.assetRenameFolder"><i data-lucide="pencil"></i></button>
-                    </div>
-                </div>
-                <div id="assetGrid" class="asset-grid"></div>
+                <div id="contentList" class="content-list"></div>
             </section>
+
+            <aside class="pane preview-pane">
+                <div class="pane-head">
+                    <div class="pane-title"><i data-lucide="scan-eye"></i><span id="previewPaneTitle">预览</span></div>
+                </div>
+                <div id="previewContent" class="preview-content"></div>
+            </aside>
         </main>
     </div>
 
@@ -226,44 +525,91 @@
             <div id="nameModalTitle" class="dialog-title">命名</div>
             <input id="nameInput" type="text" autocomplete="off">
             <div class="dialog-actions">
-                <button id="nameCancel" class="text-btn" type="button" data-i18n="common.cancel">取消</button>
-                <button id="nameOk" class="text-btn primary" type="button" data-i18n="common.confirm">确定</button>
+                <button id="nameCancel" class="text-btn" type="button">取消</button>
+                <button id="nameOk" class="text-btn primary" type="button">确定</button>
             </div>
         </div>
     </div>
 
-    <div id="previewModal" class="preview-modal">
-        <div class="preview-shell">
-            <div class="preview-head">
-                <div id="previewTitle" class="preview-title">Preview</div>
-                <button id="previewClose" class="icon-btn" type="button" title="关闭" data-i18n-title="common.close"><i data-lucide="x"></i></button>
+    <div id="templateModal" class="modal">
+        <div class="dialog template-dialog">
+            <div id="templateModalTitle" class="dialog-title">提示词模板</div>
+            <div class="field-stack">
+                <label class="field-label">
+                    <span id="templateScopeLabel">分组</span>
+                    <select id="templateScope"></select>
+                </label>
+                <label class="field-label">
+                    <span id="templateNameLabel">名称</span>
+                    <input id="templateName" type="text" autocomplete="off">
+                </label>
+                <label class="field-label">
+                    <span id="templateTextLabel">内容</span>
+                    <textarea id="templateText"></textarea>
+                </label>
             </div>
-            <div id="previewBody" class="preview-body"></div>
+            <div id="templateDialogStatus" class="dialog-status"></div>
+            <div class="dialog-actions">
+                <button id="templateCancel" class="text-btn" type="button">取消</button>
+                <button id="templateSave" class="text-btn primary" type="button">保存</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const categoryList = document.getElementById('categoryList');
-        const assetGrid = document.getElementById('assetGrid');
+        const libraryRail = document.getElementById('libraryRail');
+        const groupList = document.getElementById('groupList');
+        const contentList = document.getElementById('contentList');
+        const previewContent = document.getElementById('previewContent');
         const libraryStatus = document.getElementById('libraryStatus');
-        const activeFolderName = document.getElementById('activeFolderName');
-        const activeFolderType = document.getElementById('activeFolderType');
+        const contentTitle = document.getElementById('contentTitle');
+        const contentSubtitle = document.getElementById('contentSubtitle');
+        const newGroupBtn = document.getElementById('newGroupBtn');
+        const uploadImageBtn = document.getElementById('uploadImageBtn');
+        const imageUploadInput = document.getElementById('imageUploadInput');
+        const newTemplateBtn = document.getElementById('newTemplateBtn');
+        const renameGroupBtn = document.getElementById('renameGroupBtn');
         const nameModal = document.getElementById('nameModal');
         const nameModalTitle = document.getElementById('nameModalTitle');
         const nameInput = document.getElementById('nameInput');
         const nameCancel = document.getElementById('nameCancel');
         const nameOk = document.getElementById('nameOk');
-        const previewModal = document.getElementById('previewModal');
-        const previewTitle = document.getElementById('previewTitle');
-        const previewBody = document.getElementById('previewBody');
-        let library = {categories:[]};
-        let activeCategoryId = '';
+        const templateModal = document.getElementById('templateModal');
+        const templateModalTitle = document.getElementById('templateModalTitle');
+        const templateScope = document.getElementById('templateScope');
+        const templateName = document.getElementById('templateName');
+        const templateText = document.getElementById('templateText');
+        const templateDialogStatus = document.getElementById('templateDialogStatus');
+        const templateCancel = document.getElementById('templateCancel');
+        const templateSave = document.getElementById('templateSave');
+        const ACTIVE_KEY = 'asset_library_active_library';
+        const GROUP_KEY = 'asset_library_active_group';
 
-        function tr(key){
-            return window.StudioI18n?.t?.(key) || key;
+        const TEMPLATE_SCOPES = [
+            {id:'storyboard', icon:'clapperboard', zh:'分镜模板', en:'Storyboard'},
+            {id:'asset:character', icon:'user-round', zh:'角色提取', en:'Characters'},
+            {id:'asset:scene', icon:'map', zh:'场景提取', en:'Scenes'},
+            {id:'asset:prop', icon:'package', zh:'道具提取', en:'Props'}
+        ];
+
+        let assetLibrary = {categories:[]};
+        let templateLibrary = {templates:[]};
+        let activeLibraryId = localStorage.getItem(ACTIVE_KEY) || 'images';
+        let activeGroupId = localStorage.getItem(GROUP_KEY) || '';
+        let activeItemId = '';
+        let editingTemplateId = '';
+
+        function isEn(){
+            return window.StudioI18n?.lang?.() === 'en';
+        }
+        function copy(zh, en){
+            return isEn() ? en : zh;
         }
         function escapeHtml(value){
             return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function setStatus(text=''){
+            libraryStatus.textContent = text;
         }
         function mediaKind(item){
             if(item?.kind === 'video' || item?.type === 'video') return 'video';
@@ -273,43 +619,170 @@
             if(/\.(mp3|wav|m4a|aac|ogg|flac)$/.test(url)) return 'audio';
             return 'image';
         }
-        function activeCategory(){
-            const cats = library.categories || [];
-            if(!cats.length) return null;
-            return cats.find(cat => cat.id === activeCategoryId) || cats[0];
+        function formatTime(value){
+            const n = Number(value || 0);
+            if(!Number.isFinite(n) || n <= 0) return copy('无时间', 'No time');
+            try { return new Date(n).toLocaleString(isEn() ? 'en-US' : 'zh-CN'); } catch(e) { return String(n); }
         }
-        function setStatus(text=''){
-            libraryStatus.textContent = text;
+        function scopeLabel(scope){
+            return (TEMPLATE_SCOPES.find(item => item.id === scope) || TEMPLATE_SCOPES[0])[isEn() ? 'en' : 'zh'];
         }
-        async function loadLibrary(){
-            setStatus(tr('common.loading'));
-            try {
-                const data = await fetch('/api/asset-library', {cache:'no-store'}).then(r => r.json());
-                library = data.library || {categories:[]};
-                if(!activeCategoryId || !(library.categories || []).some(cat => cat.id === activeCategoryId)){
-                    activeCategoryId = library.categories?.[0]?.id || '';
+        function scopeIcon(scope){
+            return (TEMPLATE_SCOPES.find(item => item.id === scope) || TEMPLATE_SCOPES[0]).icon;
+        }
+        function uid(prefix){
+            if(typeof crypto !== 'undefined' && crypto.randomUUID) {
+                try { return `${prefix}_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`; } catch(e) {}
+            }
+            return `${prefix}_${Math.random().toString(16).slice(2, 14)}`;
+        }
+        function imageGroups(){
+            return (assetLibrary.categories || [])
+                .filter(cat => cat && cat.type !== 'workflow')
+                .map(cat => ({
+                    id:cat.id,
+                    name:cat.name || copy('未命名分组', 'Untitled group'),
+                    icon:'folder',
+                    type:'image',
+                    typeLabel:copy('图片资产分组', 'Image asset group'),
+                    items:Array.isArray(cat.items) ? cat.items : [],
+                    source:cat
+                }));
+        }
+        function promptGroups(){
+            const templates = Array.isArray(templateLibrary.templates) ? templateLibrary.templates : [];
+            return TEMPLATE_SCOPES.map(scope => ({
+                id:scope.id,
+                name:scope[isEn() ? 'en' : 'zh'],
+                icon:scope.icon,
+                type:'prompt',
+                typeLabel:copy('提示词模板分组', 'Prompt template group'),
+                items:templates.filter(item => item.scope === scope.id),
+                source:scope
+            }));
+        }
+        function groupsFor(libraryId=activeLibraryId){
+            return libraryId === 'prompts' ? promptGroups() : imageGroups();
+        }
+        function activeGroup(){
+            const groups = groupsFor();
+            return groups.find(group => group.id === activeGroupId) || groups[0] || null;
+        }
+        function selectedItem(){
+            const group = activeGroup();
+            return (group?.items || []).find(item => item.id === activeItemId) || null;
+        }
+        function libraryModels(){
+            const image = imageGroups();
+            const prompts = promptGroups();
+            const imageCount = image.reduce((sum, group) => sum + group.items.length, 0);
+            const promptCount = prompts.reduce((sum, group) => sum + group.items.length, 0);
+            return [
+                {
+                    id:'images',
+                    icon:'image',
+                    name:copy('图片资产', 'Image Assets'),
+                    desc:copy('角色、场景和画布保存的视觉资产', 'Visual assets saved from canvas'),
+                    groupCount:image.length,
+                    itemCount:imageCount
+                },
+                {
+                    id:'prompts',
+                    icon:'file-text',
+                    name:copy('提示词库', 'Prompt Library'),
+                    desc:copy('分镜、角色、场景、道具指令模板', 'Storyboard and asset instruction templates'),
+                    groupCount:prompts.length,
+                    itemCount:promptCount
                 }
-                render();
+            ];
+        }
+        function ensureSelection(){
+            if(!['images','prompts'].includes(activeLibraryId)) activeLibraryId = 'images';
+            const groups = groupsFor();
+            if(!groups.some(group => group.id === activeGroupId)) activeGroupId = groups[0]?.id || '';
+            const group = activeGroup();
+            if(!group?.items?.some(item => item.id === activeItemId)) activeItemId = group?.items?.[0]?.id || '';
+            localStorage.setItem(ACTIVE_KEY, activeLibraryId);
+            localStorage.setItem(GROUP_KEY, activeGroupId);
+        }
+        async function loadAll(){
+            setStatus(copy('加载中...', 'Loading...'));
+            try {
+                const [assetData, templateData] = await Promise.all([
+                    fetch('/api/asset-library', {cache:'no-store'}).then(r => r.json()),
+                    fetch('/api/instruction-templates', {cache:'no-store'}).then(r => r.json())
+                ]);
+                assetLibrary = assetData.library || {categories:[]};
+                templateLibrary = {templates:Array.isArray(templateData?.templates) ? templateData.templates : [], updated_at:templateData?.updated_at || 0};
+                renderAll();
                 setStatus('');
             } catch(e) {
-                setStatus('加载失败');
+                setStatus(copy('加载失败', 'Load failed'));
             }
         }
-        function renderCategories(){
-            const cats = library.categories || [];
-            categoryList.innerHTML = cats.length ? cats.map(cat => {
-                const count = Array.isArray(cat.items) ? cat.items.length : 0;
-                const icon = cat.type === 'workflow' ? 'workflow' : 'folder';
-                return `<button class="category-btn ${cat.id === activeCategoryId ? 'active' : ''}" type="button" data-category="${escapeHtml(cat.id)}">
-                    <i data-lucide="${icon}"></i>
-                    <span class="cat-name">${escapeHtml(cat.name || tr('smart.assetFolder'))}</span>
-                    <span class="cat-count">${count}</span>
-                </button>`;
-            }).join('') : `<div class="empty-state"><i data-lucide="folder-open"></i><span>暂无文件夹</span></div>`;
-            categoryList.querySelectorAll('[data-category]').forEach(btn => {
+        function renderStaticText(){
+            document.title = copy('素材库', 'Asset Library');
+            document.getElementById('pageTitle').textContent = copy('素材库', 'Asset Library');
+            document.getElementById('pageSubtitle').textContent = copy('按库、分组、内容、预览管理图片资产与提示词模板。', 'Manage image assets and prompt templates by library, group, content, and preview.');
+            document.getElementById('libraryPaneTitle').textContent = copy('库', 'Library');
+            document.getElementById('groupPaneTitle').textContent = copy('分组', 'Groups');
+            document.getElementById('previewPaneTitle').textContent = copy('预览', 'Preview');
+            document.getElementById('newGroupText').textContent = copy('新建分组', 'New group');
+            document.getElementById('uploadImageText').textContent = copy('上传图片', 'Upload images');
+            document.getElementById('newTemplateText').textContent = copy('新建提示词', 'New prompt');
+            document.getElementById('refreshBtn').title = copy('刷新', 'Refresh');
+            uploadImageBtn.title = copy('上传图片到当前分组', 'Upload images to the current group');
+            renameGroupBtn.title = copy('重命名分组', 'Rename group');
+            nameCancel.textContent = copy('取消', 'Cancel');
+            nameOk.textContent = copy('确定', 'Confirm');
+            templateCancel.textContent = copy('取消', 'Cancel');
+            templateSave.textContent = copy('保存', 'Save');
+            document.getElementById('templateScopeLabel').textContent = copy('分组', 'Group');
+            document.getElementById('templateNameLabel').textContent = copy('名称', 'Name');
+            document.getElementById('templateTextLabel').textContent = copy('内容', 'Content');
+        }
+        function renderLibraries(){
+            libraryRail.innerHTML = libraryModels().map(lib => `
+                <button class="library-btn ${lib.id === activeLibraryId ? 'active' : ''}" type="button" data-library="${escapeHtml(lib.id)}">
+                    <span class="library-icon"><i data-lucide="${escapeHtml(lib.icon)}"></i></span>
+                    <span class="library-copy">
+                        <span class="library-name">${escapeHtml(lib.name)}</span>
+                        <span class="library-desc">${escapeHtml(lib.desc)}</span>
+                        <span class="library-count">${escapeHtml(copy(`${lib.groupCount} 组 · ${lib.itemCount} 项`, `${lib.groupCount} groups · ${lib.itemCount} items`))}</span>
+                    </span>
+                </button>
+            `).join('');
+            libraryRail.querySelectorAll('[data-library]').forEach(btn => {
                 btn.onclick = () => {
-                    activeCategoryId = btn.dataset.category || '';
-                    render();
+                    activeLibraryId = btn.dataset.library || 'images';
+                    activeGroupId = '';
+                    activeItemId = '';
+                    renderAll();
+                };
+            });
+        }
+        function renderGroups(){
+            const groups = groupsFor();
+            newGroupBtn.style.display = activeLibraryId === 'images' ? 'inline-flex' : 'none';
+            uploadImageBtn.style.display = activeLibraryId === 'images' ? 'inline-flex' : 'none';
+            uploadImageBtn.disabled = activeLibraryId !== 'images' || !activeGroup();
+            newTemplateBtn.style.display = activeLibraryId === 'prompts' ? 'inline-flex' : 'none';
+            renameGroupBtn.style.display = activeLibraryId === 'images' ? 'inline-flex' : 'none';
+            groupList.innerHTML = groups.length ? groups.map(group => `
+                <button class="group-btn ${group.id === activeGroupId ? 'active' : ''}" type="button" data-group="${escapeHtml(group.id)}">
+                    <i data-lucide="${escapeHtml(group.icon)}"></i>
+                    <span class="group-meta">
+                        <span class="group-name">${escapeHtml(group.name)}</span>
+                        <span class="group-type">${escapeHtml(group.typeLabel)}</span>
+                    </span>
+                    <span class="count-pill">${group.items.length}</span>
+                </button>
+            `).join('') : `<div class="empty-state"><i data-lucide="folder-open"></i><span>${escapeHtml(copy('暂无分组', 'No groups'))}</span></div>`;
+            groupList.querySelectorAll('[data-group]').forEach(btn => {
+                btn.onclick = () => {
+                    activeGroupId = btn.dataset.group || '';
+                    activeItemId = '';
+                    renderAll();
                 };
             });
         }
@@ -317,59 +790,129 @@
             const url = escapeHtml(item.url || '');
             const kind = mediaKind(item);
             if(kind === 'video') return `<video src="${url}" muted preload="metadata" playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video><span class="kind-badge"><i data-lucide="film"></i>VIDEO</span>`;
-            if(kind === 'audio') return `<div class="audio-thumb"><i data-lucide="file-audio"></i><span>AUDIO</span></div>`;
+            if(kind === 'audio') return `<div class="audio-thumb"><i data-lucide="file-audio"></i><span>AUDIO</span></div><span class="kind-badge"><i data-lucide="music"></i>AUDIO</span>`;
             return `<img src="${url}" alt="">`;
         }
-        function renderAssets(){
-            const cat = activeCategory();
-            activeFolderName.textContent = cat?.name || tr('assetLibrary.title');
-            activeFolderType.textContent = cat?.type || 'image';
-            const items = cat?.items || [];
-            if(!cat){
-                assetGrid.innerHTML = `<div class="empty-state"><i data-lucide="library"></i><span>素材库为空</span></div>`;
+        function renderContent(){
+            const group = activeGroup();
+            const items = group?.items || [];
+            contentTitle.textContent = group?.name || copy('内容', 'Content');
+            contentSubtitle.textContent = group
+                ? copy(`${group.typeLabel} · ${items.length} 项`, `${group.typeLabel} · ${items.length} items`)
+                : copy('选择一个分组查看内容', 'Select a group to view content');
+            if(!group){
+                contentList.className = 'content-list';
+                contentList.innerHTML = `<div class="empty-state"><i data-lucide="library"></i><span>${escapeHtml(copy('还没有可用内容', 'No content yet'))}</span></div>`;
                 return;
             }
-            if(cat.type === 'workflow'){
-                assetGrid.innerHTML = `<div class="empty-state"><i data-lucide="workflow"></i><span>${escapeHtml(tr('smart.assetWorkflowEmpty'))}</span></div>`;
-                return;
-            }
-            assetGrid.innerHTML = items.length ? items.map(item => `
-                <article class="asset-card" data-item="${escapeHtml(item.id)}">
-                    <button class="thumb" type="button" data-preview="${escapeHtml(item.id)}">${thumbHtml(item)}</button>
-                    <div class="asset-info">
-                        <div class="asset-name" title="${escapeHtml(item.name || '')}">${escapeHtml(item.name || 'asset')}</div>
-                        <div class="asset-actions">
-                            <button class="icon-btn" type="button" data-rename="${escapeHtml(item.id)}" title="${escapeHtml(tr('smart.assetRename'))}"><i data-lucide="pencil"></i></button>
-                            <button class="icon-btn" type="button" data-delete="${escapeHtml(item.id)}" title="${escapeHtml(tr('common.delete'))}"><i data-lucide="trash-2"></i></button>
-                        </div>
-                    </div>
-                </article>
-            `).join('') : `<div class="empty-state"><i data-lucide="image"></i><span>${escapeHtml(tr('smart.assetEmpty'))}</span></div>`;
-            assetGrid.querySelectorAll('[data-preview]').forEach(btn => {
-                btn.onclick = () => previewItem(btn.dataset.preview);
-            });
-            assetGrid.querySelectorAll('[data-rename]').forEach(btn => {
-                btn.onclick = async () => renameItem(btn.dataset.rename);
-            });
-            assetGrid.querySelectorAll('[data-delete]').forEach(btn => {
-                btn.onclick = async () => deleteItem(btn.dataset.delete);
+            if(activeLibraryId === 'images') renderImageContent(group, items);
+            else renderPromptContent(group, items);
+        }
+        function renderImageContent(group, items){
+            contentList.className = 'content-list images';
+            contentList.innerHTML = items.length ? items.map(item => `
+                <button class="asset-card ${item.id === activeItemId ? 'active' : ''}" type="button" data-item="${escapeHtml(item.id)}">
+                    <span class="thumb">${thumbHtml(item)}</span>
+                    <span class="asset-info">
+                        <span class="asset-name" title="${escapeHtml(item.name || '')}">${escapeHtml(item.name || 'asset')}</span>
+                        <span class="asset-meta">${escapeHtml(mediaKind(item))}</span>
+                    </span>
+                </button>
+            `).join('') : `<div class="empty-state"><i data-lucide="image"></i><span>${escapeHtml(copy('这个分组还没有图片资产。从无限画布保存素材后会出现在这里。', 'No image assets here yet. Save assets from Smart Canvas to see them here.'))}</span></div>`;
+            contentList.querySelectorAll('[data-item]').forEach(btn => {
+                btn.onclick = () => {
+                    activeItemId = btn.dataset.item || '';
+                    renderAll();
+                };
             });
         }
-        function render(){
-            renderCategories();
-            renderAssets();
+        function renderPromptContent(group, items){
+            contentList.className = 'content-list prompt-list';
+            contentList.innerHTML = items.length ? items.map(item => `
+                <button class="prompt-row ${item.id === activeItemId ? 'active' : ''}" type="button" data-item="${escapeHtml(item.id)}">
+                    <span class="prompt-main">
+                        <span class="prompt-name" title="${escapeHtml(item.name || '')}">${escapeHtml(item.name || copy('未命名提示词', 'Untitled prompt'))}</span>
+                        <span class="prompt-snippet">${escapeHtml(item.text || '')}</span>
+                    </span>
+                    <span class="prompt-date">${escapeHtml(formatTime(item.updatedAt || item.createdAt))}</span>
+                </button>
+            `).join('') : `<div class="empty-state"><i data-lucide="file-text"></i><span>${escapeHtml(copy('这个分组还没有提示词模板。', 'No prompt templates in this group yet.'))}</span></div>`;
+            contentList.querySelectorAll('[data-item]').forEach(btn => {
+                btn.onclick = () => {
+                    activeItemId = btn.dataset.item || '';
+                    renderAll();
+                };
+            });
+        }
+        function renderPreview(){
+            const group = activeGroup();
+            const item = selectedItem();
+            if(!group){
+                previewContent.innerHTML = `<div class="preview-empty"><i data-lucide="scan-eye"></i><span>${escapeHtml(copy('选择库和分组后查看预览', 'Select a library and group to preview'))}</span></div>`;
+                return;
+            }
+            if(!item){
+                previewContent.innerHTML = `<div class="preview-empty"><i data-lucide="${activeLibraryId === 'prompts' ? 'file-text' : 'image'}"></i><span>${escapeHtml(copy('选择内容后在这里预览', 'Select content to preview here'))}</span></div>`;
+                return;
+            }
+            if(activeLibraryId === 'images') renderImagePreview(group, item);
+            else renderPromptPreview(group, item);
+        }
+        function renderImagePreview(group, item){
+            const kind = mediaKind(item);
+            const media = kind === 'video'
+                ? `<video src="${escapeHtml(item.url)}" controls playsinline></video>`
+                : kind === 'audio'
+                    ? `<audio src="${escapeHtml(item.url)}" controls></audio>`
+                    : `<img src="${escapeHtml(item.url)}" alt="">`;
+            previewContent.innerHTML = `
+                <div class="preview-media">${media}</div>
+                <div class="preview-name">${escapeHtml(item.name || 'asset')}</div>
+                <div class="preview-actions">
+                    <button class="text-btn" type="button" data-action="rename-image"><i data-lucide="pencil"></i><span>${escapeHtml(copy('重命名', 'Rename'))}</span></button>
+                    <button class="text-btn danger" type="button" data-action="delete-image"><i data-lucide="trash-2"></i><span>${escapeHtml(copy('删除', 'Delete'))}</span></button>
+                </div>
+                <dl class="meta-list">
+                    <div class="meta-row"><dt class="meta-key">${escapeHtml(copy('库', 'Library'))}</dt><dd class="meta-value">${escapeHtml(copy('图片资产', 'Image Assets'))}</dd></div>
+                    <div class="meta-row"><dt class="meta-key">${escapeHtml(copy('分组', 'Group'))}</dt><dd class="meta-value">${escapeHtml(group.name)}</dd></div>
+                    <div class="meta-row"><dt class="meta-key">${escapeHtml(copy('类型', 'Type'))}</dt><dd class="meta-value">${escapeHtml(kind)}</dd></div>
+                    <div class="meta-row"><dt class="meta-key">${escapeHtml(copy('时间', 'Time'))}</dt><dd class="meta-value">${escapeHtml(formatTime(item.created_at || item.createdAt))}</dd></div>
+                    <div class="meta-row"><dt class="meta-key">URL</dt><dd class="meta-value">${escapeHtml(item.url || '')}</dd></div>
+                </dl>
+            `;
+            previewContent.querySelector('[data-action="rename-image"]').onclick = () => renameImageAsset(item.id);
+            previewContent.querySelector('[data-action="delete-image"]').onclick = () => deleteImageAsset(item.id);
+        }
+        function renderPromptPreview(group, item){
+            previewContent.innerHTML = `
+                <div class="preview-name">${escapeHtml(item.name || copy('未命名提示词', 'Untitled prompt'))}</div>
+                <div class="preview-actions">
+                    <button class="text-btn" type="button" data-action="edit-template"><i data-lucide="pencil"></i><span>${escapeHtml(copy('编辑', 'Edit'))}</span></button>
+                    <button class="text-btn danger" type="button" data-action="delete-template"><i data-lucide="trash-2"></i><span>${escapeHtml(copy('删除', 'Delete'))}</span></button>
+                </div>
+                <pre class="template-preview">${escapeHtml(item.text || '')}</pre>
+                <dl class="meta-list">
+                    <div class="meta-row"><dt class="meta-key">${escapeHtml(copy('库', 'Library'))}</dt><dd class="meta-value">${escapeHtml(copy('提示词库', 'Prompt Library'))}</dd></div>
+                    <div class="meta-row"><dt class="meta-key">${escapeHtml(copy('分组', 'Group'))}</dt><dd class="meta-value">${escapeHtml(group.name || scopeLabel(item.scope))}</dd></div>
+                    <div class="meta-row"><dt class="meta-key">Scope</dt><dd class="meta-value">${escapeHtml(item.scope || '')}</dd></div>
+                    <div class="meta-row"><dt class="meta-key">${escapeHtml(copy('更新', 'Updated'))}</dt><dd class="meta-value">${escapeHtml(formatTime(item.updatedAt || item.createdAt))}</dd></div>
+                </dl>
+            `;
+            previewContent.querySelector('[data-action="edit-template"]').onclick = () => openTemplateDialog(item);
+            previewContent.querySelector('[data-action="delete-template"]').onclick = () => deleteTemplate(item.id);
+        }
+        function renderAll(){
+            renderStaticText();
+            ensureSelection();
+            renderLibraries();
+            renderGroups();
+            renderContent();
+            renderPreview();
             window.lucide?.createIcons();
-        }
-        function itemById(id){
-            for(const cat of library.categories || []){
-                const item = (cat.items || []).find(x => x.id === id);
-                if(item) return item;
-            }
-            return null;
         }
         function openNameDialog({title='', value='' }={}){
             return new Promise(resolve => {
-                nameModalTitle.textContent = title || '命名';
+                nameModalTitle.textContent = title || copy('命名', 'Name');
                 nameInput.value = value || '';
                 nameModal.classList.add('open');
                 nameInput.focus();
@@ -391,71 +934,177 @@
                 nameModal.onmousedown = event => { if(event.target === nameModal) done(''); };
             });
         }
-        async function createCategory(){
-            const name = await openNameDialog({title:tr('smart.assetNewFolder'), value:tr('smart.assetFolder')});
+        async function createImageGroup(){
+            const name = await openNameDialog({title:copy('新建分组', 'New group'), value:copy('新建分组', 'New group')});
             if(!name) return;
             const data = await fetch('/api/asset-library/categories', {
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({name, type:'image'})
             }).then(r => r.json());
-            library = data.library || library;
-            activeCategoryId = data.category?.id || activeCategoryId;
-            render();
+            assetLibrary = data.library || assetLibrary;
+            activeLibraryId = 'images';
+            activeGroupId = data.category?.id || activeGroupId;
+            activeItemId = '';
+            renderAll();
         }
-        async function renameCategory(){
-            const cat = activeCategory();
-            if(!cat || cat.type === 'workflow') return;
-            const name = await openNameDialog({title:tr('smart.assetRenameFolder'), value:cat.name || ''});
+        async function renameImageGroup(){
+            const group = activeGroup();
+            if(activeLibraryId !== 'images' || !group) return;
+            const name = await openNameDialog({title:copy('重命名分组', 'Rename group'), value:group.name || ''});
             if(!name) return;
-            const data = await fetch(`/api/asset-library/categories/${encodeURIComponent(cat.id)}`, {
+            const data = await fetch(`/api/asset-library/categories/${encodeURIComponent(group.id)}`, {
                 method:'PATCH',
                 headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({name})
             }).then(r => r.json());
-            library = data.library || library;
-            render();
+            assetLibrary = data.library || assetLibrary;
+            renderAll();
         }
-        async function renameItem(id){
-            const item = itemById(id);
-            if(!item) return;
-            const name = await openNameDialog({title:tr('smart.assetRename'), value:item.name || ''});
+        async function renameImageAsset(id){
+            const item = selectedItem();
+            if(!item || item.id !== id) return;
+            const name = await openNameDialog({title:copy('重命名素材', 'Rename asset'), value:item.name || ''});
             if(!name) return;
             const data = await fetch(`/api/asset-library/items/${encodeURIComponent(id)}`, {
                 method:'PATCH',
                 headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({name})
             }).then(r => r.json());
-            library = data.library || library;
-            render();
+            assetLibrary = data.library || assetLibrary;
+            activeItemId = id;
+            renderAll();
         }
-        async function deleteItem(id){
-            if(!confirm(tr('smart.assetDeleteConfirm'))) return;
+        async function deleteImageAsset(id){
+            const ok = confirm(copy('确认从素材库移除这个资产？', 'Remove this asset from the library?'));
+            if(!ok) return;
             const data = await fetch(`/api/asset-library/items/${encodeURIComponent(id)}`, {method:'DELETE'}).then(r => r.json());
-            library = data.library || library;
-            render();
+            assetLibrary = data.library || assetLibrary;
+            activeItemId = '';
+            renderAll();
         }
-        function previewItem(id){
-            const item = itemById(id);
-            if(!item?.url) return;
-            const kind = mediaKind(item);
-            previewTitle.textContent = item.name || 'asset';
-            if(kind === 'video') previewBody.innerHTML = `<video src="${escapeHtml(item.url)}" controls autoplay playsinline></video>`;
-            else if(kind === 'audio') previewBody.innerHTML = `<audio src="${escapeHtml(item.url)}" controls autoplay></audio>`;
-            else previewBody.innerHTML = `<img src="${escapeHtml(item.url)}" alt="">`;
-            previewModal.classList.add('open');
+        async function uploadImagesToGroup(files){
+            const group = activeGroup();
+            const selected = [...(files || [])].filter(file => /^image\//.test(String(file.type || '')) || /\.(png|jpe?g|webp|gif|bmp)$/i.test(file.name || ''));
+            if(activeLibraryId !== 'images' || !group || !selected.length) {
+                setStatus(copy('请选择图片文件', 'Choose image files'));
+                return;
+            }
+            const form = new FormData();
+            form.append('category_id', group.id);
+            selected.forEach(file => form.append('files', file));
+            uploadImageBtn.disabled = true;
+            setStatus(copy('上传中...', 'Uploading...'));
+            try {
+                const res = await fetch('/api/asset-library/upload', {method:'POST', body:form});
+                const data = await res.json().catch(() => ({}));
+                if(!res.ok) throw new Error(data.detail || copy('上传失败', 'Upload failed'));
+                assetLibrary = data.library || assetLibrary;
+                activeLibraryId = 'images';
+                activeGroupId = group.id;
+                activeItemId = data.items?.[0]?.id || '';
+                renderAll();
+                setStatus(copy(`已上传 ${data.items?.length || selected.length} 张图片`, `Uploaded ${data.items?.length || selected.length} image(s)`));
+            } catch(e) {
+                setStatus(e.message || copy('上传失败', 'Upload failed'));
+            } finally {
+                uploadImageBtn.disabled = false;
+                imageUploadInput.value = '';
+            }
         }
-        function closePreview(){
-            previewModal.classList.remove('open');
-            previewBody.innerHTML = '';
+        function openTemplateDialog(template=null){
+            editingTemplateId = template?.id || '';
+            templateModalTitle.textContent = template ? copy('编辑提示词', 'Edit prompt') : copy('新建提示词', 'New prompt');
+            templateDialogStatus.textContent = '';
+            templateScope.innerHTML = TEMPLATE_SCOPES.map(scope => `<option value="${escapeHtml(scope.id)}">${escapeHtml(scope[isEn() ? 'en' : 'zh'])}</option>`).join('');
+            templateScope.value = template?.scope || (activeLibraryId === 'prompts' && activeGroupId ? activeGroupId : TEMPLATE_SCOPES[0].id);
+            templateName.value = template?.name || '';
+            templateText.value = template?.text || '';
+            templateModal.classList.add('open');
+            templateName.focus();
+            templateName.select();
         }
-        document.getElementById('refreshBtn').onclick = loadLibrary;
-        document.getElementById('newFolderBtn').onclick = createCategory;
-        document.getElementById('renameFolderBtn').onclick = renameCategory;
-        document.getElementById('previewClose').onclick = closePreview;
-        previewModal.addEventListener('mousedown', event => { if(event.target === previewModal) closePreview(); });
+        function closeTemplateDialog(){
+            templateModal.classList.remove('open');
+            editingTemplateId = '';
+            templateDialogStatus.textContent = '';
+        }
+        async function saveTemplates(){
+            const res = await fetch('/api/instruction-templates', {
+                method:'PUT',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({templates:templateLibrary.templates || []})
+            });
+            if(!res.ok) throw new Error('save failed');
+            const data = await res.json();
+            templateLibrary = {templates:Array.isArray(data?.templates) ? data.templates : [], updated_at:data?.updated_at || Date.now()};
+        }
+        async function saveTemplateFromDialog(){
+            const scope = templateScope.value;
+            const name = templateName.value.trim();
+            const text = templateText.value.trim();
+            if(!name || !text){
+                templateDialogStatus.textContent = copy('名称和内容不能为空', 'Name and content are required');
+                return;
+            }
+            const now = Date.now();
+            const templates = Array.isArray(templateLibrary.templates) ? templateLibrary.templates : [];
+            if(editingTemplateId){
+                const target = templates.find(item => item.id === editingTemplateId);
+                if(target){
+                    target.scope = scope;
+                    target.name = name;
+                    target.text = text;
+                    target.updatedAt = now;
+                }
+            } else {
+                editingTemplateId = uid('instruction_template');
+                templates.unshift({id:editingTemplateId, scope, name, text, createdAt:now, updatedAt:now});
+            }
+            templateLibrary.templates = templates;
+            try {
+                await saveTemplates();
+                activeLibraryId = 'prompts';
+                activeGroupId = scope;
+                activeItemId = editingTemplateId;
+                closeTemplateDialog();
+                renderAll();
+            } catch(e) {
+                templateDialogStatus.textContent = copy('保存失败', 'Save failed');
+            }
+        }
+        async function deleteTemplate(id){
+            const item = selectedItem();
+            if(!item || item.id !== id) return;
+            const ok = confirm(copy(`确认删除提示词「${item.name || '未命名'}」？`, `Delete prompt "${item.name || 'Untitled'}"?`));
+            if(!ok) return;
+            templateLibrary.templates = (templateLibrary.templates || []).filter(template => template.id !== id);
+            try {
+                await saveTemplates();
+                activeItemId = '';
+                renderAll();
+            } catch(e) {
+                alert(copy('删除失败', 'Delete failed'));
+                await loadAll();
+            }
+        }
+        document.getElementById('refreshBtn').onclick = loadAll;
+        newGroupBtn.onclick = createImageGroup;
+        uploadImageBtn.onclick = () => {
+            imageUploadInput.value = '';
+            imageUploadInput.click();
+        };
+        imageUploadInput.onchange = () => uploadImagesToGroup(imageUploadInput.files);
+        newTemplateBtn.onclick = () => openTemplateDialog();
+        renameGroupBtn.onclick = renameImageGroup;
+        templateCancel.onclick = closeTemplateDialog;
+        templateSave.onclick = saveTemplateFromDialog;
+        templateModal.addEventListener('mousedown', event => { if(event.target === templateModal) closeTemplateDialog(); });
         document.addEventListener('keydown', event => {
-            if(event.key === 'Escape') closePreview();
+            if(event.key === 'Escape') {
+                if(templateModal.classList.contains('open')) closeTemplateDialog();
+                if(nameModal.classList.contains('open')) nameModal.classList.remove('open');
+            }
         });
         window.addEventListener('message', event => {
             if(event.data?.type === 'studio-theme') window.StudioTheme?.set?.(event.data.theme || 'light');
@@ -465,11 +1114,12 @@
             document.body.classList.toggle('theme-dark', event.detail?.theme === 'dark');
         });
         window.addEventListener('studio-lang-change', () => {
-            render();
+            renderAll();
         });
         window.addEventListener('DOMContentLoaded', () => {
             window.StudioI18n?.apply?.();
-            loadLibrary();
+            renderStaticText();
+            loadAll();
         });
     </script>
 </body>
