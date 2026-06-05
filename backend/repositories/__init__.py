@@ -37,7 +37,10 @@ from .conversation_repo import (
     user_dir,
 )
 from .instruction_template_repo import (
+    create_instruction_template_group,
+    delete_instruction_template_group,
     load_instruction_templates,
+    rename_instruction_template_group,
     save_instruction_templates,
 )
 
@@ -47,8 +50,10 @@ __all__ = [
     "canvas_record",
     "cleanup_expired_canvas_trash",
     "conversation_path",
+    "create_instruction_template_group",
     "default_asset_library",
     "delete_canvas_assets",
+    "delete_instruction_template_group",
     "find_asset_category",
     "iter_canvas_records",
     "list_canvases",
@@ -64,6 +69,7 @@ __all__ = [
     "new_conversation",
     "normalize_canvas_kind",
     "now_ms",
+    "rename_instruction_template_group",
     "safe_user_id",
     "sanitize_asset_name",
     "save_asset_library",

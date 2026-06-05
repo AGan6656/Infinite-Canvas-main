@@ -17,6 +17,8 @@ from ..core import ASSET_LIBRARY_DIR, OUTPUT_DIR, app, manager
 from ..repositories import (
     canvas_path,
     conversation_path,
+    create_instruction_template_group,
+    delete_instruction_template_group,
     find_asset_category,
     list_canvases,
     list_conversations,
@@ -31,6 +33,7 @@ from ..repositories import (
     new_conversation,
     normalize_canvas_kind,
     now_ms,
+    rename_instruction_template_group,
     safe_user_id,
     sanitize_asset_name,
     save_canvas_asset_extraction,
@@ -49,6 +52,7 @@ from ..schemas import (
     CanvasExtractedAssetsSaveRequest,
     CanvasSaveRequest,
     ConversationCreateRequest,
+    InstructionTemplateGroupRequest,
     InstructionTemplateSaveRequest,
     SmartCanvasGroupExportRequest,
 )
@@ -254,7 +258,32 @@ async def get_instruction_templates():
 
 @app.put("/api/instruction-templates")
 async def put_instruction_templates(payload: InstructionTemplateSaveRequest):
-    return save_instruction_templates(payload.templates)
+    return save_instruction_templates(payload.templates, payload.groups)
+
+
+@app.post("/api/instruction-template-groups")
+async def create_instruction_group(payload: InstructionTemplateGroupRequest):
+    return create_instruction_template_group(payload.name)
+
+
+@app.patch("/api/instruction-template-groups/{group_id}")
+async def rename_instruction_group(group_id: str, payload: InstructionTemplateGroupRequest):
+    try:
+        return rename_instruction_template_group(group_id, payload.name)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@app.delete("/api/instruction-template-groups/{group_id}")
+async def delete_instruction_group(group_id: str):
+    try:
+        return delete_instruction_template_group(group_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
 
 @app.post("/api/asset-library/categories")

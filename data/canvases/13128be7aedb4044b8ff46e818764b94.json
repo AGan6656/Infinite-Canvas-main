@@ -4,7 +4,7 @@
   "icon": "sparkles",
   "kind": "smart",
   "created_at": 1780312147625,
-  "updated_at": 1780658392999,
+  "updated_at": 1780665612890,
   "nodes": [
     {
       "id": "smart_gijl6setvyis",
@@ -79,9 +79,9 @@
   ],
   "connections": [],
   "viewport": {
-    "x": 280.93124344721423,
-    "y": 39.813065650299336,
-    "scale": 0.7408182206817179
+    "x": 336.3366812101722,
+    "y": 84.84275607466577,
+    "scale": 0.6703200460356392
   },
   "logs": [],
   "settings": {

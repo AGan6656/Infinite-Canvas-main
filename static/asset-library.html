@@ -429,6 +429,7 @@
         }
         .template-dialog { width:min(720px, calc(100vw - 44px)); }
         .dialog-title { font-size:14px; font-weight:950; margin-bottom:12px; }
+        .dialog-message { color:var(--muted); font-size:13px; line-height:1.55; font-weight:750; margin:0; }
         .field-stack { display:flex; flex-direction:column; gap:10px; }
         .field-label { display:flex; flex-direction:column; gap:6px; color:var(--muted); font-size:11px; font-weight:850; }
         .dialog input,.dialog select,.dialog textarea {
@@ -495,7 +496,10 @@
             <aside class="pane">
                 <div class="pane-head">
                     <div class="pane-title"><i data-lucide="folder-tree"></i><span id="groupPaneTitle">分组</span></div>
-                    <button id="renameGroupBtn" class="icon-btn" type="button" title="重命名分组"><i data-lucide="pencil"></i></button>
+                    <div class="top-actions">
+                        <button id="renameGroupBtn" class="icon-btn" type="button" title="重命名分组"><i data-lucide="pencil"></i></button>
+                        <button id="deleteGroupBtn" class="icon-btn danger" type="button" title="删除分组"><i data-lucide="trash-2"></i></button>
+                    </div>
                 </div>
                 <div id="groupList" class="group-list"></div>
             </aside>
@@ -556,6 +560,17 @@
         </div>
     </div>
 
+    <div id="confirmModal" class="modal">
+        <div class="dialog">
+            <div id="confirmTitle" class="dialog-title">确认删除</div>
+            <p id="confirmMessage" class="dialog-message">删除后不可恢复。</p>
+            <div class="dialog-actions">
+                <button id="confirmCancel" class="text-btn" type="button">取消</button>
+                <button id="confirmOk" class="text-btn danger" type="button">确认删除</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const libraryRail = document.getElementById('libraryRail');
         const groupList = document.getElementById('groupList');
@@ -569,6 +584,7 @@
         const imageUploadInput = document.getElementById('imageUploadInput');
         const newTemplateBtn = document.getElementById('newTemplateBtn');
         const renameGroupBtn = document.getElementById('renameGroupBtn');
+        const deleteGroupBtn = document.getElementById('deleteGroupBtn');
         const nameModal = document.getElementById('nameModal');
         const nameModalTitle = document.getElementById('nameModalTitle');
         const nameInput = document.getElementById('nameInput');
@@ -582,6 +598,11 @@
         const templateDialogStatus = document.getElementById('templateDialogStatus');
         const templateCancel = document.getElementById('templateCancel');
         const templateSave = document.getElementById('templateSave');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmTitle = document.getElementById('confirmTitle');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const confirmCancel = document.getElementById('confirmCancel');
+        const confirmOk = document.getElementById('confirmOk');
         const ACTIVE_KEY = 'asset_library_active_library';
         const GROUP_KEY = 'asset_library_active_group';
 
@@ -598,6 +619,7 @@
         let activeGroupId = localStorage.getItem(GROUP_KEY) || '';
         let activeItemId = '';
         let editingTemplateId = '';
+        let closeConfirmDialog = null;
 
         function isEn(){
             return window.StudioI18n?.lang?.() === 'en';
@@ -625,10 +647,13 @@
             try { return new Date(n).toLocaleString(isEn() ? 'en-US' : 'zh-CN'); } catch(e) { return String(n); }
         }
         function scopeLabel(scope){
-            return (TEMPLATE_SCOPES.find(item => item.id === scope) || TEMPLATE_SCOPES[0])[isEn() ? 'en' : 'zh'];
+            const builtin = TEMPLATE_SCOPES.find(item => item.id === scope);
+            if(builtin) return builtin[isEn() ? 'en' : 'zh'];
+            const custom = (templateLibrary.groups || []).find(item => item.id === scope);
+            return custom?.name || copy('自定义分组', 'Custom group');
         }
         function scopeIcon(scope){
-            return (TEMPLATE_SCOPES.find(item => item.id === scope) || TEMPLATE_SCOPES[0]).icon;
+            return (TEMPLATE_SCOPES.find(item => item.id === scope) || {icon:'folder'}).icon;
         }
         function uid(prefix){
             if(typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -651,15 +676,27 @@
         }
         function promptGroups(){
             const templates = Array.isArray(templateLibrary.templates) ? templateLibrary.templates : [];
-            return TEMPLATE_SCOPES.map(scope => ({
+            const builtins = TEMPLATE_SCOPES.map(scope => ({
                 id:scope.id,
                 name:scope[isEn() ? 'en' : 'zh'],
                 icon:scope.icon,
                 type:'prompt',
                 typeLabel:copy('提示词模板分组', 'Prompt template group'),
                 items:templates.filter(item => item.scope === scope.id),
-                source:scope
+                source:scope,
+                isDefault:true
             }));
+            const customs = (templateLibrary.groups || []).map(group => ({
+                id:group.id,
+                name:group.name || copy('自定义分组', 'Custom group'),
+                icon:'folder',
+                type:'prompt',
+                typeLabel:copy('自定义提示词分组', 'Custom prompt group'),
+                items:templates.filter(item => item.scope === group.id),
+                source:group,
+                isDefault:false
+            }));
+            return [...builtins, ...customs];
         }
         function groupsFor(libraryId=activeLibraryId){
             return libraryId === 'prompts' ? promptGroups() : imageGroups();
@@ -713,7 +750,11 @@
                     fetch('/api/instruction-templates', {cache:'no-store'}).then(r => r.json())
                 ]);
                 assetLibrary = assetData.library || {categories:[]};
-                templateLibrary = {templates:Array.isArray(templateData?.templates) ? templateData.templates : [], updated_at:templateData?.updated_at || 0};
+                templateLibrary = {
+                    templates:Array.isArray(templateData?.templates) ? templateData.templates : [],
+                    groups:Array.isArray(templateData?.groups) ? templateData.groups : [],
+                    updated_at:templateData?.updated_at || 0
+                };
                 renderAll();
                 setStatus('');
             } catch(e) {
@@ -733,10 +774,13 @@
             document.getElementById('refreshBtn').title = copy('刷新', 'Refresh');
             uploadImageBtn.title = copy('上传图片到当前分组', 'Upload images to the current group');
             renameGroupBtn.title = copy('重命名分组', 'Rename group');
+            deleteGroupBtn.title = copy('删除分组', 'Delete group');
             nameCancel.textContent = copy('取消', 'Cancel');
             nameOk.textContent = copy('确定', 'Confirm');
             templateCancel.textContent = copy('取消', 'Cancel');
             templateSave.textContent = copy('保存', 'Save');
+            confirmCancel.textContent = copy('取消', 'Cancel');
+            confirmOk.textContent = copy('确认删除', 'Delete');
             document.getElementById('templateScopeLabel').textContent = copy('分组', 'Group');
             document.getElementById('templateNameLabel').textContent = copy('名称', 'Name');
             document.getElementById('templateTextLabel').textContent = copy('内容', 'Content');
@@ -763,11 +807,13 @@
         }
         function renderGroups(){
             const groups = groupsFor();
-            newGroupBtn.style.display = activeLibraryId === 'images' ? 'inline-flex' : 'none';
+            const group = activeGroup();
+            newGroupBtn.style.display = activeLibraryId === 'images' || activeLibraryId === 'prompts' ? 'inline-flex' : 'none';
             uploadImageBtn.style.display = activeLibraryId === 'images' ? 'inline-flex' : 'none';
-            uploadImageBtn.disabled = activeLibraryId !== 'images' || !activeGroup();
+            uploadImageBtn.disabled = activeLibraryId !== 'images' || !group;
             newTemplateBtn.style.display = activeLibraryId === 'prompts' ? 'inline-flex' : 'none';
-            renameGroupBtn.style.display = activeLibraryId === 'images' ? 'inline-flex' : 'none';
+            renameGroupBtn.style.display = (activeLibraryId === 'images' || (activeLibraryId === 'prompts' && group && !group.isDefault)) ? 'inline-flex' : 'none';
+            deleteGroupBtn.style.display = (activeLibraryId === 'images' || (activeLibraryId === 'prompts' && group && !group.isDefault)) ? 'inline-flex' : 'none';
             groupList.innerHTML = groups.length ? groups.map(group => `
                 <button class="group-btn ${group.id === activeGroupId ? 'active' : ''}" type="button" data-group="${escapeHtml(group.id)}">
                     <i data-lucide="${escapeHtml(group.icon)}"></i>
@@ -934,6 +980,27 @@
                 nameModal.onmousedown = event => { if(event.target === nameModal) done(''); };
             });
         }
+        function openConfirmDialog({title='', message='', confirmText=''}={}){
+            return new Promise(resolve => {
+                confirmTitle.textContent = title || copy('确认删除', 'Confirm delete');
+                confirmMessage.textContent = message || copy('删除后不可恢复。', 'This cannot be undone.');
+                confirmOk.textContent = confirmText || copy('确认删除', 'Delete');
+                confirmModal.classList.add('open');
+                confirmCancel.focus();
+                const done = result => {
+                    confirmModal.classList.remove('open');
+                    confirmOk.onclick = null;
+                    confirmCancel.onclick = null;
+                    confirmModal.onmousedown = null;
+                    closeConfirmDialog = null;
+                    resolve(result);
+                };
+                closeConfirmDialog = done;
+                confirmOk.onclick = () => done(true);
+                confirmCancel.onclick = () => done(false);
+                confirmModal.onmousedown = event => { if(event.target === confirmModal) done(false); };
+            });
+        }
         async function createImageGroup(){
             const name = await openNameDialog({title:copy('新建分组', 'New group'), value:copy('新建分组', 'New group')});
             if(!name) return;
@@ -961,6 +1028,25 @@
             assetLibrary = data.library || assetLibrary;
             renderAll();
         }
+        async function deleteImageGroup(){
+            const group = activeGroup();
+            if(activeLibraryId !== 'images' || !group) return;
+            const ok = await openConfirmDialog({
+                title:copy('删除图片分组', 'Delete image group'),
+                message:copy(`确认删除图片分组「${group.name}」？该分组下的素材会从素材库中移除。`, `Delete image group "${group.name}"? Assets in this group will be removed from the library.`)
+            });
+            if(!ok) return;
+            const res = await fetch(`/api/asset-library/categories/${encodeURIComponent(group.id)}`, {method:'DELETE'});
+            const data = await res.json().catch(() => ({}));
+            if(!res.ok){
+                setStatus(data.detail || copy('删除失败', 'Delete failed'));
+                return;
+            }
+            assetLibrary = data.library || assetLibrary;
+            activeGroupId = '';
+            activeItemId = '';
+            renderAll();
+        }
         async function renameImageAsset(id){
             const item = selectedItem();
             if(!item || item.id !== id) return;
@@ -976,7 +1062,10 @@
             renderAll();
         }
         async function deleteImageAsset(id){
-            const ok = confirm(copy('确认从素材库移除这个资产？', 'Remove this asset from the library?'));
+            const ok = await openConfirmDialog({
+                title:copy('删除图片资产', 'Delete image asset'),
+                message:copy('确认从素材库移除这个资产？', 'Remove this asset from the library?')
+            });
             if(!ok) return;
             const data = await fetch(`/api/asset-library/items/${encodeURIComponent(id)}`, {method:'DELETE'}).then(r => r.json());
             assetLibrary = data.library || assetLibrary;
@@ -1012,11 +1101,81 @@
                 imageUploadInput.value = '';
             }
         }
+        async function createPromptGroup(){
+            const name = await openNameDialog({title:copy('新建提示词分组', 'New prompt group'), value:copy('新分组', 'New group')});
+            if(!name) return;
+            const data = await fetch('/api/instruction-template-groups', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({name})
+            }).then(async r => {
+                const data = await r.json().catch(() => ({}));
+                if(!r.ok) throw new Error(data.detail || copy('新建失败', 'Create failed'));
+                return data;
+            });
+            const library = data.library || data;
+            templateLibrary = {
+                templates:Array.isArray(library.templates) ? library.templates : [],
+                groups:Array.isArray(library.groups) ? library.groups : [],
+                updated_at:library.updated_at || Date.now()
+            };
+            activeLibraryId = 'prompts';
+            activeGroupId = data.group?.id || activeGroupId;
+            activeItemId = '';
+            renderAll();
+        }
+        async function renamePromptGroup(){
+            const group = activeGroup();
+            if(activeLibraryId !== 'prompts' || !group || group.isDefault) return;
+            const name = await openNameDialog({title:copy('重命名提示词分组', 'Rename prompt group'), value:group.name || ''});
+            if(!name) return;
+            const res = await fetch(`/api/instruction-template-groups/${encodeURIComponent(group.id)}`, {
+                method:'PATCH',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({name})
+            });
+            const data = await res.json().catch(() => ({}));
+            if(!res.ok){
+                setStatus(data.detail || copy('重命名失败', 'Rename failed'));
+                return;
+            }
+            const library = data.library || data;
+            templateLibrary = {
+                templates:Array.isArray(library.templates) ? library.templates : [],
+                groups:Array.isArray(library.groups) ? library.groups : [],
+                updated_at:library.updated_at || Date.now()
+            };
+            activeGroupId = data.group?.id || group.id;
+            renderAll();
+        }
+        async function deletePromptGroup(){
+            const group = activeGroup();
+            if(activeLibraryId !== 'prompts' || !group || group.isDefault) return;
+            const ok = await openConfirmDialog({
+                title:copy('删除提示词分组', 'Delete prompt group'),
+                message:copy(`确认删除提示词分组「${group.name}」？该分组下的模板也会删除。`, `Delete prompt group "${group.name}"? Templates in this group will also be deleted.`)
+            });
+            if(!ok) return;
+            const res = await fetch(`/api/instruction-template-groups/${encodeURIComponent(group.id)}`, {method:'DELETE'});
+            const data = await res.json().catch(() => ({}));
+            if(!res.ok){
+                setStatus(data.detail || copy('删除失败', 'Delete failed'));
+                return;
+            }
+            templateLibrary = {
+                templates:Array.isArray(data.templates) ? data.templates : [],
+                groups:Array.isArray(data.groups) ? data.groups : [],
+                updated_at:data.updated_at || Date.now()
+            };
+            activeGroupId = '';
+            activeItemId = '';
+            renderAll();
+        }
         function openTemplateDialog(template=null){
             editingTemplateId = template?.id || '';
             templateModalTitle.textContent = template ? copy('编辑提示词', 'Edit prompt') : copy('新建提示词', 'New prompt');
             templateDialogStatus.textContent = '';
-            templateScope.innerHTML = TEMPLATE_SCOPES.map(scope => `<option value="${escapeHtml(scope.id)}">${escapeHtml(scope[isEn() ? 'en' : 'zh'])}</option>`).join('');
+            templateScope.innerHTML = promptGroups().map(group => `<option value="${escapeHtml(group.id)}">${escapeHtml(group.name)}</option>`).join('');
             templateScope.value = template?.scope || (activeLibraryId === 'prompts' && activeGroupId ? activeGroupId : TEMPLATE_SCOPES[0].id);
             templateName.value = template?.name || '';
             templateText.value = template?.text || '';
@@ -1033,11 +1192,15 @@
             const res = await fetch('/api/instruction-templates', {
                 method:'PUT',
                 headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({templates:templateLibrary.templates || []})
+                body:JSON.stringify({templates:templateLibrary.templates || [], groups:templateLibrary.groups || []})
             });
             if(!res.ok) throw new Error('save failed');
             const data = await res.json();
-            templateLibrary = {templates:Array.isArray(data?.templates) ? data.templates : [], updated_at:data?.updated_at || Date.now()};
+            templateLibrary = {
+                templates:Array.isArray(data?.templates) ? data.templates : [],
+                groups:Array.isArray(data?.groups) ? data.groups : [],
+                updated_at:data?.updated_at || Date.now()
+            };
         }
         async function saveTemplateFromDialog(){
             const scope = templateScope.value;
@@ -1076,7 +1239,10 @@
         async function deleteTemplate(id){
             const item = selectedItem();
             if(!item || item.id !== id) return;
-            const ok = confirm(copy(`确认删除提示词「${item.name || '未命名'}」？`, `Delete prompt "${item.name || 'Untitled'}"?`));
+            const ok = await openConfirmDialog({
+                title:copy('删除提示词', 'Delete prompt'),
+                message:copy(`确认删除提示词「${item.name || '未命名'}」？`, `Delete prompt "${item.name || 'Untitled'}"?`)
+            });
             if(!ok) return;
             templateLibrary.templates = (templateLibrary.templates || []).filter(template => template.id !== id);
             try {
@@ -1089,19 +1255,21 @@
             }
         }
         document.getElementById('refreshBtn').onclick = loadAll;
-        newGroupBtn.onclick = createImageGroup;
+        newGroupBtn.onclick = () => activeLibraryId === 'prompts' ? createPromptGroup() : createImageGroup();
         uploadImageBtn.onclick = () => {
             imageUploadInput.value = '';
             imageUploadInput.click();
         };
         imageUploadInput.onchange = () => uploadImagesToGroup(imageUploadInput.files);
         newTemplateBtn.onclick = () => openTemplateDialog();
-        renameGroupBtn.onclick = renameImageGroup;
+        renameGroupBtn.onclick = () => activeLibraryId === 'prompts' ? renamePromptGroup() : renameImageGroup();
+        deleteGroupBtn.onclick = () => activeLibraryId === 'prompts' ? deletePromptGroup() : deleteImageGroup();
         templateCancel.onclick = closeTemplateDialog;
         templateSave.onclick = saveTemplateFromDialog;
         templateModal.addEventListener('mousedown', event => { if(event.target === templateModal) closeTemplateDialog(); });
         document.addEventListener('keydown', event => {
             if(event.key === 'Escape') {
+                if(closeConfirmDialog) closeConfirmDialog(false);
                 if(templateModal.classList.contains('open')) closeTemplateDialog();
                 if(nameModal.classList.contains('open')) nameModal.classList.remove('open');
             }

@@ -230,8 +230,13 @@ class AssetLibraryRenameRequest(BaseModel):
     name: str = ""
 
 
+class InstructionTemplateGroupRequest(BaseModel):
+    name: str = "新分组"
+
+
 class InstructionTemplateSaveRequest(BaseModel):
     templates: List[Dict[str, Any]] = []
+    groups: Optional[List[Dict[str, Any]]] = None
 
 
 class TestConnectionPayload(BaseModel):

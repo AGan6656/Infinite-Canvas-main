@@ -86,16 +86,8 @@ let activeAssetCategoryId = '';
 let mentionSource = 'input';
 let mentionAssetCategoryId = '';
 const PROMPT_PRESETS_KEY = 'smart_canvas_prompt_presets_v1';
-const ASSET_EXTRACTION_PROMPT_URLS = {
-    character:'/static/prompts/asset-extraction/character.txt',
-    scene:'/static/prompts/asset-extraction/scene.txt',
-    prop:'/static/prompts/asset-extraction/prop.txt'
-};
-const STORYBOARD_PROMPT_URL = '/static/prompts/storyboard/default.txt';
 let promptPresets = [];
 let instructionTemplates = [];
-let assetExtractionPromptTemplates = {};
-let storyboardPromptTemplate = '';
 let storyboardSettingsState = {nodeId:'', mode:'image'};
 let promptPresetDeleteArmed = false;
 let instructionTemplateDeleteArmed = false;
@@ -1592,27 +1584,6 @@ function loadPromptPresets(){
         promptPresets = [];
     }
 }
-async function loadAssetExtractionPromptTemplates(){
-    const entries = await Promise.all(Object.entries(ASSET_EXTRACTION_PROMPT_URLS).map(async ([type, url]) => {
-        try {
-            const res = await fetch(`${url}?v=${Date.now()}`, {cache:'no-store'});
-            if(!res.ok) return [type, ''];
-            const text = (await res.text()).trim();
-            return [type, assetExtractorScriptTokenPattern().test(text) ? text : `${text}\n\n剧本文本：\n{{script_text}}`];
-        } catch(e) {
-            return [type, ''];
-        }
-    }));
-    assetExtractionPromptTemplates = Object.fromEntries(entries.filter(([, text]) => text));
-}
-async function loadStoryboardPromptTemplate(){
-    try {
-        const res = await fetch(`${STORYBOARD_PROMPT_URL}?v=${Date.now()}`, {cache:'no-store'});
-        storyboardPromptTemplate = res.ok ? (await res.text()).trim() : '';
-    } catch(e) {
-        storyboardPromptTemplate = '';
-    }
-}
 function savePromptPresets(){
     localStorage.setItem(PROMPT_PRESETS_KEY, JSON.stringify(promptPresets));
 }
@@ -1700,13 +1671,15 @@ function editPromptPresetForNode(node){
 }
 async function loadInstructionTemplates(){
     try {
-        const data = await fetch('/api/instruction-templates', {cache:'no-store'}).then(r => r.json());
+        const data = await fetch('/api/instruction-templates', {cache:'no-store'}).then(async r => {
+            if(!r.ok) throw new Error(await r.text());
+            return r.json();
+        });
         const list = Array.isArray(data?.templates) ? data.templates : [];
         instructionTemplates = Array.isArray(list)
             ? list.filter(item => item?.id && item.scope && typeof item.text === 'string')
             : [];
     } catch(e) {
-        instructionTemplates = [];
         toast(tr('smart.instructionTemplateLoadFailed'));
     }
 }
@@ -1742,14 +1715,32 @@ function instructionTemplatesForScope(scope){
 function currentInstructionTemplate(id){
     return instructionTemplates.find(item => item.id === id) || null;
 }
+function firstInstructionTemplateForScope(scope){
+    return instructionTemplatesForScope(scope)[0] || null;
+}
+function nodeInstructionTemplate(node, options={}){
+    const scope = instructionTemplateScopeForNode(node);
+    if(!scope) return null;
+    const selected = node?.instructionTemplateId ? currentInstructionTemplate(node.instructionTemplateId) : null;
+    if(selected?.scope === scope) return selected;
+    return options.allowFirst ? firstInstructionTemplateForScope(scope) : null;
+}
+function syncNodeInstructionFromTemplate(node, options={}){
+    const preset = nodeInstructionTemplate(node, {allowFirst: options.allowFirst !== false});
+    if(!node || !preset) return null;
+    node.instructionTemplateId = preset.id;
+    node.instruction = preset.text || '';
+    node.instructionMode = 'template';
+    return preset;
+}
 function instructionTemplatePanelNode(){
     return nodes.find(n => n.id === instructionTemplatePanel?.dataset.nodeId) || null;
 }
 function instructionTemplateTextForNode(node){
     if(!node) return '';
-    if(node.type === 'smart-asset-extractor') ensureAssetExtractorInstructionTemplate(node);
-    if(node.type === 'smart-storyboard' && !String(node.instruction || '').trim()) node.instruction = defaultStoryboardInstruction();
-    return String(node.instruction || '').trim();
+    const preset = syncNodeInstructionFromTemplate(node, {allowFirst:true});
+    if(preset?.text) return String(preset.text || '').trim();
+    return '';
 }
 function defaultInstructionTemplateName(text, scope=''){
     const first = String(text || '').trim().split(/\r?\n/).map(line => line.trim()).filter(Boolean)[0] || '';
@@ -1798,28 +1789,36 @@ function renderInstructionTemplatePanel(selectedId='', message='', tone=''){
     const scoped = instructionTemplatesForScope(scope);
     const preferredId = selectedId || node?.instructionTemplateId || '';
     const preset = scoped.find(item => item.id === preferredId) || scoped[0] || null;
-    if(instructionTemplateTitle) instructionTemplateTitle.textContent = tr('smart.instructionTemplateLibrary');
+    if(instructionTemplateTitle) instructionTemplateTitle.textContent = tr('smart.instructionTemplateSettings');
     if(instructionTemplateScope) instructionTemplateScope.textContent = instructionTemplateScopeLabel(scope);
     instructionTemplateSelect.innerHTML = scoped.length
-        ? scoped.map(item => `<option value="${escapeHtml(item.id)}" ${preset?.id === item.id ? 'selected' : ''}>${escapeHtml(item.name || tr('smart.instructionTemplateUnnamed'))}${node?.instructionTemplateId === item.id ? ` · ${escapeHtml(tr('smart.instructionTemplateActive'))}` : ''}</option>`).join('')
+        ? scoped.map(item => `<option value="${escapeHtml(item.id)}" ${preset?.id === item.id ? 'selected' : ''}>${escapeHtml(item.name || tr('smart.instructionTemplateUnnamed'))}${node?.instructionTemplateId === item.id ? ` - ${escapeHtml(tr('smart.instructionTemplateActive'))}` : ''}</option>`).join('')
         : `<option value="">${escapeHtml(tr('smart.instructionTemplateNone'))}</option>`;
     if(preset && instructionTemplateSelect.value !== preset.id) instructionTemplateSelect.value = preset.id;
     const fallbackText = instructionTemplateTextForNode(node);
-    instructionTemplateName.value = preset?.name || defaultInstructionTemplateName(fallbackText, scope);
-    instructionTemplateText.value = preset?.text || fallbackText;
+    if(instructionTemplateName) {
+        instructionTemplateName.value = preset?.name || defaultInstructionTemplateName(fallbackText, scope);
+        instructionTemplateName.readOnly = true;
+    }
+    if(instructionTemplateText) {
+        instructionTemplateText.value = preset?.text || fallbackText;
+        instructionTemplateText.readOnly = true;
+    }
     const hasPreset = Boolean(preset);
-    instructionTemplateApply.disabled = !hasPreset;
-    instructionTemplateDelete.disabled = !hasPreset;
-    instructionTemplateSave.disabled = !hasPreset;
-    instructionTemplateNew.disabled = !node && !String(instructionTemplateText.value || '').trim();
-    setInstructionTemplateStatus(message || (hasPreset ? tr('smart.instructionTemplatePanelHint') : tr('smart.instructionTemplatePanelEmpty')), tone);
+    if(instructionTemplateApply) instructionTemplateApply.disabled = !hasPreset;
+    if(instructionTemplateDelete) instructionTemplateDelete.style.display = 'none';
+    if(instructionTemplateSave) instructionTemplateSave.style.display = 'none';
+    if(instructionTemplateNew) instructionTemplateNew.style.display = 'none';
+    if(instructionTemplateApply) instructionTemplateApply.textContent = tr('smart.instructionTemplateUse');
+    setInstructionTemplateStatus(message || (hasPreset ? tr('smart.instructionTemplateLibraryHint') : tr('smart.instructionTemplateLibraryEmpty')), tone);
 }
-function openInstructionTemplatePanel(nodeId='', templateId='', options={}){
+async function openInstructionTemplatePanel(nodeId='', templateId='', options={}){
     if(!instructionTemplatePanel) return;
     const node = nodes.find(n => n.id === nodeId);
     const scope = instructionTemplateScopeForNode(node);
     if(!node || !scope) return;
     closePromptPresetPanel();
+    await loadInstructionTemplates();
     instructionTemplatePanel.dataset.nodeId = nodeId;
     instructionTemplatePanel.dataset.scope = scope;
     renderInstructionTemplatePanel(templateId || node.instructionTemplateId || '', options.status || '', options.tone || '');
@@ -1848,7 +1847,7 @@ function applyInstructionTemplateToNode(node, preset, textOverride=null){
     node.instruction = text;
     node.instructionMode = 'template';
     node.instructionTemplateId = preset?.id || '';
-    node.instructionOpen = true;
+    node.instructionOpen = false;
     render();
     scheduleSave();
     renderInstructionTemplatePanel(preset?.id || '', tr('smart.instructionTemplateApplied'), 'ok');
@@ -2232,40 +2231,16 @@ function defaultAssetExtractionInstruction(type){
 function assetExtractorScriptTokenPattern(){
     return /\{\{\s*script_text\s*\}\}/;
 }
-function fallbackAssetExtractionPromptTemplate(type){
-    const assetType = normalizeAssetExtractorType(type);
-    const label = tr(assetExtractorTypeMeta(assetType).labelKey);
-    return [
-        `请从剧本文本中提取${label}资产。`,
-        '',
-        '只输出 JSON 数组。每个对象必须且只能包含 name、aliases、description 三个字段。',
-        'description 必须是可直接给后续图片节点使用的自然语言描述。',
-        '',
-        '剧本文本：',
-        '{{script_text}}'
-    ].join('\n');
-}
 function defaultAssetExtractionPromptTemplate(type){
     const assetType = normalizeAssetExtractorType(type);
-    return String(assetExtractionPromptTemplates[assetType] || fallbackAssetExtractionPromptTemplate(assetType)).trim();
-}
-function mergeLegacyAssetInstructionIntoTemplate(template, legacy){
-    const note = String(legacy || '').trim();
-    if(!note) return template;
-    return String(template || '').replace(/\n剧本文本：\n\{\{\s*script_text\s*\}\}\s*$/m, `\n用户补充要求：\n${note}\n\n剧本文本：\n{{script_text}}`);
+    const fromLibrary = firstInstructionTemplateForScope(`asset:${assetType}`)?.text || '';
+    return String(fromLibrary).trim();
 }
 function ensureAssetExtractorInstructionTemplate(node){
     if(!node || node.type !== 'smart-asset-extractor') return;
-    const assetType = normalizeAssetExtractorType(node.assetType);
-    const current = String(node.instruction || '').trim();
-    if(node.instructionMode === 'template'){
-        if(!current) node.instruction = defaultAssetExtractionPromptTemplate(assetType);
-        return;
-    }
-    const template = defaultAssetExtractionPromptTemplate(assetType);
-    node.instruction = assetExtractorScriptTokenPattern().test(current)
-        ? current
-        : mergeLegacyAssetInstructionIntoTemplate(template, current);
+    const preset = syncNodeInstructionFromTemplate(node, {allowFirst:true});
+    if(preset?.text) return;
+    node.instructionTemplateId = '';
     node.instructionMode = 'template';
 }
 function renderAssetExtractionPromptTemplate(template, node, scriptText){
@@ -2285,6 +2260,7 @@ function createAssetExtractorNode(assetType, x, y, options={}){
     if(!options.skipUndo) pushUndo();
     const type = normalizeAssetExtractorType(assetType);
     const providerId = resolveChatProviderId();
+    const preset = firstInstructionTemplateForScope(`asset:${type}`);
     const node = {
         id:uid(`extract_${type}`),
         type:'smart-asset-extractor',
@@ -2294,8 +2270,9 @@ function createAssetExtractorNode(assetType, x, y, options={}){
         w:380,
         h:360,
         title:tr(assetExtractorTypeMeta(type).titleKey),
-        instruction:defaultAssetExtractionPromptTemplate(type),
+        instruction:preset?.text || '',
         instructionMode:'template',
+        instructionTemplateId:preset?.id || '',
         llmProvider:providerId,
         llmModel:resolveChatModel('', providerId),
         items:[],
@@ -2332,6 +2309,7 @@ function createAssetOutputNode(extractor, item, index, text, x, y){
 function createStoryboardNode(x, y, options={}){
     if(!options.skipUndo) pushUndo();
     const providerId = resolveChatProviderId();
+    const preset = firstInstructionTemplateForScope('storyboard');
     const node = {
         id:uid('storyboard'),
         type:'smart-storyboard',
@@ -2340,8 +2318,9 @@ function createStoryboardNode(x, y, options={}){
         w:430,
         h:470,
         title:tr('smart.storyboardNodeTitle'),
-        instruction:defaultStoryboardInstruction(),
+        instruction:preset?.text || defaultStoryboardInstruction(),
         instructionMode:'template',
+        instructionTemplateId:preset?.id || '',
         durationMode:'60',
         customDurationSec:60,
         llmProvider:providerId,
@@ -3044,8 +3023,9 @@ function parseAssetExtractionJson(text, assetType){
     throw lastError || new Error(tr('smart.assetExtractorJsonFailed'));
 }
 function assetExtractorPromptFor(node, scriptText){
-    ensureAssetExtractorInstructionTemplate(node);
-    return renderAssetExtractionPromptTemplate(node.instruction, node, scriptText);
+    const preset = syncNodeInstructionFromTemplate(node, {allowFirst:true});
+    const template = String(preset?.text || '').trim();
+    return template ? renderAssetExtractionPromptTemplate(template, node, scriptText) : '';
 }
 function assetExtractorItemSummary(item, assetType){
     const nameKeys = new Set(['id','type','name','title','角色名','场景名','道具名','名称']);
@@ -3156,7 +3136,7 @@ function syncAssetExtractorOutputNodes(extractor){
     return synced;
 }
 function defaultStoryboardInstruction(){
-    return String(storyboardPromptTemplate || '').trim();
+    return String(firstInstructionTemplateForScope('storyboard')?.text || '').trim();
 }
 function storyboardTokenPattern(name){
     return new RegExp(`\\{\\{\\s*${name}\\s*\\}\\}`, 'g');
@@ -3338,7 +3318,9 @@ function storyboardDurationOptionsHtml(node){
     return STORYBOARD_DURATION_OPTIONS.map(value => `<option value="${value}" ${mode === value ? 'selected' : ''}>${escapeHtml(labels[value])}</option>`).join('');
 }
 function storyboardPromptFor(node, scriptText){
-    const template = String(node.instruction || defaultStoryboardInstruction()).trim();
+    const preset = syncNodeInstructionFromTemplate(node, {allowFirst:true});
+    const template = String(preset?.text || '').trim();
+    if(!template) return '';
     const hasDuration = storyboardTokenPattern('duration_context').test(template);
     let text = template
         .replace(storyboardTokenPattern('script_text'), scriptText)
@@ -3809,16 +3791,14 @@ function storyboardBodyHtml(node){
     node.llmModel = resolveChatModel(node.llmModel || '', node.llmProvider);
     node.durationMode = normalizeStoryboardDurationMode(node.durationMode);
     node.customDurationSec = clampStoryboardDuration(node.customDurationSec || storyboardDurationSeconds(node));
+    syncNodeInstructionFromTemplate(node, {allowFirst:true});
     if(!String(node.instruction || '').trim()) node.instruction = defaultStoryboardInstruction();
     const sourceCount = storyboardInputNodes(node).length;
     const shotCount = Array.isArray(node.shots) ? node.shots.length : 0;
-    const instructionOpen = Boolean(node.instructionOpen);
     const durationSeconds = storyboardDurationSeconds(node);
     const targetShots = storyboardTargetShotCount(node);
     return `<div class="asset-extractor-card storyboard-card">
         <div class="asset-extractor-head"><span><i data-lucide="clapperboard"></i>${escapeHtml(tr('smart.storyboardNodeTitle'))}</span><span>${escapeHtml(sourceCount ? trf('smart.assetExtractorSourceCount', {n:sourceCount}) : tr('smart.assetExtractorNoSource'))}</span></div>
-        <button class="storyboard-edit asset-extractor-control ${instructionOpen ? 'active' : ''}" type="button"><i data-lucide="pencil"></i><span>${escapeHtml(tr('smart.storyboardInstruction'))}</span></button>
-        ${instructionOpen ? `<textarea class="storyboard-instruction asset-extractor-control" placeholder="${escapeHtml(tr('smart.storyboardInstruction'))}">${escapeHtml(node.instruction || '')}</textarea>` : ''}
         <div class="storyboard-duration-row">
             <span>${escapeHtml(tr('smart.storyboardDuration'))}</span>
             <select class="asset-extractor-control storyboard-duration-select">${storyboardDurationOptionsHtml(node)}</select>
@@ -3880,14 +3860,11 @@ function assetExtractorBodyHtml(node){
     const sourceCount = assetExtractorInputNodes(node).length;
     const itemCount = Array.isArray(node.items) ? node.items.length : 0;
     const saved = node.assetFile || (canvasId ? `data/canvas_assets/${canvasId}.json` : '');
-    const instructionOpen = Boolean(node.instructionOpen);
     return `<div class="asset-extractor-card asset-extractor-${escapeHtml(node.assetType)}">
         <div class="asset-extractor-head">
             <span><i data-lucide="${escapeHtml(meta.icon)}"></i>${escapeHtml(tr(meta.titleKey))}</span>
             <span>${escapeHtml(sourceCount ? trf('smart.assetExtractorSourceCount', {n:sourceCount}) : tr('smart.assetExtractorNoSource'))}</span>
         </div>
-        <button class="asset-extractor-edit asset-extractor-control ${instructionOpen ? 'active' : ''}" type="button"><i data-lucide="pencil"></i><span>${escapeHtml(tr('smart.assetExtractorInstruction'))}</span></button>
-        ${instructionOpen ? `<textarea class="asset-extractor-instruction asset-extractor-control" placeholder="${escapeHtml(tr('smart.assetExtractorInstruction'))}">${escapeHtml(node.instruction || '')}</textarea>` : ''}
         <div class="asset-extractor-model-row">
             <select class="asset-extractor-control asset-extractor-provider">${chatProviderOptions(node.llmProvider)}</select>
             <select class="asset-extractor-control asset-extractor-model">${chatModelOptions(node.llmModel, node.llmProvider)}</select>
@@ -4097,16 +4074,16 @@ function render(){
         const body = nodeBodyHtml(node, layout);
         const deleteBtn = `<button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button>`;
         const instructionTemplateBtn = (isAssetExtractor || isStoryboard)
-            ? `<button class="node-template-library" type="button" data-instruction-template="${escapeHtml(node.id)}" title="${escapeHtml(tr('smart.instructionTemplateLibrary'))}" aria-label="${escapeHtml(tr('smart.instructionTemplateLibrary'))}"><i data-lucide="library"></i><span>${escapeHtml(tr('smart.instructionTemplateLibrary'))}</span></button>`
+            ? `<button class="node-title-settings" type="button" data-instruction-template="${escapeHtml(node.id)}" title="${escapeHtml(tr('smart.instructionTemplateSettings'))}" aria-label="${escapeHtml(tr('smart.instructionTemplateSettings'))}"><i data-lucide="settings"></i></button>`
             : '';
+        const showFloatingActions = !isEmpty && !(isAssetExtractor || isStoryboard);
         const hint = isStoryboard ? escapeHtml(tr('smart.storyboardHint')) : isStoryboardOutput ? escapeHtml(tr('smart.storyboardOutputHint')) : isStoryboardShot ? escapeHtml(tr('smart.storyboardShotHint')) : isAssetExtractor ? escapeHtml(tr('smart.assetExtractorHint')) : isScript ? escapeHtml(tr('smart.scriptNodeHint')) : isPending ? escapeHtml(tr('smart.hintPending')) : (imgs.length > 1 ? escapeHtml(tr('smart.hintMulti')) : imgs.length ? escapeHtml(tr('smart.hintSingle')) : escapeHtml(tr('smart.hintEmpty')));
         const displayHint = isAssetOutput ? escapeHtml(tr('smart.assetOutputHint')) : hint;
         const html = `<div class="image-node ${isEmpty ? 'empty-node' : ''} ${isGroup ? 'group-node' : ''} ${isPrompt ? 'prompt-smart-node' : ''} ${isScript ? 'script-smart-node' : ''} ${isAssetExtractor ? 'asset-extractor-node' : ''} ${isAssetOutput ? 'asset-output-node' : ''} ${isStoryboard ? 'storyboard-node' : ''} ${isStoryboardOutput ? 'storyboard-output-node' : ''} ${isStoryboardShot ? 'storyboard-shot-node' : ''} ${isLoop ? 'loop-smart-node' : ''} ${isNodeSelected(node.id) ? 'selected' : ''} ${(dragState?.groupIds?.includes(node.id) || dragState?.id === node.id) ? 'dragging' : ''} ${node.running ? 'node-running' : ''} ${isPending ? 'node-pending' : ''}" data-id="${escapeHtml(node.id)}" style="left:${node.x || 0}px;top:${node.y || 0}px;width:${layout.width}px;height:${layout.height}px">
-            <div class="node-head"><div class="node-title">${displayTitle}</div><div class="node-actions">${deleteBtn}</div></div>
-            ${!isEmpty ? `<div class="floating-node-actions"><button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button></div>` : ''}
+            <div class="node-head"><div class="node-title">${displayTitle}</div><div class="node-actions">${instructionTemplateBtn}${deleteBtn}</div></div>
+            ${showFloatingActions ? `<div class="floating-node-actions"><button class="mini-x node-delete" type="button" title="${escapeHtml(tr('smart.deleteNode'))}"><i data-lucide="trash-2"></i></button></div>` : ''}
             ${runTimePillHtml(node)}
             <div class="node-body">${body}</div>
-            ${instructionTemplateBtn}
             <div class="node-hint">${displayHint}</div>
             ${imgs.length || node.pending || isPrompt || isScript || isAssetExtractor || isAssetOutput || isStoryboard || isStoryboardOutput || isStoryboardShot || isLoop ? '<div class="node-resize-handle" data-resize="1"></div>' : ''}
             <div class="node-port port-in" data-port="in" title="input"></div>
@@ -4353,23 +4330,6 @@ function bindAssetExtractorControls(el, node){
         control.addEventListener('click', e => e.stopPropagation());
         control.addEventListener('dblclick', e => e.stopPropagation());
     });
-    const instructionEl = el.querySelector('.asset-extractor-instruction');
-    if(instructionEl){
-        bindScrollableText(instructionEl);
-        instructionEl.oninput = e => {
-            node.instruction = e.target.value;
-            node.instructionMode = 'template';
-            scheduleSave();
-        };
-    }
-    const editEl = el.querySelector('.asset-extractor-edit');
-    if(editEl) editEl.onclick = e => {
-        e.preventDefault();
-        e.stopPropagation();
-        node.instructionOpen = !node.instructionOpen;
-        render();
-        scheduleSave();
-    };
     const providerEl = el.querySelector('.asset-extractor-provider');
     if(providerEl) providerEl.onchange = e => {
         e.stopPropagation();
@@ -4416,23 +4376,6 @@ function bindStoryboardControls(el, node){
         control.addEventListener('click', e => e.stopPropagation());
         control.addEventListener('dblclick', e => e.stopPropagation());
     });
-    const instructionEl = el.querySelector('.storyboard-instruction');
-    if(instructionEl){
-        bindScrollableText(instructionEl);
-        instructionEl.oninput = e => {
-            node.instruction = e.target.value;
-            node.instructionMode = 'template';
-            scheduleSave();
-        };
-    }
-    const editEl = el.querySelector('.storyboard-edit');
-    if(editEl) editEl.onclick = e => {
-        e.preventDefault();
-        e.stopPropagation();
-        node.instructionOpen = !node.instructionOpen;
-        render();
-        scheduleSave();
-    };
     const durationSelect = el.querySelector('.storyboard-duration-select');
     if(durationSelect) durationSelect.onchange = e => {
         e.stopPropagation();
@@ -4932,7 +4875,7 @@ function bindNodeEvents(){
         });
         const beginNodeDrag = e => {
             if(e.button !== 0 || e.target.closest('.mini-x, .node-resize-handle, .thumb-item, .node-drop, .node-port, select, input, button')) return;
-            if(e.target.closest('.prompt-node-pill, .prompt-node-llm, textarea:not(.prompt-node-text):not(.script-node-text):not(.asset-extractor-instruction)')) return;
+            if(e.target.closest('.prompt-node-pill, .prompt-node-llm, textarea:not(.prompt-node-text):not(.script-node-text)')) return;
             e.preventDefault(); e.stopPropagation();
             window.getSelection?.()?.removeAllRanges?.();
             if(document.activeElement?.blur) document.activeElement.blur();
@@ -7714,6 +7657,7 @@ async function runStoryboardNode(nodeId){
     node.runTimerHidden = false;
     render();
     try {
+        await loadInstructionTemplates();
         const provider = resolveChatProviderId(node.llmProvider || '');
         const model = resolveChatModel(node.llmModel || '', provider);
         const message = storyboardPromptFor(node, scriptText);
@@ -7950,9 +7894,11 @@ async function runAssetExtractorNode(nodeId){
     node.runTimerHidden = false;
     render();
     try {
+        await loadInstructionTemplates();
         const provider = resolveChatProviderId(node.llmProvider || '');
         const model = resolveChatModel(node.llmModel || '', provider);
         const message = assetExtractorPromptFor(node, scriptText);
+        if(!message) throw new Error(tr('smart.assetExtractorInstructionMissing'));
         const result = await fetch('/api/canvas-llm', {
             method:'POST',
             headers:{'Content-Type':'application/json'},
@@ -9000,7 +8946,7 @@ if(instructionTemplateSave) instructionTemplateSave.onclick = async () => {
     if(node?.instructionTemplateId === preset.id){
         node.instruction = savedPreset.text || text;
         node.instructionMode = 'template';
-        node.instructionOpen = true;
+        node.instructionOpen = false;
     }
     renderInstructionTemplatePanel(savedPreset.id || preset.id, tr('smart.instructionTemplateSaved'), 'ok');
     render();
@@ -9166,7 +9112,7 @@ document.addEventListener('click', event => {
     if(!event.target.closest('.smart-control')) closeAllSmartPopovers();
     if(!event.target.closest('.mention-picker') && !event.target.closest('#promptInput')) closeMentionPicker();
     if(!event.target.closest('.prompt-preset-panel') && !event.target.closest('.prompt-preset-edit') && !event.target.closest('.prompt-preset-save')) closePromptPresetPanel();
-    if(!event.target.closest('.instruction-template-panel') && !event.target.closest('.node-template-library')) closeInstructionTemplatePanel();
+    if(!event.target.closest('.instruction-template-panel') && !event.target.closest('.node-title-settings')) closeInstructionTemplatePanel();
 });
 document.addEventListener('keydown', event => {
     if(event.key === 'Escape') { closeAllSmartPopovers(); closeCreateMenu(); closeSmartCanvasLog(); closePromptPresetPanel(); closeInstructionTemplatePanel(); closeStoryboardSettings(); }
@@ -9348,8 +9294,6 @@ window.onload = async () => {
     if(window.StudioI18n) window.StudioI18n.apply();
     if(window.lucide) lucide.createIcons();
     await loadInstructionTemplates();
-    await loadAssetExtractionPromptTemplates();
-    await loadStoryboardPromptTemplate();
     await loadConfig();
     await loadAssetLibrary();
     await loadCanvas();

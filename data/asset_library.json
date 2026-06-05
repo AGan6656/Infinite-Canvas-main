@@ -4,43 +4,32 @@
       "id": "characters",
       "name": "角色",
       "type": "image",
-      "items": [
-        {
-          "id": "asset_b3816e9c6db6",
-          "name": "6a1ce84fdc8348ec0f89c8bb",
-          "url": "/assets/library/lib_a316cecfa310_6a1ce84fdc8348ec0f89c8bb.webp",
-          "kind": "image",
-          "created_at": 1780658353601
-        }
-      ]
+      "items": []
     },
     {
       "id": "scenes",
       "name": "场景",
       "type": "image",
-      "items": [
-        {
-          "id": "asset_c500eb7e60a3",
-          "name": "Image 2",
-          "url": "/assets/library/lib_d3c94f836e5f_Image 2.png",
-          "kind": "image",
-          "created_at": 1780658361650
-        },
-        {
-          "id": "asset_649bedf85e04",
-          "name": "Image 1",
-          "url": "/assets/library/lib_fdf8e5f729df_Image 1.png",
-          "kind": "image",
-          "created_at": 1780656013521
-        }
-      ]
+      "items": []
     },
     {
       "id": "workflows",
       "name": "工作流",
       "type": "workflow",
       "items": []
+    },
+    {
+      "id": "cat_51825271b549",
+      "name": "道具",
+      "type": "image",
+      "items": []
+    },
+    {
+      "id": "cat_4ab1071fe0ce",
+      "name": "新建分组",
+      "type": "image",
+      "items": []
     }
   ],
-  "updated_at": 1780658361651
+  "updated_at": 1780661471746
 }
