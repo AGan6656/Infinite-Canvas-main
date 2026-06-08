@@ -128,11 +128,6 @@ async def generate_image(
                 for fh in opened:
                     fh.close()
             if response is None:
-                if is_gpt2:
-                    raise HTTPException(
-                        status_code=502,
-                        detail=f"GPT-Image-2 edit endpoint /images/edits failed: {edit_failed_text[:300] or edit_failed_status}",
-                    )
                 image_payload = [reference_to_data_url(ref, max_size=1536) for ref in image_refs[:4]]
                 body = {
                     "model": model,

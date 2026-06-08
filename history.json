@@ -1,5 +1,180 @@
 [
     {
+        "prompt": "shot-1|时长：3秒|景别：特写(CU)|运镜：推(Push in)|角度：平拍\n画面描述：江凡绝望地抬起头，双眼通红，对着手机嘶吼，脖颈青筋暴起，完全不顾电话那头的警告。\n台词：江凡（绝望，带着哭腔）：\"真的有鬼啊！她是飘着的！\"\n空间站位：江凡面部填满画面，情绪极度激动。\n\nshot-2|时长：2秒|景别：大特写(ECU)|运镜：固定|角度：俯拍\n画面描述：江凡的手无力地垂下，手机屏幕的光亮映亮了他绝望的脸庞，随后屏幕熄灭，周围陷入更深的黑暗。\n台词：江凡os（混响）：\"完了，死定了……\"\n空间站位：手机位于画面前景，江凡虚化在背景。\n\nshot-3|时长：3秒|景别：全景(WS)|运镜：慢推(Slow Push)|角度：平拍\n画面描述：胡同深处的迷雾开始翻滚，气温骤降，地面结起薄霜。一道模糊的白影在迷雾深处无声无息地显现，正向镜头方向飘来。\n台词：无。\n空间站位：白影位于画面纵深远处，逐渐变大。\n\nshot-4|时长：2秒|景别：中景(MS)|运镜：固定|角度：侧拍\n画面描述：江凡背靠着墙壁，身体瑟瑟发抖，他似乎感觉到了逼近的危险，惊恐地瞪大眼睛看向画面右侧（白影来的方向）。\n台词：无。\n空间站位：江凡位于画面左侧边缘，视线投向右侧画外。\n\nshot-5|时长：3秒|景别：特写(CU)|运镜：快速横摇(Whip Pan)|角度：平拍\n画面描述：一道刺眼的闪电划破夜空，瞬间照亮了胡同。镜头快速扫过，定格在逼近的白影上。\n台词：无。\n空间站位：闪电光芒瞬间充斥画面，随后聚焦于白影。\n\nshot-6|时长：2秒|景别：大特写(ECU)|运镜：固定|角度：微仰\n画面描述：镜头聚焦在白影的下半身。一双白皙精致、不沾尘埃的赤足悬浮在离地半尺的空中，下方青石板上的积水微微震颤。\n台词：无。\n空间站位：赤足位于画面中央，悬空状态，背景虚化。",
+        "images": [
+            "/assets/output/online_64cf029f73.png"
+        ],
+        "timestamp": 1780826933.575969,
+        "type": "online",
+        "model": "gpt-image-2-all",
+        "provider_id": "custom-api-4",
+        "provider_name": "yunwu2",
+        "task_id": null,
+        "request_id": null,
+        "params": {
+            "provider_id": "custom-api-4",
+            "model": "gpt-image-2-all",
+            "size": "1536x864",
+            "quality": "high",
+            "n": 1,
+            "reference_images": [
+                {
+                    "url": "/assets/input/ai_ref_84b70f5ed06d.png",
+                    "name": "洛仙",
+                    "role": "image_1"
+                },
+                {
+                    "url": "/assets/output/online_367c773a78.png",
+                    "name": "江凡",
+                    "role": "image_2"
+                },
+                {
+                    "url": "/assets/input/ai_ref_8d245f742c8d.png",
+                    "name": "老旧胡同巷口",
+                    "role": "image_3"
+                }
+            ]
+        },
+        "raw_usage": {
+            "input_tokens": 4559,
+            "output_tokens": 4312,
+            "total_tokens": 8871,
+            "input_tokens_details": {
+                "text_tokens": 723,
+                "image_tokens": 3836
+            },
+            "output_tokens_details": {
+                "text_tokens": 0,
+                "image_tokens": 4312
+            }
+        }
+    },
+    {
+        "prompt": "shot-1|时长：3秒|景别：全景(WS)|运镜：跟(Follow)|角度：侧拍\n画面描述：漆黑的老旧胡同巷口，江凡身穿灰色卫衣和牛仔裤，从画面右侧向左侧狂奔。他的头发凌乱，满头大汗，动作狼狈且充满恐慌，脚下青石板路面湿滑，溅起水花。\n台词：无。\n空间站位：江凡位于画面中央，沿胡同纵深方向奔跑，背景是高耸的砖墙和微弱的街灯。\n\nshot-2|时长：3秒|景别：中近景(MCU)|运镜：手持晃动(Handheld)|角度：平拍\n画面描述：江凡一边跑一边紧紧攥着手机贴在耳边，神色惊恐扭曲，眼神四处乱瞟，胸口剧烈起伏。\n台词：江凡（喘息，对着手机大喊）：\"喂，110吗？救命！有人追我……不，有鬼在追我！\"\n空间站位：江凡占据画面主体，背景快速向后掠过，强化奔跑速度感。\n\nshot-3|时长：2秒|景别：特写(CU)|运镜：急推(Crash Zoom)|角度：平拍\n画面描述：镜头猛地推向江凡的眼睛，他的瞳孔因恐惧而放大，猛地回头看向身后（画面右后方），仿佛看到了什么不可名状的东西。\n台词：江凡（破音）：\"……不，有鬼在追我！\"\n空间站位：江凡面部特写，回头动作带动肩膀旋转。\n\nshot-4|时长：2秒|景别：大特写(ECU)|运镜：摇(Pan)|角度：俯拍\n画面描述：镜头跟随江凡的脚步，特写他穿着运动鞋的脚在青石板上打滑，险些跌倒，鞋底摩擦湿滑的青苔。\n台词：无。\n空间站位：脚部位于画面下方中央，地面占据大部分画面。\n\nshot-5|时长：2秒|景别：中景(MS)|运镜：拉(Pull out)|角度：低角度\n画面描述：江凡脚下一滑，身体失去平衡，踉跄着向后退去，背部重重撞在满是青苔的墙壁上，发出一声闷响。\n台词：无。\n空间站位：江凡从画面前景踉跄后退至背景墙壁处，身体呈弓形。\n\nshot-6|时长：3秒|景别：近景(MCU)|运镜：固定|角度：仰拍\n画面描述：江凡背靠墙壁滑坐在地，双手死死抓着手机，手指关节泛白，呼吸急促，脸上混合着汗水和恐惧。\n台词：VO（电话音，冷漠机械）：\"先生，报假警是要负法律责任的。\"\n空间站位：江凡位于画面左侧靠墙，身体蜷缩。",
+        "images": [
+            "/assets/output/online_2226f81fb1.png"
+        ],
+        "timestamp": 1780826601.130922,
+        "type": "online",
+        "model": "gpt-image-2-all",
+        "provider_id": "custom-api-4",
+        "provider_name": "yunwu2",
+        "task_id": null,
+        "request_id": null,
+        "params": {
+            "provider_id": "custom-api-4",
+            "model": "gpt-image-2-all",
+            "size": "1536x864",
+            "quality": "high",
+            "n": 1,
+            "reference_images": [
+                {
+                    "url": "/assets/output/online_a5c8856a30.png",
+                    "name": "shot-1.png",
+                    "role": "image_1"
+                },
+                {
+                    "url": "/assets/output/online_367c773a78.png",
+                    "name": "江凡",
+                    "role": "image_2"
+                },
+                {
+                    "url": "/assets/input/ai_ref_8d245f742c8d.png",
+                    "name": "老旧胡同巷口",
+                    "role": "image_3"
+                }
+            ]
+        },
+        "raw_usage": {
+            "input_tokens": 4776,
+            "output_tokens": 4312,
+            "total_tokens": 9088,
+            "input_tokens_details": {
+                "text_tokens": 464,
+                "image_tokens": 4312
+            },
+            "output_tokens_details": {
+                "text_tokens": 0,
+                "image_tokens": 4312
+            }
+        }
+    },
+    {
+        "prompt": "A multi-camera angle reference sheet in 3x3 grid layout, showing [主体] from 9 different perspectives simultaneously: top-left front view, top-center 3/4 front view, top-right side profile, middle-left low angle, middle-center eye-level straight-on, middle-right high angle, bottom-left back view, bottom-center 3/4 back view, bottom-right top-down overhead view. [主体详细描述]. Consistent lighting across all 9 frames, uniform light warm gray background color F0EDE8, subjects softly blending with background with natural edge transition, no hard edges no white halo no light bleed, professional studio photography, clean grid layout with thin white dividers between frames, character consistency maintained across all angles, absolutely no visible numbers text labels frame counters corner marks or annotations anywhere on the image\n\n一只猫猫",
+        "images": [
+            "/assets/output/online_a7aea76c45.png"
+        ],
+        "timestamp": 1780826393.645461,
+        "type": "online",
+        "model": "gpt-image-2-all",
+        "provider_id": "custom-api-4",
+        "provider_name": "yunwu2",
+        "task_id": null,
+        "request_id": null,
+        "params": {
+            "provider_id": "custom-api-4",
+            "model": "gpt-image-2-all",
+            "size": "1536x864",
+            "quality": "high",
+            "n": 1,
+            "reference_images": []
+        },
+        "raw_usage": {
+            "input_tokens": 231,
+            "output_tokens": 4312,
+            "total_tokens": 4543,
+            "input_tokens_details": {
+                "text_tokens": 231,
+                "image_tokens": 0
+            },
+            "output_tokens_details": {
+                "text_tokens": 0,
+                "image_tokens": 4312
+            }
+        }
+    },
+    {
+        "prompt": "主体:江凡在胡同巷口狂奔逃命，手持手机；\n环境：外景，夜，老旧胡同巷口。狭窄破旧的胡同空间，两侧高耸斑驳的砖墙附着湿冷青苔，地面为凹凸不平的青石板路，远处微弱街灯余光，空气中弥漫着潮湿夜雾；\n动作和时间轴：\n0-3秒\n漆黑夜色下，江凡满头大汗神色惊恐地在胡同里狂奔，手持手机；\n3-6秒\n江凡边跑边对着手机大喊，时不时回头看一眼身后；\n6-9秒\n江凡喘息着：\"喂，110吗？救命！有人追我……不，有鬼在追我！\"；\n9-12秒\n镜头跟拍江凡奔跑的脚部特写，青石板路上水花四溅；\n12-15秒\n江凡继续狂奔，呼吸急促，眼神恐惧地扫视身后；\n镜头：开头用大全景交代环境，3秒后用手持高速跟拍江凡逃亡，制造晃动压迫感；6秒切近景给江凡面部特写；9秒切脚部特写；12秒回全景跟拍。；\n影像风格: 悬疑惊悚电影感，低饱和冷蓝色调，夜雾弥漫，光影对比强烈。；\n声音：BGM为低频鼓点加急促弦乐；环境音有风声、脚步声、远处隐约的诡异声响；江凡台词声音喘息、惊恐。；\n衔接: 结尾用江凡回头的视线匹配剪辑，硬切到电话另一端的反应。；\n旁白: 无旁白。\n\n参考图为当前分镜匹配到的角色、场景和道具资产。请保持资产外观一致。\n图1：江凡\n图2：老旧胡同巷口",
+        "images": [
+            "/assets/output/online_a5c8856a30.png"
+        ],
+        "timestamp": 1780713528.8432899,
+        "type": "online",
+        "model": "gpt-image-2-all",
+        "provider_id": "custom-api-4",
+        "provider_name": "yunwu2",
+        "task_id": null,
+        "request_id": null,
+        "params": {
+            "provider_id": "custom-api-4",
+            "model": "gpt-image-2-all",
+            "size": "1536x864",
+            "quality": "auto",
+            "n": 1,
+            "reference_images": [
+                {
+                    "url": "/assets/output/online_367c773a78.png",
+                    "name": "江凡",
+                    "role": "image_1"
+                },
+                {
+                    "url": "/assets/input/ai_ref_8d245f742c8d.png",
+                    "name": "老旧胡同巷口",
+                    "role": "image_2"
+                }
+            ]
+        },
+        "raw_usage": {
+            "total_tokens": 3259,
+            "input_tokens": 2154,
+            "output_tokens": 1105,
+            "input_tokens_details": {
+                "text_tokens": 1034,
+                "image_tokens": 1120
+            }
+        }
+    },
+    {
         "prompt": "shot-1\n全景 / 关系镜头 / 推 / 平拍 / 广角焦距\n幽暗的现代简约书房，室内唯一的光源是电脑屏幕散发的幽蓝色微光，桌面略显杂乱。江凡背对镜头坐在电脑前，身体微微前倾。\n江凡背对镜头坐在夜晚的都市简约书房中，屏幕发出幽蓝微光，全景，平视缓慢推镜头，广角，安静专注的现代悬疑短剧质感\n\n参考图为当前分镜匹配到的角色、场景和道具资产。请保持资产外观一致。\n图1：shot-1",
         "images": [
             "/assets/output/online_700e3bfd03.png"

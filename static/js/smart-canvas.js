@@ -5,6 +5,7 @@ const world = document.getElementById('world');
 const composer = document.getElementById('composer');
 const createMenu = document.getElementById('createMenu');
 const promptInput = document.getElementById('promptInput');
+const upstreamPromptPreview = document.getElementById('upstreamPromptPreview');
 const mentionPicker = document.getElementById('mentionPicker');
 const mentionPreview = document.getElementById('mentionPreview');
 const engineSelect = document.getElementById('engineSelect');
@@ -14,6 +15,7 @@ const cascadeRunBtn = document.getElementById('cascadeRunBtn');
 const fileInput = document.getElementById('fileInput');
 const apiKindToggle = document.getElementById('apiKindToggle');
 const inputThumbsRow = document.getElementById('inputThumbsRow');
+const promptPresetLibraryBtn = document.getElementById('promptPresetLibraryBtn');
 const minimap = document.getElementById('minimap');
 const minimapContent = document.getElementById('minimapContent');
 const imageEditModal = document.getElementById('imageEditModal');
@@ -41,9 +43,7 @@ const promptPresetSelect = document.getElementById('promptPresetSelect');
 const promptPresetName = document.getElementById('promptPresetName');
 const promptPresetText = document.getElementById('promptPresetText');
 const promptPresetApply = document.getElementById('promptPresetApply');
-const promptPresetDelete = document.getElementById('promptPresetDelete');
-const promptPresetNew = document.getElementById('promptPresetNew');
-const promptPresetSave = document.getElementById('promptPresetSave');
+const promptPresetTagBar = document.getElementById('promptPresetTagBar');
 const instructionTemplatePanel = document.getElementById('instructionTemplatePanel');
 const instructionTemplateTitle = document.getElementById('instructionTemplateTitle');
 const instructionTemplateScope = document.getElementById('instructionTemplateScope');
@@ -85,11 +85,9 @@ let assetTab = 'image';
 let activeAssetCategoryId = '';
 let mentionSource = 'input';
 let mentionAssetCategoryId = '';
-const PROMPT_PRESETS_KEY = 'smart_canvas_prompt_presets_v1';
-let promptPresets = [];
 let instructionTemplates = [];
+let instructionTemplateGroups = [];
 let storyboardSettingsState = {nodeId:'', mode:'image'};
-let promptPresetDeleteArmed = false;
 let instructionTemplateDeleteArmed = false;
 let createMenuPoint = {x:0, y:0};
 let createMenuContext = null;
@@ -317,7 +315,7 @@ function applyRecentSmartSettingsForCurrentMode(){
     normalizeVideoSelection(settings);
 }
 function isSmartImageNode(node){
-    return Boolean(node && (node.type === 'smart-image' || node.type === 'smart-storyboard-shot' || !node.type));
+    return Boolean(node && (node.type === 'smart-image' || !node.type));
 }
 function validOutpaintSize(node){
     const w = Math.round(Number(node?.outpaintSize?.width || 0));
@@ -413,10 +411,21 @@ function setPromptInputLocked(locked){
     promptInput.dataset.promptLocked = locked ? '1' : '0';
     promptInput.setAttribute('contenteditable', locked ? 'false' : 'true');
     promptInput.classList.toggle('prompt-input-locked', Boolean(locked));
+    if(promptPresetLibraryBtn){
+        promptPresetLibraryBtn.disabled = Boolean(locked);
+        promptPresetLibraryBtn.classList.toggle('disabled', Boolean(locked));
+        promptPresetLibraryBtn.title = tr('smart.promptPresetDefault');
+    }
     if(locked) closeMentionPicker();
 }
 function setPromptText(text){
     promptInput.textContent = text || '';
+}
+function renderUpstreamPromptPreview(text=''){
+    if(!upstreamPromptPreview) return;
+    const value = String(text || '').trim();
+    upstreamPromptPreview.textContent = value;
+    upstreamPromptPreview.classList.toggle('show', Boolean(value));
 }
 function clearPromptInput(options={}){
     if(options.preserveDraft){
@@ -519,32 +528,49 @@ function singleImageLayout(image, node, scale){
     }
     return {cols:1, rows:1, width:Math.round(260*scale), height:Math.round(180*scale), thumb:Math.round(96*scale), single:true};
 }
-function smartNodeInputThumbRows(count){
-    return count ? Math.ceil(Math.min(10, count) / 5) : 0;
+function smartNodeInputThumbRows(count, cols=5){
+    const columns = Math.max(1, Number(cols) || 5);
+    return count ? Math.ceil(Math.min(10, count) / columns) : 0;
 }
-function smartNodeInputThumbsHeight(images){
-    const rows = smartNodeInputThumbRows((images || []).length);
-    return rows ? rows * 44 + (rows - 1) * 6 + 8 : 0;
+function smartNodeInputThumbsHeight(images, opts={}){
+    const named = Boolean(opts.showNames);
+    const rows = smartNodeInputThumbRows((images || []).length, opts.columns || (named ? 4 : 5));
+    const itemHeight = named ? 60 : 44;
+    const gap = named ? 8 : 6;
+    return rows ? rows * itemHeight + (rows - 1) * gap + 8 : 0;
 }
 function promptNodeInputImages(node){
     if(!node?.llmEnabled) return [];
     return inputImagesFor(node).filter(img => img?.url);
 }
+function referenceImageDisplayName(ref, index=0, fallback=''){
+    const explicit = String(ref?.name || ref?.title || ref?.alias || '').trim();
+    if(explicit) return explicit;
+    const url = String(ref?.url || '').split(/[?#]/)[0];
+    const filename = decodeURIComponent(url.split('/').pop() || '').replace(/\.[^.]+$/, '').trim();
+    return filename || fallback || `Image ${index + 1}`;
+}
 function smartNodeInputThumbsHtml(images, opts={}){
     const refs = (images || []).filter(img => img?.url);
     if(!refs.length) return '';
     const limit = Math.min(10, refs.length);
+    const interactive = Boolean(opts.preview);
+    const showNames = Boolean(opts.showNames);
     const items = refs.slice(0, limit).map((img, index) => {
         const label = opts.labelPrefix ? `${opts.labelPrefix}${index + 1}` : (window.StudioI18n?.lang?.() === 'en' ? `Image ${index + 1}` : `图${index + 1}`);
+        const name = referenceImageDisplayName(img, index, label);
+        const canPreview = interactive && img.nodeId && Number.isFinite(Number(img.imageIndex)) && mediaKindForItem(img) === 'image';
+        const previewAttrs = canPreview ? ` data-preview-node-id="${escapeAttr(img.nodeId)}" data-preview-image-index="${escapeAttr(Number(img.imageIndex))}"` : '';
         const media = isAudioMediaItem(img)
             ? `<div class="media-thumb audio-thumb"><i data-lucide="file-audio"></i><span>${escapeHtml(img.name || 'Audio')}</span></div>`
             : isVideoMediaItem(img)
             ? `<video src="${escapeHtml(img.url)}" muted preload="metadata" playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video>`
             : `<img src="${escapeHtml(img.url)}" alt="">`;
-        return `<div class="smart-node-input-thumb" title="${escapeHtml(label)}">${media}<span class="smart-node-input-badge">${escapeHtml(label)}</span></div>`;
+        const thumb = `<div class="smart-node-input-thumb ${canPreview ? 'previewable' : ''}" title="${escapeAttr(name || label)}"${previewAttrs}>${media}<span class="smart-node-input-badge">${escapeHtml(label)}</span></div>`;
+        return showNames ? `<div class="smart-node-input-thumb-wrap">${thumb}<span class="smart-node-input-name" title="${escapeAttr(name || label)}">${escapeHtml(name || label)}</span></div>` : thumb;
     }).join('');
     const more = refs.length > limit ? `<div class="smart-node-input-thumb smart-node-input-more">+${refs.length - limit}</div>` : '';
-    return `<div class="smart-node-input-thumbs">${items}${more}</div>`;
+    return `<div class="smart-node-input-thumbs ${interactive ? 'interactive' : ''} ${showNames ? 'named' : ''}">${items}${more}</div>`;
 }
 function promptNodeExpandedHeight(node){
     return (node?.llmSystemEnabled ? 344 : 292) + smartNodeInputThumbsHeight(promptNodeInputImages(node));
@@ -584,7 +610,10 @@ function storyboardNodeLayoutSize(node){
 }
 function storyboardShotNodeLayoutSize(node){
     const width = Math.max(320, Number(node?.w) || 360);
-    const height = Math.max(220, Number(node?.h) || 300);
+    const refHeight = smartNodeInputThumbsHeight(storyboardShotInputImages(node), {showNames:true, columns:4});
+    const minHeight = refHeight ? Math.max(300, 168 + refHeight) : 220;
+    const fallbackHeight = refHeight ? minHeight : 300;
+    const height = Math.max(minHeight, Number(node?.h) || fallbackHeight);
     return {width:Math.round(width), height:Math.round(height)};
 }
 function storyboardOutputNodeLayoutSize(node){
@@ -1576,22 +1605,71 @@ async function refreshSmartConfigFromSettings(){
     const node = selectedNode();
     if(node?.type === 'smart-prompt') render();
 }
-function loadPromptPresets(){
-    try {
-        const list = JSON.parse(localStorage.getItem(PROMPT_PRESETS_KEY) || '[]');
-        promptPresets = Array.isArray(list) ? list.filter(p => p?.id && typeof p.text === 'string') : [];
-    } catch(e) {
-        promptPresets = [];
-    }
+const IMAGE_PROMPT_TEMPLATE_EXCLUDED_SCOPES = new Set(['storyboard', 'asset:character', 'asset:scene', 'asset:prop']);
+function isImagePromptTemplate(item){
+    const scope = String(item?.scope || '').trim().toLowerCase();
+    return Boolean(item?.id && typeof item.text === 'string' && scope && !IMAGE_PROMPT_TEMPLATE_EXCLUDED_SCOPES.has(scope));
 }
-function savePromptPresets(){
-    localStorage.setItem(PROMPT_PRESETS_KEY, JSON.stringify(promptPresets));
+function imagePromptTemplates(){
+    return instructionTemplates.filter(isImagePromptTemplate);
+}
+function instructionTemplateGroupLabel(scope){
+    const group = instructionTemplateGroups.find(item => item.id === scope);
+    return group?.name || instructionTemplateScopeLabel(scope);
+}
+function normalizePromptTemplateTags(value){
+    const raw = Array.isArray(value)
+        ? value
+        : String(value || '').split(/[,，;；|#\r\n\t]+/);
+    const tags = [];
+    const seen = new Set();
+    raw.forEach(item => {
+        const tag = String(item || '').trim();
+        const key = tag.toLowerCase();
+        if(!tag || seen.has(key)) return;
+        seen.add(key);
+        tags.push(tag.slice(0, 32));
+    });
+    return tags;
+}
+function promptTemplateTags(item, options={}){
+    const tags = [
+        ...normalizePromptTemplateTags(item?.tags),
+        ...normalizePromptTemplateTags(item?.tag),
+        ...normalizePromptTemplateTags(item?.labels)
+    ];
+    if(options.includeGroup !== false){
+        const group = instructionTemplateGroupLabel(item?.scope);
+        if(group) tags.push(group);
+    }
+    const seen = new Set();
+    return tags.filter(tag => {
+        const key = String(tag || '').trim().toLowerCase();
+        if(!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+function promptTemplateMatchesTag(item, tag){
+    const key = String(tag || '').trim().toLowerCase();
+    if(!key) return true;
+    return promptTemplateTags(item).some(itemTag => itemTag.toLowerCase() === key);
+}
+function promptPresetListForNode(node){
+    return (isSmartImageNode(node) || node?.type === 'smart-prompt') ? imagePromptTemplates() : [];
+}
+function promptPresetPanelUsesPromptLibrary(){
+    const node = promptPresetPanelNode();
+    return isSmartImageNode(node) || node?.type === 'smart-prompt';
+}
+function promptPresetPanelList(){
+    const list = promptPresetListForNode(promptPresetPanelNode());
+    if(!promptPresetPanelUsesPromptLibrary()) return list;
+    const tag = promptPresetPanel?.dataset?.tag || '';
+    return tag ? list.filter(item => promptTemplateMatchesTag(item, tag)) : list;
 }
 function currentPromptPreset(id){
-    return promptPresets.find(p => p.id === id) || null;
-}
-function defaultPromptPresetName(text){
-    return (String(text || '').trim().split(/\r?\n/)[0] || tr('smart.promptPresetDefault')).slice(0, 28);
+    return imagePromptTemplates().find(p => p.id === id) || null;
 }
 function promptPresetPanelNode(){
     return nodes.find(n => n.id === promptPresetPanel?.dataset.nodeId) || null;
@@ -1602,60 +1680,99 @@ function setPromptPresetStatus(text='', tone=''){
     promptPresetStatus.classList.toggle('warn', tone === 'warn');
     promptPresetStatus.classList.toggle('ok', tone === 'ok');
 }
-function resetPromptPresetDeleteState(){
-    promptPresetDeleteArmed = false;
-    if(promptPresetDelete){
-        promptPresetDelete.textContent = tr('common.delete');
-        promptPresetDelete.classList.remove('confirm-danger');
+function promptPresetTagItems(){
+    const counts = new Map();
+    imagePromptTemplates().forEach(item => {
+        promptTemplateTags(item).forEach(tag => counts.set(tag, (counts.get(tag) || 0) + 1));
+    });
+    return [...counts.entries()]
+        .map(([name, count]) => ({name, count}))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+function renderPromptPresetTags(){
+    if(!promptPresetTagBar) return;
+    const usePromptLibrary = promptPresetPanelUsesPromptLibrary();
+    if(!usePromptLibrary){
+        promptPresetTagBar.innerHTML = '';
+        promptPresetTagBar.classList.remove('show');
+        if(promptPresetPanel) delete promptPresetPanel.dataset.tag;
+        return;
     }
-}
-function createPromptPresetFromNode(node, {openPanel=true}={}){
-    const text = String(node?.text || '').trim();
-    if(!text){ toast(tr('smart.promptPresetEmpty')); return null; }
-    const preset = {id:uid('preset'), name:defaultPromptPresetName(text), text, createdAt:Date.now(), updatedAt:Date.now()};
-    promptPresets.unshift(preset);
-    savePromptPresets();
-    if(node) node.promptPresetId = preset.id;
-    render();
-    scheduleSave();
-    if(openPanel) openPromptPresetPanel(node?.id || '', preset.id, {status:tr('smart.promptPresetSavedNew'), tone:'ok'});
-    return preset;
-}
-function savePromptNodeAsPreset(node){
-    createPromptPresetFromNode(node);
+    const tags = promptPresetTagItems();
+    let active = promptPresetPanel?.dataset?.tag || '';
+    if(active && !tags.some(tag => tag.name === active)){
+        active = '';
+        if(promptPresetPanel) delete promptPresetPanel.dataset.tag;
+    }
+    promptPresetTagBar.classList.toggle('show', tags.length > 0);
+    promptPresetTagBar.innerHTML = tags.length
+        ? [
+            `<button class="prompt-preset-tag ${active ? '' : 'active'}" type="button" data-prompt-tag="">全部</button>`,
+            ...tags.map(tag => `<button class="prompt-preset-tag ${tag.name === active ? 'active' : ''}" type="button" data-prompt-tag="${escapeAttr(tag.name)}">${escapeHtml(tag.name)}<span>${tag.count}</span></button>`)
+        ].join('')
+        : '';
 }
 function renderPromptPresetPanel(selectedId='', message=''){
     if(!promptPresetSelect) return;
-    resetPromptPresetDeleteState();
-    promptPresetSelect.innerHTML = promptPresets.length
-        ? promptPresets.map(p => `<option value="${escapeHtml(p.id)}" ${p.id === selectedId ? 'selected' : ''}>${escapeHtml(p.name || tr('smart.promptPresetUnnamed'))}</option>`).join('')
+    const usePromptLibrary = promptPresetPanelUsesPromptLibrary();
+    renderPromptPresetTags();
+    const presets = promptPresetPanelList();
+    const heading = promptPresetPanel.querySelector('.prompt-preset-panel-head span');
+    if(heading) heading.textContent = usePromptLibrary ? tr('smart.instructionTemplateLibrary') : tr('smart.promptPresetDefault');
+    promptPresetSelect.innerHTML = presets.length
+        ? presets.map(p => {
+            const extraTags = promptTemplateTags(p, {includeGroup:false});
+            const tagLabel = usePromptLibrary && extraTags.length ? ` [${extraTags.slice(0, 2).join(', ')}]` : '';
+            const label = usePromptLibrary
+                ? `${p.name || tr('smart.promptPresetUnnamed')} - ${instructionTemplateGroupLabel(p.scope)}${tagLabel}`
+                : (p.name || tr('smart.promptPresetUnnamed'));
+            return `<option value="${escapeHtml(p.id)}" ${p.id === selectedId ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+        }).join('')
         : `<option value="">${escapeHtml(tr('smart.promptPresetNone'))}</option>`;
-    const preset = currentPromptPreset(selectedId) || promptPresets[0] || null;
+    const preset = presets.find(p => p.id === selectedId) || presets[0] || null;
     if(preset && promptPresetSelect.value !== preset.id) promptPresetSelect.value = preset.id;
     promptPresetName.value = preset?.name || '';
     promptPresetText.value = preset?.text || '';
+    promptPresetName.readOnly = usePromptLibrary;
+    promptPresetText.readOnly = usePromptLibrary;
     const hasPreset = Boolean(preset);
-    const nodeHasText = Boolean(String(promptPresetPanelNode()?.text || '').trim());
     promptPresetApply.disabled = !hasPreset;
-    promptPresetDelete.disabled = !hasPreset;
-    promptPresetSave.disabled = !hasPreset;
-    if(promptPresetNew) promptPresetNew.disabled = !nodeHasText;
-    setPromptPresetStatus(message || (hasPreset ? tr('smart.promptPresetPanelHint') : tr('smart.promptPresetPanelEmpty')));
+    const defaultMessage = usePromptLibrary
+        ? (hasPreset ? tr('smart.instructionTemplateLibraryHint') : tr('smart.instructionTemplateLibraryEmpty'))
+        : (hasPreset ? tr('smart.promptPresetPanelHint') : tr('smart.promptPresetPanelEmpty'));
+    setPromptPresetStatus(message || defaultMessage);
 }
-function openPromptPresetPanel(nodeId='', presetId='', options={}){
+async function openPromptPresetPanel(nodeId='', presetId='', options={}){
     if(!promptPresetPanel) return;
     promptPresetPanel.dataset.nodeId = nodeId || '';
     const node = nodes.find(n => n.id === nodeId);
-    const preferred = presetId || node?.promptPresetId || promptPresets[0]?.id || '';
+    const usePromptLibrary = isSmartImageNode(node) || node?.type === 'smart-prompt';
+    promptPresetPanel.classList.toggle('template-library-mode', usePromptLibrary);
+    if(usePromptLibrary) {
+        await loadInstructionTemplates();
+        if(!options.keepTag) delete promptPresetPanel.dataset.tag;
+    } else {
+        delete promptPresetPanel.dataset.tag;
+    }
+    const list = promptPresetListForNode(node);
+    const preferred = presetId || node?.promptPresetId || list[0]?.id || '';
     renderPromptPresetPanel(preferred, options.status || '');
     if(options.tone) setPromptPresetStatus(options.status || '', options.tone);
+    const anchorRect = options.anchorEl?.getBoundingClientRect?.() || null;
     const nodeEl = nodeId ? world.querySelector(`.image-node[data-id="${CSS.escape(nodeId)}"]`) : null;
-    const rect = nodeEl?.getBoundingClientRect();
+    const rect = anchorRect || nodeEl?.getBoundingClientRect();
     const shellRect = shell.getBoundingClientRect();
-    const maxLeft = Math.max(18, shellRect.width - 410);
-    const maxTop = Math.max(18, shellRect.height - 330);
-    const left = rect ? Math.min(maxLeft, Math.max(18, rect.right - shellRect.left + 12)) : 80;
-    const top = rect ? Math.min(maxTop, Math.max(18, rect.top - shellRect.top)) : 80;
+    const panelW = usePromptLibrary ? Math.min(520, Math.max(280, shellRect.width - 36)) : 392;
+    const panelH = usePromptLibrary ? 460 : 330;
+    const maxLeft = Math.max(18, shellRect.width - panelW - 18);
+    const maxTop = Math.max(18, shellRect.height - panelH);
+    const left = usePromptLibrary
+        ? maxLeft
+        : (rect ? Math.min(maxLeft, Math.max(18, rect.right - shellRect.left + 12)) : 80);
+    const libraryTop = Math.max(18, Math.min(92, Math.round(shellRect.height * 0.12)));
+    const top = usePromptLibrary
+        ? Math.min(maxTop, libraryTop)
+        : (rect ? Math.min(maxTop, Math.max(18, rect.top - shellRect.top)) : 80);
     promptPresetPanel.style.left = `${left}px`;
     promptPresetPanel.style.top = `${top}px`;
     promptPresetPanel.classList.add('open');
@@ -1663,11 +1780,41 @@ function openPromptPresetPanel(nodeId='', presetId='', options={}){
 }
 function closePromptPresetPanel(){
     promptPresetPanel?.classList.remove('open');
-    resetPromptPresetDeleteState();
 }
-function editPromptPresetForNode(node){
-    if(!promptPresets.length) savePromptNodeAsPreset(node);
-    else openPromptPresetPanel(node?.id || '', node?.promptPresetId || '');
+function prependPromptTextToComposer(text){
+    const value = String(text || '').trim();
+    if(!value || !promptInput) return false;
+    const hasExisting = promptInput.childNodes.length > 0 && promptPlainText();
+    const prefix = document.createTextNode(value + (hasExisting ? '\n\n' : ''));
+    promptInput.insertBefore(prefix, promptInput.firstChild || null);
+    delete promptInput.dataset.preserveDraftOnce;
+    promptInput.focus();
+    const range = document.createRange();
+    range.setStart(prefix, Math.min(value.length, prefix.length || value.length));
+    range.collapse(true);
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    saveMentionRange();
+    return true;
+}
+function applyPromptPresetToNode(node, preset, textOverride=null){
+    const text = String(textOverride ?? preset?.text ?? '').trim();
+    if(!preset || !node || !text) return false;
+    node.promptPresetId = preset.id;
+    if(isSmartImageNode(node)){
+        if(activeComposerNode()?.id === node.id && promptInput){
+            prependPromptTextToComposer(text);
+            savePromptDraftForCurrent();
+        } else {
+            const oldText = String(node.promptDraftText || node.runPrompt || '').trim();
+            node.promptDraftText = oldText ? `${text}\n\n${oldText}` : text;
+            node.promptDraftHtml = escapeHtml(node.promptDraftText);
+        }
+        return true;
+    }
+    node.text = text;
+    return true;
 }
 async function loadInstructionTemplates(){
     try {
@@ -1678,6 +1825,9 @@ async function loadInstructionTemplates(){
         const list = Array.isArray(data?.templates) ? data.templates : [];
         instructionTemplates = Array.isArray(list)
             ? list.filter(item => item?.id && item.scope && typeof item.text === 'string')
+            : [];
+        instructionTemplateGroups = Array.isArray(data?.groups)
+            ? data.groups.filter(item => item?.id)
             : [];
     } catch(e) {
         toast(tr('smart.instructionTemplateLoadFailed'));
@@ -1692,6 +1842,7 @@ function saveInstructionTemplates(){
         if(!r.ok) throw new Error(await r.text());
         const data = await r.json();
         instructionTemplates = Array.isArray(data?.templates) ? data.templates : instructionTemplates;
+        instructionTemplateGroups = Array.isArray(data?.groups) ? data.groups : instructionTemplateGroups;
         return data;
     }).catch(e => {
         toast((e.message || tr('smart.instructionTemplateSaveFailed')).slice(0, 180));
@@ -2350,6 +2501,7 @@ function createStoryboardShotNode(storyboard, shot, index, x, y){
         shot:JSON.parse(JSON.stringify(shot || {})),
         images:refs.map(ref => stripImageGenerationMeta({...ref})),
         sourceStoryboardId:storyboard?.id || '',
+        sourceStoryboardOutputId:'',
         sourceShotIndex:index,
         created_at:Date.now()
     };
@@ -2392,6 +2544,109 @@ function createStoryboardOutputNode(storyboard, x, y, existingShots=[]){
         sourceNodeIds:storyboard?.id ? [storyboard.id] : [],
         created_at:Date.now()
     };
+}
+function storyboardShotNodeTextForOutputShot(shot){
+    return String(storyboardEditableShotText(shot) || storyboardShotPrompt(shot) || storyboardShotNodeText(shot) || '').trim();
+}
+function storyboardShotOutputMedia(shot){
+    const media = [];
+    if(shot?.generatedImage?.url) media.push({...stripImageGenerationMeta({...shot.generatedImage}), name:shot.generatedImage.name || `${shot.title || 'shot'}.png`, kind:'image', generatedResult:true});
+    if(shot?.generatedVideo?.url) media.push({...stripImageGenerationMeta({...shot.generatedVideo}), name:shot.generatedVideo.name || `${shot.title || 'shot'}.mp4`, kind:'video', generatedResult:true});
+    return media;
+}
+function storyboardShotNodeImagesForShot(shot){
+    return uniqueReferenceImages([
+        ...storyboardShotOutputMedia(shot),
+        ...storyboardOutputShotImages(shot)
+    ]).map(ref => stripImageGenerationMeta({...ref}));
+}
+function syncStoryboardShotNodes(output, storyboard=null, options={}){
+    if(!output || output.type !== 'smart-storyboard-output') return [];
+    const shots = Array.isArray(output.shots) ? output.shots : [];
+    const layout = options.layout !== false;
+    const baseRect = nodeRect(output);
+    const x = baseRect.x + baseRect.width + 80;
+    const gap = 22;
+    let y = baseRect.y;
+    const existing = nodes
+        .filter(node => node.type === 'smart-storyboard-shot' && (node.sourceStoryboardOutputId === output.id || (!node.sourceStoryboardOutputId && node.sourceStoryboardId === output.sourceStoryboardId)))
+        .sort((a, b) => (Number(a.sourceShotIndex) || 0) - (Number(b.sourceShotIndex) || 0));
+    const used = new Set();
+    const synced = [];
+    shots.forEach((shot, index) => {
+        let item = existing.find(node => !used.has(node.id) && Number(node.sourceShotIndex) === index);
+        if(!item) item = existing.find(node => !used.has(node.id));
+        if(item){
+            used.add(item.id);
+            item.sourceStoryboardId = output.sourceStoryboardId || storyboard?.id || item.sourceStoryboardId || '';
+            item.sourceStoryboardOutputId = output.id;
+            item.sourceShotIndex = index;
+            item.title = shot.title || `${tr('smart.storyboardShotNodeTitle')} ${index + 1}`;
+            if(!item.textEdited) item.text = storyboardShotNodeTextForOutputShot(shot);
+            item.shot = JSON.parse(JSON.stringify(shot || {}));
+            item.images = storyboardShotNodeImagesForShot(shot);
+            if(layout){
+                item.x = x;
+                item.y = y;
+                item.w = Math.max(320, Number(item.w) || 360);
+                item.h = Math.max(220, Number(item.h) || 300);
+            }
+        } else {
+            item = createStoryboardShotNode(storyboard || output, shot, index, x, y);
+            item.sourceStoryboardId = output.sourceStoryboardId || storyboard?.id || '';
+            item.sourceStoryboardOutputId = output.id;
+            item.title = shot.title || `${tr('smart.storyboardShotNodeTitle')} ${index + 1}`;
+            item.text = storyboardShotNodeTextForOutputShot(shot);
+            item.images = storyboardShotNodeImagesForShot(shot);
+            nodes.push(item);
+        }
+        item.inputNodeIds = (item.inputNodeIds || []).filter(id => id !== output.id);
+        if(canvas?.connections) canvas.connections = canvas.connections.filter(conn => !(conn.from === output.id && conn.to === item.id && conn.kind === 'input'));
+        addConnection(output.id, item.id, 'flow');
+        synced.push(item);
+        y += nodeRect(item).height + gap;
+    });
+    removeNodesSilently(existing.filter(node => !used.has(node.id)).map(node => node.id));
+    return synced;
+}
+function storyboardShotNodeForOutputShot(output, shotIndex, options={}){
+    if(!output || output.type !== 'smart-storyboard-output') return null;
+    const index = Number(shotIndex);
+    if(!Number.isFinite(index)) return null;
+    if(options.sync !== false) syncStoryboardShotNodes(output, null, {layout:false});
+    return nodes.find(node => node.type === 'smart-storyboard-shot' && node.sourceStoryboardOutputId === output.id && Number(node.sourceShotIndex) === index)
+        || nodes.find(node => node.type === 'smart-storyboard-shot' && !node.sourceStoryboardOutputId && node.sourceStoryboardId === output.sourceStoryboardId && Number(node.sourceShotIndex) === index)
+        || null;
+}
+function storyboardOutputNodeForShotNode(shotNode){
+    if(!shotNode || shotNode.type !== 'smart-storyboard-shot') return null;
+    return nodes.find(node => node.type === 'smart-storyboard-output' && node.id === shotNode.sourceStoryboardOutputId)
+        || nodes.find(node => node.type === 'smart-storyboard-output' && node.sourceStoryboardId === shotNode.sourceStoryboardId)
+        || null;
+}
+function syncStoryboardOutputShotFromNode(shotNode){
+    if(!shotNode || shotNode.type !== 'smart-storyboard-shot') return false;
+    const output = storyboardOutputNodeForShotNode(shotNode);
+    const index = Number(shotNode.sourceShotIndex);
+    const shot = Number.isFinite(index) ? output?.shots?.[index] : null;
+    if(!shot) return false;
+    const generatedImage = (shotNode.images || []).find(img => img?.url && img.generatedResult && mediaKindForItem(img) === 'image');
+    if(!generatedImage) return false;
+    shot.generatedImage = stripImageGenerationMeta({...generatedImage, kind:'image', generatedResult:true});
+    if(shot.mode !== 'video') shot.mode = 'image';
+    return true;
+}
+function openStoryboardOutputShotPreview(outputNodeId, shotIndex){
+    const output = nodes.find(node => node.id === outputNodeId && node.type === 'smart-storyboard-output');
+    const index = Number(shotIndex);
+    const shot = Number.isFinite(index) ? output?.shots?.[index] : null;
+    const media = storyboardShotMediaItem(shot);
+    if(!media?.url || mediaKindForItem(media) !== 'image') return;
+    const shotNode = storyboardShotNodeForOutputShot(output, index);
+    if(!shotNode) return;
+    let imageIndex = (shotNode.images || []).findIndex(img => img?.url === media.url && mediaKindForItem(img) === 'image');
+    if(imageIndex < 0) imageIndex = (shotNode.images || []).findIndex(img => img?.url && mediaKindForItem(img) === 'image');
+    if(imageIndex >= 0) openImageEditor(shotNode.id, imageIndex);
 }
 
 function createLoopNode(x, y, options={}){
@@ -2869,8 +3124,6 @@ function promptNodeBodyHtml(node){
     node.llmProvider = resolveChatProviderId(node.llmProvider || '');
     node.llmModel = resolveChatModel(node.llmModel || '', node.llmProvider);
     node.llmSystemEnabled = node.llmSystemEnabled === true;
-    if(node.promptPresetId && !promptPresets.some(p => p.id === node.promptPresetId)) node.promptPresetId = '';
-    const presetOptions = `<option value="">${escapeHtml(tr('smart.promptPreset'))}</option>${promptPresets.map(p => `<option value="${escapeHtml(p.id)}" ${p.id === node.promptPresetId ? 'selected' : ''}>${escapeHtml(p.name || tr('smart.promptPresetUnnamed'))}</option>`).join('')}`;
     const readonly = node.llmEnabled ? 'readonly' : '';
     const systemPrompt = (node.llmSystemPrompt || '').trim();
     const inputThumbs = smartNodeInputThumbsHtml(promptNodeInputImages(node));
@@ -2888,9 +3141,7 @@ function promptNodeBodyHtml(node){
     return `<div class="prompt-node-card">
         <textarea class="prompt-node-text prompt-node-control" ${readonly} placeholder="${escapeHtml(tr('smart.promptPlaceholderNode'))}">${escapeHtml(node.text || '')}</textarea>
         <div class="prompt-node-tools">
-            <select class="prompt-node-control prompt-node-preset-select">${presetOptions}</select>
-            <button class="prompt-node-pill prompt-node-control prompt-preset-save" type="button"><i data-lucide="save"></i><span>${escapeHtml(tr('common.save'))}</span></button>
-            <button class="prompt-node-pill prompt-node-control prompt-preset-edit" type="button"><i data-lucide="pencil"></i><span>${escapeHtml(tr('common.edit'))}</span></button>
+            <button class="prompt-node-pill prompt-node-control prompt-template-open" type="button"><i data-lucide="library"></i><span>${escapeHtml(tr('smart.instructionTemplateLibrary'))}</span></button>
             <button class="prompt-node-pill prompt-llm-toggle ${node.llmEnabled ? 'active' : ''}" type="button"><i data-lucide="sparkles"></i><span>LLM</span></button>
         </div>
         ${node.llmEnabled ? inputThumbs : ''}
@@ -3538,7 +3789,13 @@ function storyboardOutputSettingsControlsHtml(node, mode='image'){
 function storyboardShotAssetRefsHtml(shot){
     const refs = storyboardOutputShotImages(shot);
     if(!refs.length) return `<div class="storyboard-shot-assets empty">${escapeHtml(tr('smart.storyboardNoRefs'))}</div>`;
-    return `<div class="storyboard-shot-assets">${refs.map(ref => `<span class="storyboard-asset-orb" title="${escapeAttr(ref.name || ref.url || '')}">${ref.url ? `<img src="${escapeHtml(ref.url)}" alt="">` : `<i data-lucide="image"></i>`}</span>`).join('')}</div>`;
+    return `<div class="storyboard-shot-assets">${refs.map((ref, index) => {
+        const name = referenceImageDisplayName(ref, index, `Ref ${index + 1}`);
+        const media = ref.url
+            ? `<img src="${escapeAttr(ref.url)}" alt="${escapeAttr(name)}">`
+            : `<i data-lucide="image"></i>`;
+        return `<span class="storyboard-asset-chip" title="${escapeAttr(name)}"><span class="storyboard-asset-orb">${media}</span><span class="storyboard-asset-name">${escapeHtml(name)}</span></span>`;
+    }).join('')}</div>`;
 }
 function storyboardShotMediaItem(shot){
     return (shot?.mode === 'video' ? shot.generatedVideo : shot.generatedImage) || shot?.generatedVideo || shot?.generatedImage || null;
@@ -3588,6 +3845,8 @@ function storyboardOutputNodeBodyHtml(node){
                 const text = storyboardEditableShotText(shot) || storyboardShotNodeText(shot);
                 const summary = storyboardEditableShotText(shot) || storyboardShotPrompt(shot) || shot.description || shot.action || shot.text || '';
                 const open = shot.open !== false && (shot.open || index === 0);
+                const media = storyboardShotMediaItem(shot);
+                const canPreviewMedia = media?.url && mediaKindForItem(media) === 'image';
                 return `<details class="storyboard-output-shot" data-shot-index="${index}" ${open ? 'open' : ''}>
                     <summary>
                         <span class="storyboard-shot-index">${index + 1}</span>
@@ -3600,7 +3859,7 @@ function storyboardOutputNodeBodyHtml(node){
                     <div class="storyboard-output-shot-body">
                         <div class="storyboard-shot-workspace">
                             <div class="storyboard-shot-media">
-                                <div class="storyboard-shot-media-frame ${shot.running ? 'running' : ''}">${storyboardShotMediaHtml(shot)}</div>
+                                <div class="storyboard-shot-media-frame ${shot.running ? 'running' : ''} ${canPreviewMedia ? 'previewable' : ''}" ${canPreviewMedia ? `data-shot-preview-index="${index}"` : ''}>${storyboardShotMediaHtml(shot)}</div>
                             </div>
                             <div class="storyboard-shot-script">
                                 ${storyboardOutputShotMetaHtml(shot)}
@@ -3814,7 +4073,7 @@ function storyboardShotBodyHtml(node){
     const refs = storyboardShotInputImages(node);
     return `<div class="asset-output-card storyboard-shot-card">
         <div class="asset-output-head"><span><i data-lucide="clapperboard"></i>${escapeHtml(node.title || tr('smart.storyboardShotNodeTitle'))}</span><em>${escapeHtml(refs.length ? trf('smart.storyboardRefCount', {n:refs.length}) : tr('smart.storyboardNoRefs'))}</em></div>
-        ${smartNodeInputThumbsHtml(refs, {labelPrefix:'Ref '})}
+        ${smartNodeInputThumbsHtml(refs, {labelPrefix:'Ref ', preview:true, showNames:true})}
         <textarea class="storyboard-shot-text" placeholder="${escapeHtml(tr('smart.storyboardShotPlaceholder'))}">${escapeHtml(node.text || '')}</textarea>
     </div>`;
 }
@@ -4238,26 +4497,11 @@ function bindPromptNodeControls(el, node){
         bindScrollableText(textEl);
         textEl.oninput = e => { node.text = e.target.value; scheduleSave(); };
     }
-    const presetSelect = el.querySelector('.prompt-node-preset-select');
-    if(presetSelect) presetSelect.onchange = e => {
-        e.stopPropagation();
-        const preset = currentPromptPreset(e.target.value);
-        node.promptPresetId = preset?.id || '';
-        if(preset) node.text = preset.text || '';
-        render();
-        scheduleSave();
-    };
-    const presetSave = el.querySelector('.prompt-preset-save');
-    if(presetSave) presetSave.onclick = e => {
+    const templateOpen = el.querySelector('.prompt-template-open');
+    if(templateOpen) templateOpen.onclick = e => {
         e.preventDefault();
         e.stopPropagation();
-        savePromptNodeAsPreset(node);
-    };
-    const presetEdit = el.querySelector('.prompt-preset-edit');
-    if(presetEdit) presetEdit.onclick = e => {
-        e.preventDefault();
-        e.stopPropagation();
-        editPromptPresetForNode(node);
+        openPromptPresetPanel(node.id, node.promptPresetId || '', {anchorEl:templateOpen});
     };
     const toggle = el.querySelector('.prompt-llm-toggle');
     if(toggle) toggle.onclick = e => {
@@ -4421,7 +4665,20 @@ function bindStoryboardControls(el, node){
         outputStoryboardShots(node.id);
     };
 }
+function bindStoryboardThumbPreviewControls(el){
+    el.querySelectorAll('.smart-node-input-thumb[data-preview-node-id]').forEach(thumb => {
+        ['mousedown','click','dblclick'].forEach(type => thumb.addEventListener(type, e => e.stopPropagation()));
+        thumb.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            const nodeId = thumb.dataset.previewNodeId || '';
+            const imageIndex = Number(thumb.dataset.previewImageIndex);
+            if(nodeId && Number.isFinite(imageIndex)) openImageEditor(nodeId, imageIndex);
+        };
+    });
+}
 function bindStoryboardShotControls(el, node){
+    bindStoryboardThumbPreviewControls(el);
     const textEl = el.querySelector('.storyboard-shot-text');
     if(textEl){
         bindScrollableText(textEl);
@@ -4438,10 +4695,17 @@ function bindStoryboardShotControls(el, node){
     }
 }
 function bindStoryboardOutputControls(el, node){
-    el.querySelectorAll('.storyboard-output-scroll, .storyboard-output-shot, .storyboard-output-shot summary, .storyboard-output-shot-text, .storyboard-output-head-actions, .storyboard-output-mode button, .storyboard-output-settings, .storyboard-shot-controls, .storyboard-shot-mode button, .storyboard-shot-generate, .storyboard-output-batch').forEach(control => {
+    el.querySelectorAll('.storyboard-output-scroll, .storyboard-output-shot, .storyboard-output-shot summary, .storyboard-output-shot-text, .storyboard-output-head-actions, .storyboard-output-mode button, .storyboard-output-settings, .storyboard-shot-media-frame, .storyboard-shot-controls, .storyboard-shot-mode button, .storyboard-shot-generate, .storyboard-output-batch').forEach(control => {
         control.addEventListener('mousedown', e => e.stopPropagation());
         control.addEventListener('click', e => e.stopPropagation());
         control.addEventListener('dblclick', e => e.stopPropagation());
+    });
+    el.querySelectorAll('.storyboard-shot-media-frame[data-shot-preview-index]').forEach(frame => {
+        frame.onclick = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            openStoryboardOutputShotPreview(node.id, Number(frame.dataset.shotPreviewIndex));
+        };
     });
     el.querySelectorAll('.storyboard-output-shot').forEach(detail => {
         detail.addEventListener('toggle', () => {
@@ -4461,6 +4725,7 @@ function bindStoryboardOutputControls(el, node){
             shot.textEdited = true;
             shot.prompt = e.target.value;
             shot.video_promet = e.target.value;
+            syncStoryboardShotNodes(node, null, {layout:false});
             scheduleSave();
         };
     });
@@ -4948,14 +5213,14 @@ function nodeOutputsPromptText(node){
 function canAutoConnectDraggedNode(sourceNode, targetNode){
     if(!sourceNode || !targetNode || sourceNode.id === targetNode.id) return false;
     if(sourceNode.type === 'smart-image') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-prompt' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
-    if(sourceNode.type === 'smart-prompt') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
-    if(sourceNode.type === 'smart-script') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
-    if(sourceNode.type === 'smart-asset-extractor') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-asset-output' || targetNode.type === 'smart-storyboard';
-    if(sourceNode.type === 'smart-asset-output') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-prompt') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
+    if(sourceNode.type === 'smart-script') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
+    if(sourceNode.type === 'smart-asset-extractor') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-asset-output' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
+    if(sourceNode.type === 'smart-asset-output') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
     if(sourceNode.type === 'smart-storyboard') return targetNode.type === 'smart-storyboard-output' || targetNode.type === 'smart-storyboard-shot' || targetNode.type === 'smart-image' || targetNode.type === 'smart-loop';
-    if(sourceNode.type === 'smart-storyboard-output') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-storyboard';
-    if(sourceNode.type === 'smart-storyboard-shot') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-storyboard';
-    if(sourceNode.type === 'smart-loop') return targetNode.type === 'smart-image' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard';
+    if(sourceNode.type === 'smart-storyboard-output') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
+    if(sourceNode.type === 'smart-storyboard-shot') return targetNode.type === 'smart-image' || targetNode.type === 'smart-loop' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-asset-extractor';
+    if(sourceNode.type === 'smart-loop') return targetNode.type === 'smart-image' || targetNode.type === 'smart-asset-extractor' || targetNode.type === 'smart-storyboard' || targetNode.type === 'smart-storyboard-shot';
     return false;
 }
 function restoreDraggedNodePosition(){
@@ -5881,6 +6146,7 @@ function replaceEditedImage(file){
     node.images[index] = {...(node.images[index] || {}), url:file.url, name:file.name, kind:file.kind || mediaKindForItem(file), natural_w:0, natural_h:0};
     if((node.images || []).length === 1){ delete node.w; delete node.h; }
     selectedId = node.id; selectedImage = {nodeId:node.id, index};
+    syncStoryboardOutputShotFromNode(node);
     return true;
 }
 function applyOutpaintSizeToSmartParams(width, height){
@@ -6017,6 +6283,7 @@ async function applyImageGridSplit(){
             grid:{...layout, row:rects[i]?.row || 0, col:rects[i]?.col || 0, w:rects[i]?.w || 1, h:rects[i]?.h || 1}
         })));
         outputNode.title = 'Grid';
+        if(node.type === 'smart-storyboard-shot') connectInputNode(node.id, outputNode.id);
         closeImageEditor(); render(); scheduleSave();
     }
 }
@@ -6091,6 +6358,7 @@ function updateComposer(){
         activeComposerSubject = null;
         lastComposerNodeId = '';
         setPromptInputLocked(false);
+        renderUpstreamPromptPreview('');
         if(!node) setPromptText('');
         return;
     }
@@ -6101,15 +6369,13 @@ function updateComposer(){
     if(switchedNode) savePromptDraftForCurrent();
     lastComposerNodeId = composerKey;
     activeComposerSubject = subject;
-    const hasPromptInput = promptInputNodesFor(node).length > 0;
-    const lockedPromptText = inputPromptTextFor(node).trim();
+    const upstreamPromptText = inputPromptTextFor(node).trim();
     if(switchedNode){
         settings = smartSettingsForNode(subject);
-        if(hasPromptInput) setPromptText(lockedPromptText);
-        else loadPromptDraft(subject);
+        loadPromptDraft(subject);
     }
-    if(hasPromptInput) setPromptText(lockedPromptText);
-    setPromptInputLocked(hasPromptInput);
+    renderUpstreamPromptPreview(upstreamPromptText);
+    setPromptInputLocked(false);
     syncCascadeRunButton(node);
     positionComposerForNode(node);
     const ph = Math.max(60, Math.min(380, Number(settings.promptH) || 124));
@@ -6399,7 +6665,10 @@ function connectInputNode(fromId, toId){
     const fromOutputsText = nodeOutputsPromptText(from);
     if(to.type === 'smart-asset-output' && from.type !== 'smart-asset-extractor') return false;
     if(to.type === 'smart-storyboard-output' && from.type !== 'smart-storyboard') return false;
-    if(to.type === 'smart-storyboard-shot' && from.type !== 'smart-storyboard' && from.type !== 'smart-image') return false;
+    if(to.type === 'smart-storyboard-shot'){
+        const fromOutputsImage = from.type === 'smart-image' || from.type === 'smart-storyboard-shot' || (from.type === 'smart-loop' && from.imageInput);
+        if(!fromOutputsText && !fromOutputsImage) return false;
+    }
     if(to.type === 'smart-asset-extractor' && !fromOutputsText) return false;
     if(to.type === 'smart-storyboard' && !fromOutputsText && from.type !== 'smart-image') return false;
     if(to.type === 'smart-loop'){
@@ -6498,8 +6767,7 @@ function smartLoopPreviewImages(node){
 function storyboardShotInputImages(node){
     const self = imagesForNode(node).filter(img => img?.url);
     const upstream = inputNodesFor(node)
-        .filter(input => input?.type === 'smart-image')
-        .flatMap(input => imagesForNode(input))
+        .flatMap(input => outputImagesForNode(input))
         .filter(img => img?.url);
     return uniqueReferenceImages([...self, ...upstream]);
 }
@@ -6523,7 +6791,6 @@ function textForNode(node, ctx=smartLoopContext){
     return '';
 }
 function promptInputNodesFor(node){
-    if(node?.type === 'smart-storyboard-shot') return [];
     return inputNodesFor(node).filter(nodeOutputsPromptText);
 }
 function inputPromptTextFor(node, ctx=smartLoopContext){
@@ -6932,9 +7199,11 @@ function buildPromptRequest(node, overrideDefaultImages=null, consumeDefault=fal
         body += `图${refMap.get(part.url)}`;
     });
     body = body.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    const localBody = body;
     const inputPrompt = inputPromptTextFor(node, ctx).trim();
-    if(promptInputNodesFor(node).length) body = inputPrompt;
-    const displayPrompt = originalPrompt || body;
+    if(inputPrompt) body = [inputPrompt, localBody].filter(Boolean).join('\n\n').trim();
+    const localDisplayPrompt = originalPrompt || localBody;
+    const displayPrompt = [inputPrompt, localDisplayPrompt].filter(Boolean).join('\n\n').trim() || body;
     if(hasMentionToken && refs.length){
         const mapText = refs.map((img, i) => `图${i + 1}：${img.name || `图片${i + 1}`}`).join('\n');
         return {
@@ -7729,9 +7998,9 @@ function outputStoryboardShots(nodeId){
     }
     normalizeStoryboardOutputNode(output);
     connectInputNode(storyboard.id, output.id);
-    removeNodesSilently(nodes.filter(node => node.type === 'smart-storyboard-shot' && node.sourceStoryboardId === storyboard.id).map(node => node.id));
+    const shotNodes = syncStoryboardShotNodes(output, storyboard);
     selectedIds = [];
-    selectedId = output.id;
+    selectedId = shotNodes[0]?.id || output.id;
     selectedImage = {nodeId:'', index:-1};
     render();
     scheduleSave();
@@ -7812,6 +8081,7 @@ async function runStoryboardShotGeneration(outputNodeId, shotIndex, options={}){
             shot.generatedImage = stripImageGenerationMeta({url:outImages[0], name:`shot-${index + 1}.png`, kind:'image', generatedResult:true});
             addSmartGenerationLog({run:{...runLog, kind:'image'}, outputs:outImages, runMs:nowMs() - runLogStart});
         }
+        syncStoryboardShotNodes(node, null, {layout:false});
         shot.runFinishedAt = nowMs();
         shot.runElapsedMs = Math.max(0, shot.runFinishedAt - Number(shot.runStartedAt || shot.runFinishedAt));
         if(!silent) toast(tr('chat.generated'));
@@ -8842,6 +9112,23 @@ promptPresetPanel?.addEventListener('pointerdown', e => e.stopPropagation());
 promptPresetPanel?.addEventListener('mousedown', e => e.stopPropagation());
 promptPresetPanel?.addEventListener('click', e => e.stopPropagation());
 if(promptPresetClose) promptPresetClose.onclick = closePromptPresetPanel;
+promptPresetTagBar?.addEventListener('click', event => {
+    const btn = event.target.closest?.('[data-prompt-tag]');
+    if(!btn || !promptPresetPanelUsesPromptLibrary()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const tag = btn.dataset.promptTag || '';
+    if(tag) promptPresetPanel.dataset.tag = tag;
+    else delete promptPresetPanel.dataset.tag;
+    renderPromptPresetPanel('', '');
+});
+if(promptPresetLibraryBtn) promptPresetLibraryBtn.onclick = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    const node = activeComposerNode() || selectedNode();
+    if(!isSmartImageNode(node) || promptInput?.dataset?.promptLocked === '1') return;
+    openPromptPresetPanel(node.id, node.promptPresetId || '', {anchorEl:promptPresetLibraryBtn});
+};
 instructionTemplatePanel?.addEventListener('pointerdown', e => e.stopPropagation());
 instructionTemplatePanel?.addEventListener('mousedown', e => e.stopPropagation());
 instructionTemplatePanel?.addEventListener('click', e => e.stopPropagation());
@@ -8872,52 +9159,8 @@ if(promptPresetApply) promptPresetApply.onclick = () => {
     const preset = currentPromptPreset(promptPresetSelect.value);
     const node = promptPresetPanelNode();
     if(!preset || !node) return;
-    node.promptPresetId = preset.id;
-    node.text = preset.text || '';
+    applyPromptPresetToNode(node, preset, promptPresetText?.value || preset.text || '');
     closePromptPresetPanel();
-    render();
-    scheduleSave();
-};
-if(promptPresetSave) promptPresetSave.onclick = () => {
-    const preset = currentPromptPreset(promptPresetSelect.value);
-    if(!preset) return;
-    const name = promptPresetName.value.trim();
-    const text = promptPresetText.value.trim();
-    if(!name || !text){ setPromptPresetStatus(tr('smart.promptPresetRequired'), 'warn'); return; }
-    const idx = promptPresets.findIndex(p => p.id === preset.id);
-    if(idx >= 0) promptPresets[idx] = {...promptPresets[idx], name, text, updatedAt:Date.now()};
-    savePromptPresets();
-    const node = promptPresetPanelNode();
-    if(node?.promptPresetId === preset.id) node.text = text;
-    renderPromptPresetPanel(preset.id, tr('smart.promptPresetSaved'));
-    setPromptPresetStatus(tr('smart.promptPresetSaved'), 'ok');
-    render();
-    scheduleSave();
-};
-if(promptPresetNew) promptPresetNew.onclick = () => {
-    const node = promptPresetPanelNode();
-    const preset = createPromptPresetFromNode(node, {openPanel:false});
-    if(!preset) return;
-    renderPromptPresetPanel(preset.id, tr('smart.promptPresetSavedNew'));
-    setPromptPresetStatus(tr('smart.promptPresetSavedNew'), 'ok');
-    promptPresetName?.focus();
-    promptPresetName?.select();
-};
-if(promptPresetDelete) promptPresetDelete.onclick = () => {
-    const preset = currentPromptPreset(promptPresetSelect.value);
-    if(!preset) return;
-    if(!promptPresetDeleteArmed){
-        promptPresetDeleteArmed = true;
-        promptPresetDelete.textContent = tr('smart.promptPresetDeleteAgain');
-        promptPresetDelete.classList.add('confirm-danger');
-        setPromptPresetStatus(tr('smart.promptPresetDeleteConfirm').replace('{name}', preset.name || tr('smart.promptPresetUnnamed')), 'warn');
-        return;
-    }
-    promptPresets = promptPresets.filter(p => p.id !== preset.id);
-    nodes.forEach(node => { if(node.promptPresetId === preset.id) node.promptPresetId = ''; });
-    savePromptPresets();
-    renderPromptPresetPanel(promptPresets[0]?.id || '', tr('smart.promptPresetDeleted'));
-    setPromptPresetStatus(tr('smart.promptPresetDeleted'), 'ok');
     render();
     scheduleSave();
 };
@@ -9111,7 +9354,7 @@ mentionPicker.addEventListener('mousedown', event => event.stopPropagation());
 document.addEventListener('click', event => {
     if(!event.target.closest('.smart-control')) closeAllSmartPopovers();
     if(!event.target.closest('.mention-picker') && !event.target.closest('#promptInput')) closeMentionPicker();
-    if(!event.target.closest('.prompt-preset-panel') && !event.target.closest('.prompt-preset-edit') && !event.target.closest('.prompt-preset-save')) closePromptPresetPanel();
+    if(!event.target.closest('.prompt-preset-panel') && !event.target.closest('.prompt-template-btn') && !event.target.closest('.prompt-template-open')) closePromptPresetPanel();
     if(!event.target.closest('.instruction-template-panel') && !event.target.closest('.node-title-settings')) closeInstructionTemplatePanel();
 });
 document.addEventListener('keydown', event => {
@@ -9290,7 +9533,6 @@ window.addEventListener('studio-lang-change', () => {
 });
 window.onload = async () => {
     applyTheme(localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light');
-    loadPromptPresets();
     if(window.StudioI18n) window.StudioI18n.apply();
     if(window.lucide) lucide.createIcons();
     await loadInstructionTemplates();

@@ -20,6 +20,24 @@ def sanitize_instruction_group_name(name, fallback="未命名分组"):
     return text[:80] or fallback
 
 
+def sanitize_instruction_template_tags(*values):
+    tags = []
+    seen = set()
+    for value in values:
+        if isinstance(value, (list, tuple)):
+            parts = value
+        else:
+            parts = re.split(r"[,，;；|#\r\n\t]+", str(value or ""))
+        for part in parts:
+            tag = re.sub(r"[\r\n\t]+", " ", str(part or "")).strip()
+            key = tag.lower()
+            if not tag or key in seen:
+                continue
+            seen.add(key)
+            tags.append(tag[:32])
+    return tags[:24]
+
+
 def is_valid_template_scope(scope):
     return scope in VALID_TEMPLATE_SCOPES or bool(CUSTOM_TEMPLATE_SCOPE_RE.match(scope or ""))
 
@@ -43,7 +61,7 @@ def normalize_instruction_template(item):
         template_id = f"instruction_template_{uuid.uuid4().hex[:12]}"
     created_at = _int_ms(item.get("createdAt") or item.get("created_at"))
     updated_at = _int_ms(item.get("updatedAt") or item.get("updated_at"), created_at)
-    return {
+    normalized = {
         "id": template_id[:80],
         "scope": scope,
         "name": sanitize_instruction_template_name(item.get("name")),
@@ -51,6 +69,10 @@ def normalize_instruction_template(item):
         "createdAt": created_at,
         "updatedAt": updated_at,
     }
+    tags = sanitize_instruction_template_tags(item.get("tags"), item.get("tag"), item.get("labels"))
+    if tags:
+        normalized["tags"] = tags
+    return normalized
 
 
 def normalize_instruction_group(item):

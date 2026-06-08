@@ -39,7 +39,9 @@
                     </div>
                     <div id="inputThumbsRow" class="input-thumbs-row"></div>
                     <div class="prompt-row">
+                        <div id="upstreamPromptPreview" class="upstream-prompt-preview"></div>
                         <div id="promptInput" class="prompt-input" contenteditable="true" data-i18n-placeholder="smart.promptPlaceholder" data-placeholder="描述你想生成或编辑的图片..."></div>
+                        <button id="promptPresetLibraryBtn" class="prompt-template-btn" type="button" data-i18n-title="smart.promptPresetDefault" title="提示词预设"><i data-lucide="library"></i></button>
                         <div id="mentionPicker" class="mention-picker"></div>
                         <div id="promptResize" class="prompt-resize" data-i18n-title="smart.promptResize" title="拖拽调整文本框高度"></div>
                     </div>
@@ -122,6 +124,7 @@
                 <button id="promptPresetClose" type="button" title="关闭"><i data-lucide="x"></i></button>
             </div>
             <div id="promptPresetStatus" class="prompt-preset-status"></div>
+            <div id="promptPresetTagBar" class="prompt-preset-tags"></div>
             <div class="prompt-preset-fields">
                 <select id="promptPresetSelect"></select>
                 <input id="promptPresetName" type="text" placeholder="预设名称">
@@ -129,10 +132,6 @@
             </div>
             <div class="prompt-preset-actions">
                 <button id="promptPresetApply" type="button">应用</button>
-                <button id="promptPresetDelete" class="danger" type="button">删除</button>
-                <span style="flex:1"></span>
-                <button id="promptPresetNew" type="button">存为新预设</button>
-                <button id="promptPresetSave" class="primary" type="button">保存修改</button>
             </div>
         </div>
         <div id="instructionTemplatePanel" class="instruction-template-panel">
