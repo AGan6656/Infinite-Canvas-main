@@ -16,10 +16,10 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/lucide.js?v=2026.05.29.1"></script>
-    <script src="/static/js/theme.js?v=2026.05.29.1"></script>
-    <script src="/static/js/i18n.js?v=2026.05.29.1"></script>
-    <link rel="stylesheet" href="/static/css/smart-canvas.css?v=2026.05.29.1">
+    <script src="/static/vendor/js/lucide.js?v=2026.06.09.1"></script>
+    <script src="/static/js/theme.js?v=2026.06.09.1"></script>
+    <script src="/static/js/i18n.js?v=2026.06.09.1"></script>
+    <link rel="stylesheet" href="/static/css/smart-canvas.css?v=2026.06.09.1">
 </head>
 <body>
     <div id="shell" class="shell">
@@ -124,14 +124,31 @@
                 <button id="promptPresetClose" type="button" title="关闭"><i data-lucide="x"></i></button>
             </div>
             <div id="promptPresetStatus" class="prompt-preset-status"></div>
-            <div id="promptPresetTagBar" class="prompt-preset-tags"></div>
-            <div class="prompt-preset-fields">
-                <select id="promptPresetSelect"></select>
-                <input id="promptPresetName" type="text" placeholder="预设名称">
-                <textarea id="promptPresetText" placeholder="预设内容"></textarea>
-            </div>
-            <div class="prompt-preset-actions">
-                <button id="promptPresetApply" type="button">应用</button>
+            <div id="promptPresetTabs" class="prompt-preset-tabs"></div>
+            <div class="prompt-preset-library">
+                <aside class="prompt-preset-nav-pane">
+                    <label class="prompt-preset-search">
+                        <i data-lucide="search"></i>
+                        <input id="promptPresetSearch" type="search" placeholder="查询提示词" data-i18n-placeholder="smart.promptTemplateSearchPlaceholder">
+                    </label>
+                    <div id="promptPresetNav" class="prompt-preset-nav"></div>
+                    <div class="prompt-preset-nav-actions">
+                        <button id="promptPresetNew" type="button" title="新建提示词" data-i18n-title="smart.promptTemplateNew"><i data-lucide="plus"></i><span data-i18n="smart.promptTemplateNew">新建</span></button>
+                        <button id="promptPresetRename" type="button" title="重命名" data-i18n-title="smart.promptTemplateRename"><i data-lucide="pencil"></i></button>
+                        <button id="promptPresetDelete" class="danger" type="button" title="删除" data-i18n-title="common.delete"><i data-lucide="trash-2"></i></button>
+                    </div>
+                </aside>
+                <section class="prompt-preset-preview">
+                    <input id="promptPresetName" type="text" placeholder="模板名称" data-i18n-placeholder="smart.promptTemplateNamePlaceholder">
+                    <input id="promptPresetTagsInput" type="text" placeholder="标签，用逗号分隔" data-i18n-placeholder="smart.promptTemplateTagsPlaceholder">
+                    <textarea id="promptPresetText" placeholder="提示词内容" data-i18n-placeholder="smart.promptTemplateTextPlaceholder"></textarea>
+                    <div class="prompt-preset-actions">
+                        <button id="promptPresetApply" class="primary" type="button" data-i18n="smart.instructionTemplateUse">使用模板</button>
+                        <span class="prompt-preset-action-spacer"></span>
+                        <button id="promptPresetEdit" type="button" data-i18n="common.edit">编辑</button>
+                        <button id="promptPresetSave" type="button" data-i18n="common.save">保存</button>
+                    </div>
+                </section>
             </div>
         </div>
         <div id="instructionTemplatePanel" class="instruction-template-panel">
@@ -330,6 +347,6 @@
         <div id="toast" class="toast"></div>
         <div id="mentionPreview" class="mention-preview"><img alt="preview"></div>
     </div>
-    <script src="/static/js/smart-canvas.js?v=2026.05.29.1"></script>
+    <script src="/static/js/smart-canvas.js?v=2026.06.09.1"></script>
 </body>
 </html>

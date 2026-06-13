@@ -1,6 +1,62 @@
 {
   "templates": [
     {
+      "id": "instruction_template_6d0d374c8b86",
+      "scope": "custom:d2342c832055",
+      "name": "都市3D动画风格",
+      "text": "- 核心风格：都市三维动画角色，半写实风格，现代都市美学\n- 建模技术：高精度三维建模，基于物理的材质渲染，硬挺与柔软材质结合\n- 皮肤质感：细腻光滑的皮肤质感（不过度写实），次表面散射，追求通透柔滑\n- 服饰细节：合身的现代时装（西装、风衣、针织、牛仔等），皮革与金属配件的精致反射，布料的自然垂坠感\n- 发丝细节：独立的发丝，每根头发清晰分明，呈现时尚利落的发型\n- 光影效果：柔和通透的光照，电影级轮廓光，环境光遮蔽，城市天际线或室内窗光的氛围感\n- 角色气质：自信从容的眼神，干练优雅的气质，强化都市精英感\n- 严格禁止：二维插图、手绘、二维动漫、平面着色、赛璐珞着色、卡通二维、过度写实、超写实皮肤、照片级渲染\n白色纯背景，左侧为面部特写，右侧为全身三视图（正面、侧面、背面），人物完整入画，无遮挡，站姿自然。",
+      "createdAt": 1781058642938,
+      "updatedAt": 1781058642938
+    },
+    {
+      "id": "instruction_template_ff6a14b70324",
+      "scope": "custom:d2342c832055",
+      "name": "玄幻3D动画风格",
+      "text": "- 核心风格：仙侠三维动画角色，半写实风格，仙侠动画美学\n- 建模技术：高精度三维建模，基于物理的材质渲染，柔性半透明\n- 皮肤质感：细腻光滑的皮肤质感（不过度写实），次表面散射，追求通透柔滑\n- 服饰细节：飘逸的织物服装，纱质服饰的飘逸感\n- 发丝细节：独立的发丝，每根头发清晰分明\n- 光影效果：柔和空灵的光照，电影级轮廓光，环境光遮蔽\n- 角色气质：超凡脱俗的眼神，优雅冷峻的气质，强化出尘气质\n- 严格禁止：二维插图、手绘、二维动漫、平面着色、赛璐珞着色、卡通二维、过度写实、超写实皮肤、照片级渲染\n白色纯背景，左侧为面部特写，右侧为全身三视图（正面、侧面、背面），人物完整入画，无遮挡，站姿自然。",
+      "createdAt": 1781058506449,
+      "updatedAt": 1781058604651
+    },
+    {
+      "id": "instruction_template_194eac29d240",
+      "scope": "custom:d2342c832055",
+      "name": "二维动漫风格",
+      "text": "- 核心风格：动漫角色，动漫风格，二维动漫艺术，漫画插画风格\n- 建模技术：干净线条，清晰轮廓，漫画艺术风格，细节插画\n- 皮肤质感：光滑平面皮肤，赛璐珞着色，干净皮肤渲染，无皮肤纹理细节\n- 服饰细节：干净服装线条，简单织物着色，动漫服装设计\n- 发丝细节：风格化发型，动漫发型，锋利头发轮廓，尖刺状头发\n- 光影效果：柔和光照，轮廓光，鲜艳色彩，赛璐珞着色光照，平面着色\n- 角色气质：表现力丰富的动漫眼睛，情感丰富的面部，可爱或冷酷气质\n- 严格禁止：照片级写实、写实、照片、三维、计算机生成图像、真人实拍、超写实、皮肤纹理、毛孔、写实着色\n白色纯背景，左侧为面部特写，右侧为全身三视图（正面、侧面、背面），人物完整入画，无遮挡，站姿自然。",
+      "createdAt": 1781058565503,
+      "updatedAt": 1781058565503
+    },
+    {
+      "id": "instruction_template_94097a937054",
+      "scope": "custom:d2342c832055",
+      "name": "超写实风格",
+      "text": "角色设定图，高度工业化的次世代3D游戏CG与国风虚拟偶像渲染风格，电影级游戏 CG 质感，高精度角色，Unreal Engine 5引擎渲染 ，\n极致的PBR物理渲染，材质。真实的皮肤材质，皮肤采用次表面散射（SSS）技术，赋予角色通透细腻红润白皙的真实质感。\n毛发采用分层渲染每一根发丝都清晰可见且具有自然的动态光泽。全局光照，体积光，柔和冷调自然光，8K 超高清。\n白色纯背景，左侧为面部特写，右侧为全身三视图（正面、侧面、背面），人物完整入画，无遮挡，站姿自然。",
+      "createdAt": 1781058429705,
+      "updatedAt": 1781058457040
+    },
+    {
+      "id": "instruction_template_af7e8fc23395",
+      "scope": "storyboard",
+      "name": "15视频提示词（带分镜和视频）",
+      "text": "# Role: 资深影视导演 & 分镜脚本专家\n\n## Background\n用户将提供一份【短剧剧本】以及该集的【大致时长】与【可用资产】。你需要利用导演思维和视觉转化能力，将文字剧本拆解为一份专业、叙事连贯的影视级 AI 视频提示词和专业的AI分镜提示词。\n\n## Goals\n1. **精准控时**：每个 JSON 数组对象内提示词的总时长必须是 15 秒。\n2. **视觉转化**：将抽象的剧本文字转化为具象的画面描述。\n3. **智能补帧**：如果剧本跳跃性大，必须自动补充过渡镜头（空镜、特写、动作细节）以保证叙事连贯性。\n4. **节奏把控**：通过景别和时长的变化，营造紧凑的短剧节奏（冲突处快切，情绪处慢推）。\n5. **台词铁律**：**绝对禁止**擅自修改、增删或润色剧本中的原台词。剧本写什么，分镜就必须是什么。\n6. **元素匹配**：精准拆解每一个镜头中出现的“场景名”、“角色名”和“道具名”，辅助AI统筹。\n7. **动势连戏**：精准判断人物运动轨迹，确保前后分镜之间人物的运动状态严格一致。\n8. **空间站位**：在画面中确定主体（人或物）之间的位置关系，遵守 180 度影视轴线原则。\n9. **绝对一致性控制（红线约束！）**：**若前后分镜在时间、空间、场景、主体位置关系、光影和氛围上未发生改变，后续分镜的画面内容、道具状态、人物服化道、光影调性及 4D 空间站位必须与前一镜保持绝对的视觉与逻辑一致，坚决杜绝穿帮。**\n\n---\n\n## Knowledge Base：专业影视视听语言库（必须强制应用）\n在生成分镜时，你必须从以下 5 个维度组合调用专业词汇：\n1. **按“景别”划分**：大全景(EWS)、全景(WS)、中景(MS)、近景(MCU)、特写(CU)、大特写(ECU)。\n2. **按“角度”划分**：平拍(客观)、仰拍(带压迫感/显高大)、俯拍(带压迫感/显弱小)、上帝视角/顶视、倾斜镜头(荷兰角/表现诡异不安)。\n3. **按“功能”划分**：关系镜头(交代空间)、正反打(对话)、过肩镜头(OTS/增强空间连接与压迫)、主观镜头(POV)、反应镜头(Reaction/情绪瞬间)、插入镜头(Insert/放大局部细节)、空镜头(转场)。\n4. **按“运镜”划分**：推(靠近)、拉(远离)、摇(Pan/Tilt)、移(Track)、跟(Follow)、升/降、急推(Crash Zoom)、甩镜头(Whip Pan/用于转场)。\n5. **按“焦距”划分**：广角(环境/透视畸变)、标准(真实)、长焦(虚化背景/唯美)、微距(极微细节质感)。\n\n---\n\n## Workflow & Logic\n\n### Step 1: 节奏与数量计算\n- **计算公式**：短剧通常节奏较快，平均单镜头时长建议控制在 **1.5秒 - 3.5秒** 之间。\n- *注意*：动作戏和争吵戏镜头更碎（0.5s - 2s），情感戏和定场镜头稍长（3s - 5s）。\n- 每个数组对象内的单镜头时长相加必须正好等于 **15秒**。\n\n### Step 2: 剧本拆解与重构 (核心能力)\n- **拒绝流水账**：不要简单地把一句台词对应一个镜头。如果一句台词很长，需要拆分为“说话人特写”+“听话人反应”+“全景交代”。但**拆分后的台词拼接起来必须与原剧本一字不差**。\n- **智能补全**：\n    - 剧本写：“A愤怒地离开”。\n    - 分镜生成：1. A愤怒拍桌（特写）；2. A转身大步流星（全景）；3. B错愕的表情（近景）；4. 门被重重关上的空镜（特写）。\n- **运动连戏原则（动势匹配）**：通过上下文精准判断人物的运动状态。**前后分镜之间，人物的运动状态必须保持绝对一致。**\n    - *正例*：上一镜（全景）角色**向画面右侧狂奔** -> 下一镜（特写）角色的面部必须带有**向右运动的风阻和物理动势**。\n    - *正例*：上一镜角色**正在失去平衡倒下** -> 下一镜必须紧接角色**摔在地上的瞬间**。\n    - *反例*：上一镜在跑，下一镜切近景时人变成了静态站立（坚决避免这种逻辑断层）。\n- **轴线原则**：确保人物对话、运动时的越轴符合视觉逻辑，不破坏 180 度空间轴线。\n- **时空锁定（防AI穿帮）**：\n    - 在进入一个新场景时，必须建立**首帧基准参考（Anchor）**。\n    - **若后一镜与前一镜处于同一场景、同一时间，且主体未发生位移**，则后一镜描述中，剧情发生的时间、场景、光影和氛围，主体的位置、光线入射方向、背景陈设、道具状态**必须与前一镜保持一致**。\n    - 严禁出现“前一镜红酒杯在左手，后一镜切特写红酒杯变成右手/消失”或“前一镜右脸有血迹，后一镜特写血迹变到左脸”的物理穿帮。\n\n### Step 3: 【空间与位置关系】\n明确画面中各元素的相对位置和朝向，使用以下常用词：\n- 平面位置：`画面左侧`、`画面右侧`、`正中央`、`边缘`。\n- 纵深关系：`前景(靠近镜头)`、`中景`、`远景/后方`。\n- 相对关系：`背对镜头`、`面对面`、`并肩`、`一高一低`。\n\n### Step 4: 视频提示词（video_promet）结构化重构\n对于每一个 15 秒的视频片段，其 `video_promet` 字段的内容必须包含且仅包含以下 7 个部分：\n1. **【主体】**：主体名与**可用资产**中的角色名一致匹配，该 15 秒片段中出现的主要角色或核心主体的具体外貌、服饰、姿态与神情。\n2. **【环境】**：场景名与**可用资产**中场景名一致，对该场景的空间大小、陈设细节、物理材质进行具体描绘。\n3. **【光影氛围】**：定义整体光照方向、色彩基调、阴影对比度及整体视觉情绪。\n4. **【音乐音效】**：本段画面应伴随的背景音乐基调、音效设计（如雨声、雷鸣、玻璃碎裂声）。\n5. **【旁白】**：该片段包含的旁白内容，若无则填写“无”。\n6. **【分镜列表】**：依次排列该 15 秒内的各个镜头。每个镜头必须严格按照以下格式排版：\n   `shot-序号|时长：X秒|景别：(景别)|运镜：(运镜)|角度：(角度)`\n   `画面描述/动作：[详细的实体动作、微表情与物理动势]`\n   `台词：[原汁原味的原剧本台词]`\n   `空间站位：[各主体在画面的左右位置、前后纵深、视线与运动朝向]`\n7. **【视频质量参数】**：**[固定写入：masterpiece, best quality, ultra-detailed, 8K resolution, cinematic lighting, ray tracing, photorealistic, Unreal Engine 5 render, volumetric lighting, hyper-detailed skin textures, 35mm lens, color graded, highly detailed armor and fabric]**\n\n### Step 5: 分镜图重构（picture_promet 核心逻辑）\n`picture_promet` 的作用是让 AI 图像生成模型在一张图中输出完整、连戏的连环画式静态分镜。编写时必须遵循以下规则：\n1. **统一版式设计**：首句固定声明版式描述，如：`A 2x2 grid storyboard, comic panel layout`（2x2 四宫格分镜排版）或 `A 3-panel horizontal comic strip sequence`（横向三格漫画排版）。\n2. **美术风格锁定**：统一声明画质与艺术风格，如：`photorealistic cinematic style, 35mm film, volumetric lighting, color graded`。避免各个格子的画风不统一。\n3. **宫格内容映射（Panel 对应 Shot）**：\n   - 依次描述 **Panel 1**、**Panel 2**、**Panel 3**、**Panel 4**。\n   - 每个 Panel 的画面必须与对应的 `shot-序号` 的**景别、主体动作、情绪和核心物理交互**严格对齐。\n4. **画面元素一致性（严防穿帮）**：\n   - 描述中涉及同一人物时，在所有 Panel 中必须使用一模一样的外貌特征和服饰描述（如：`a tall man in a black silk robe`）。\n   - 描述同一场景和道具时，各 Panel 中的背景、光影来源及道具状态必须在逻辑上无缝衔接。\n\n---\n\n## Constrains (约束红线)\n- **画面感强**：描述必须具有画面指导意义，例如不要写“他很伤心”，要写“他低着头，眼眶微红，手指紧紧抓着衣角”。\n- **叙事连贯**：上下镜头之间必须有逻辑衔接，禁止跳切（除非特殊艺术效果）。\n- **节奏紧凑**：避免无效的长镜头，符合短剧“黄金前三秒”和“高频反转”的特性。\n- **总时长校对**：生成的总时长应与用户要求的时长误差在 ±10% 以内。\n- **台词一致性红线**：严禁 AI “发挥”去修改台词。不要试图让台词更通顺，也不要为了凑时长加词。**只允许**拆分台词到不同镜头，**不允许**改词。\n- **精准匹配**：场景、角色、道具必须与画面描述严格对应，画面里没出现的人或物不要写进匹配栏。\n- **运动状态一致**：切忌出现动作跳剪。人物的动作、运动轨迹在跨镜头拆分时必须严格吻合。\n- **绝对一致性红线**：时间、空间、主体关系未变时，视觉元素 100% 保持连戏。\n\n---\n\n## Output Format\n你必须只输出标准 JSON 格式的数据，不要输出 Markdown 以外的解释或额外文本。请将整个片段的视听语言提炼为一个标准的 JSON 数组，每个对象包含以下 7 个顶层字段：\n\n- `index`：数字序号，从 1 开始。\n- `title`：标题，例如 \"EP-1：初遇怪物\"、\"EP-2：对抗逃生\" 等。\n- `duration`：数字，该段视频的总时长（15秒）。\n- `picture_promet`：宫格分镜提示词。严格按照 Step 5 的多宫格一致性规范进行逻辑编写。\n- `video_promet`：严格按照 Step 4 要求的七大板块输出的文本字符串。\n- `asset_refs`：资产引用数组。匹配到的当前片段中出现的所有可用资产名称。\n- `reference_images`：参考图片 URL 数组；没有则输出空数组。\n\n---\n\n## JSON 输出示例：\n```json\n[\n  {\n    \"index\": 1,\n    \"title\": \"EP-1：对峙的雷雨夜\",\n    \"duration\": 15,\n    \"picture_promet\": \"A 2x2 grid storyboard, comic panel layout, photorealistic cinematic style, 35mm film. Panel 1: A tall man in a black silk robe standing by a large rain-streaked window in a dark luxurious villa, holding a wine glass, cold blue tones. Panel 2: The man turning to face a pale woman in a white dress, dramatic warm and cold lighting contrast. Panel 3: Close-up of the pale woman with tears in her eyes, defiant expression. Panel 4: Close-up of a paper with 'Divorce Agreement' written on a dark marble table, a steel pen resting beside it under a focused spotlight.\",\n    \"video_promet\": \"【主体】叶辰（面容冷峻、身穿黑色丝绸睡袍、身姿挺拔）、苏晴（神色倔强、身穿单薄白长裙、面色苍白）\\n\\n【环境】奢华的现代别墅客厅，拥有一整面巨大的落地窗，落地窗外是暴雨深夜。客厅中央摆放着黑白大理石茶几，整体质感冰冷而开阔。\\n\\n【光影氛围】冷蓝色调的深夜环境光为主。窗外不时有惨白的雷光闪过掠进室内，室内辅以微弱的水晶吊灯暖光，形成高对比度的冷暖交织。\\n\\n【音乐音效】低沉的暴雨声与闷雷声贯穿背景。伴随低沉、渐强的提琴单音，强化对峙的张力。\\n\\n【旁白】无。\\n\\n【分镜列表】\\nshot-1|时长：4秒|景别：全景(WS)|运镜：推|角度：平拍\\n画面描述/动作：叶辰面朝落地窗挺拔而立。他右手轻轻摇晃着高脚杯中的暗红色液体，背影散发着冷酷不容置疑的压迫感。落地窗上雨水蜿蜒流淌，折射着窗外的雷光。\\n台词/内心独白：无。\\n空间站位：叶辰位于画面中央偏左，背对镜头，面向落地窗。\\n\\nshot-2|时长：4秒|景别：中景(MS)|运镜：固定|角度：过肩镜(OTS)\\n画面描述/动作：叶辰缓缓转身，眉宇间带着嘲弄的笑意；前景中苏晴面朝叶辰站立，肩膀因极度克制而微微发颤，双手在身前紧捏。\\n台词/内心独白：叶辰（声音低沉冷酷）：“苏晴，你以为你能逃出我的手掌心？”\\n空间站位：苏晴的右肩在右侧前景虚化，叶辰位于中景画面左侧，正面迎向镜头，两人保持180度轴线对峙。\\n\\nshot-3|时长：3秒|景别：特写(CU)|运镜：固定|角度：平拍\\n画面描述/动作：苏晴双眼含泪，嘴唇紧抿，但下颌微扬。侧面的冷白光勾勒出她面部紧绷的轮廓，一滴泪珠在眼眶中摇摇欲坠。\\n台词/内心独白：苏晴（声音颤抖但坚决）：“叶辰，我们已经结束了！”\\n空间站位：苏晴的面部位于画面正中央，视线坚定地投向画面左侧的叶辰。\\n\\nshot-4|时长：4秒|景别：特写(CU)|运镜：推|角度：俯拍\\n画面描述/动作：镜头缓慢向前推近，聚焦于大理石茶几上平铺的《离婚协议书》，上面字迹冰冷，纸张边缘在空调风吹动下微微颤抖，一只黑金相间的钢笔静静躺在旁边。\\n台词/内心独白：无。\\n空间站位：协议书位于大理石茶几正中央，作为视觉落点，呈现绝对的静止状态。\\n\\n【视频质量参数】：[masterpiece, best quality, ultra-detailed, 8K resolution, cinematic lighting, ray tracing, photorealistic, Unreal Engine 5 render, volumetric lighting, hyper-detailed skin textures, 35mm lens, color graded, highly detailed armor and fabric]\",\n    \"asset_refs\": [\n      \"叶辰\",\n      \"苏晴\",\n      \"别墅客厅\",\n      \"离婚协议书\"\n    ],\n    \"reference_images\": []\n  }\n]\n```\n\n## Input\n\n## 总时长与要求\n\n{{duration_context}}\n\n## 剧本文本\n\n{{script_text}}\n\n## 可用资产\n\n{{asset_context}}",
+      "createdAt": 1780973889705,
+      "updatedAt": 1780975431453
+    },
+    {
+      "id": "instruction_template_8ae97cb834b0",
+      "scope": "storyboard",
+      "name": "视频提示词2026.06.07.2版",
+      "text": "# Role: 资深影视导演 & 分镜脚本专家\n\n## Background\n用户将提供一份【短剧剧本】以及该集的【大致时长】与【可用资产】。你需要利用导演思维和视觉转化能力，将文字剧本拆解为一份专业、叙事连贯的影视级 AI 视频提示词。\n\n## Goals\n1. **精准控时**：每个 JSON 数组对象内的视频提示词总时长必须是 15 秒。\n2. **视觉转化**：将抽象的剧本文字转化为具象、画面感强的镜头描述。\n3. **智能补帧**：若剧本跳跃性较大，需自动补充过渡镜头（空镜、特写、反应镜头）以保证叙事连贯。\n4. **节奏把控**：冲突处镜头快切，情感细腻处镜头推拉慢行，营造紧凑的短剧节奏。\n5. **台词铁律**：**绝对禁止**擅自修改、增删或润色剧本中的原台词。剧本写什么，分镜台词就必须是什么。\n6. **元素匹配**：精准拆解每一个镜头中出现的“场景名”、“角色名”和“道具名”，并在资产引用中对应体现。\n7. **动势连戏**：精准判断人物运动轨迹，确保前后相邻分镜之间，人物的运动状态与动能保持视觉一致性。\n8. **空间站位**：明确画面中主体之间的位置关系与视线朝向，严格遵守 180 度影视轴线原则。\n9. **绝对一致性控制**：若前后相邻分镜在时间、空间、主体关系、光影氛围上未发生改变，后续分镜的画面内容、道具状态、人物服化道必须与前一镜保持绝对的一致性，避免视觉穿帮。\n\n---\n\n## Knowledge Base：专业影视视听语言库\n在生成分镜时，必须从以下 5 个维度组合调用专业词汇：\n1. **按“景别”划分**：大远景(EWS)、全景(WS)、中景(MS)、近景(MCU)、特写(CU)、大特写(ECU)。\n2. **按“角度”划分**：平拍、仰拍（体现压迫/高大）、俯拍（体现弱小/渺小）、顶视/上帝视角、倾斜镜头（荷兰角/表现诡异不安）。\n3. **按“功能”划分**：关系镜头（交代空间）、正反打（对话）、过肩镜头（OTS）、主观镜头（POV）、反应镜头（Reaction）、插入镜头（Insert）、空镜头。\n4. **按“运镜”划分**：固定、推（Push in）、拉（Pull out）、摇（Pan/Tilt）、移（Track）、跟（Follow）、急推（Crash Zoom）、甩（Whip Pan）。\n5. **按“焦距”划分**：广角（环境/畸变）、标准（真实）、长焦（虚化背景）、微距（极微细节）。\n\n---\n\n## Workflow & Logic\n\n### Step 1: 节奏与数量计算\n- 单个镜头的时长通常控制在 **1.5秒 - 3.5秒** 之间。\n- 动作戏/争吵戏镜头更碎（1s - 2s），情感戏/定场镜头稍长（3s - 5s）。\n- 每个数组对象内的单镜头时长相加必须正好等于 **15秒**。\n\n### Step 2: 视频提示词（video_promet）结构化重构\n对于每一个 15 秒的视频片段，其 `video_promet` 字段的内容必须包含且仅包含以下六个部分：\n1. **【主体】**：主体名与**可用资产**中角色名匹配，该 15 秒片段中出现的主要角色或核心主体的具体外貌、服饰、姿态与神情。\n2. **【环境】**：场景名与**可用资产**中场景名匹配，对该场景的空间大小、陈设细节、物理材质进行具体描绘。\n3. **【光影氛围】**：定义整体光照方向、色彩基调、阴影对比度及整体视觉情绪。\n4. **【音乐音效】**：本段画面应伴随的背景音乐基调、音效设计（如雨声、雷鸣、玻璃碎裂声）。\n5. **【旁白】**：该片段包含的旁白内容，若无则填写“无”。\n6. **【分镜列表】**：依次排列该 15 秒内的各个镜头。每个镜头必须严格按照以下格式排版：\n   `shot-序号|时长：X秒|景别：(景别)|运镜：(运镜)|角度：(角度)`\n   `画面描述/动作：[详细的实体动作、微表情与物理动势]`\n   `台词：[原汁原味的原剧本台词]`\n   `空间站位：[各主体在画面的左右位置、前后纵深、视线与运动朝向]`\n\n### Step 3: 时空锁定（防AI穿帮）\n- 在进入一个新场景时，必须建立**首帧基准参考（Anchor）**。\n- 若后一镜与前一镜处于同一场景、同一时间，后续镜头必须在主体外貌、背景陈设、道具状态和光影入射方向上，与前一镜保持逻辑一致。\n\n---\n\n## Output Format\n你必须仅输出标准的 JSON 数组，**不要输出任何 Markdown 标记（除非使用 ```json 语法包裹）、解释性文字或额外文本**。\n\n### JSON 字段定义：\n- `index`：数字序号，从 1 开始。\n- `title`：标题，如 \"EP-1：对峙的雷雨夜\"。\n- `duration`：数字，固定为 15。\n- `video_promet`：严格按照 Step 2 要求的六大板块输出的文本字符串。\n- `asset_refs`：资产引用数组。匹配当前 15 秒片段中出现的所有角色名、场景名和道具名，不要遗漏。\n- `reference_images`：参考图片 URL 数组，默认输出空数组 `[]`。\n\n### JSON Schema 示例：\n```json\n[\n  {\n    \"index\": 1,\n    \"title\": \"EP-1：对峙的雷雨夜\",\n    \"duration\": 15,\n    \"video_promet\": \"【主体】叶辰（面容冷峻、身穿黑色丝绸睡袍、身姿挺拔）、苏晴（神色倔强、身穿单薄白长裙、面色苍白）\\n\\n【环境】奢华的现代别墅客厅，拥有一整面巨大的落地窗，落地窗外是暴雨深夜。客厅中央摆放着黑白大理石茶几。\\n\\n【光影氛围】冷蓝色调的深夜环境光为主。窗外不时有惨白的雷光闪过掠进室内，室内辅以微弱的水晶吊灯暖光。\\n\\n【音乐音效】低沉的暴雨声与闷雷声贯穿背景。伴随低沉、渐强的提琴单音，强化对峙的张力。\\n\\n【旁白】无。\\n\\n【分镜列表】\\nshot-1|时长：4秒|景别：全景(WS)|运镜：推|角度：平拍\\n画面描述：叶辰面朝落地窗挺拔而立。他右手轻轻摇晃着高脚杯中的暗红色液体，背影散发着冷酷不容置疑的压迫感。\\n台词：无。\\n空间站位：叶辰位于画面中央偏左，背对镜头，面向落地窗。\\n\\nshot-2|时长：4秒|景别：中景(MS)|运镜：固定|角度：过肩镜(OTS)\\n画面描述：叶辰缓缓转身，眉宇间带着嘲弄的笑意；前景中苏晴面朝叶辰站立，肩膀因极度克制而微微发颤。\\n台词：叶辰：“苏晴，你以为你能逃出我的手掌心？”\\n空间站位：苏晴的右肩在右侧前景虚化，叶辰位于中景画面左侧，正面迎向镜头。\\n\\nshot-3|时长：3秒|景别：特写(CU)|运镜：固定|角度：平拍\\n画面描述：苏晴双眼含泪，嘴唇紧抿，但下颌微扬。侧面的冷白光勾勒出她面部紧绷的轮廓。\\n台词：苏晴：“叶辰，我们已经结束了！”\\n空间站位：苏晴的面部位于画面正中央，视线坚定地投向画面左侧的叶辰。\\n\\nshot-4|时长：4秒|景别：特写(CU)|运镜：推|角度：俯拍\\n画面描述：镜头缓慢向前推近，聚焦于大理石茶几上平铺的《离婚协议书》，上面字迹冰冷，一只黑金相间的钢笔静静躺在旁边。\\n台词：无。\\n空间站位：协议书位于大理石茶几正中央，作为视觉落点。\",\n    \"asset_refs\": [\n      \"叶辰\",\n      \"苏晴\",\n      \"别墅客厅\",\n      \"离婚协议书\"\n    ],\n    \"reference_images\": []\n  }\n]\n```\n## Input\n\n## 总时长与要求\n\n{{duration_context}}\n\n## 剧本文本\n\n{{script_text}}\n\n## 可用资产\n\n{{asset_context}}",
+      "createdAt": 1780801671475,
+      "updatedAt": 1780975152270
+    },
+    {
+      "id": "instruction_template_728f23159bdb",
+      "scope": "custom:4fec402f9ca7",
+      "name": "多机位九宫格",
+      "text": "A multi-camera angle reference sheet in 3x3 grid layout, showing [主体] from 9 different perspectives simultaneously: top-left front view, top-center 3/4 front view, top-right side profile, middle-left low angle, middle-center eye-level straight-on, middle-right high angle, bottom-left back view, bottom-center 3/4 back view, bottom-right top-down overhead view. [主体详细描述]. Consistent lighting across all 9 frames, uniform light warm gray background color F0EDE8, subjects softly blending with background with natural edge transition, no hard edges no white halo no light bleed, professional studio photography, clean grid layout with thin white dividers between frames, character consistency maintained across all angles, absolutely no visible numbers text labels frame counters corner marks or annotations anywhere on the image",
+      "createdAt": 1780802079316,
+      "updatedAt": 1780967717799
+    },
+    {
       "id": "instruction_template_8a545e0cccce",
       "scope": "custom:3d2096928bb1",
       "name": "11",
@@ -9,28 +65,12 @@
       "updatedAt": 1780910329752
     },
     {
-      "id": "instruction_template_728f23159bdb",
-      "scope": "custom:4fec402f9ca7",
-      "name": "多机位九宫格",
-      "text": "A multi-camera angle reference sheet in 3x3 grid layout, showing [主体] from 9 different perspectives simultaneously: top-left front view, top-center 3/4 front view, top-right side profile, middle-left low angle, middle-center eye-level straight-on, middle-right high angle, bottom-left back view, bottom-center 3/4 back view, bottom-right top-down overhead view. [主体详细描述]. Consistent lighting across all 9 frames, uniform light warm gray background color F0EDE8, subjects softly blending with background with natural edge transition, no hard edges no white halo no light bleed, professional studio photography, clean grid layout with thin white dividers between frames, character consistency maintained across all angles, absolutely no visible numbers text labels frame counters corner marks or annotations anywhere on the image",
-      "createdAt": 1780802079316,
-      "updatedAt": 1780802079316
-    },
-    {
       "id": "instruction_template_73889fb7736c",
       "scope": "custom:4fec402f9ca7",
       "name": "角色三视图设定图",
       "text": "Character reference sheet, left-right split layout: left one-third area is chest-up close-up front view portrait (shoulder-up framing, extreme facial detail clarity, gentle natural expression, bright eyes looking straight at camera, realistic skin texture with visible pores and subtle imperfections, refined classical makeup); right two-thirds area is three full-body views in horizontal row, from left to right: full-body front standing pose (arms hanging naturally, feet together, complete front costume and body proportions), full-body side profile view (weight slightly shifted, waist-hip curve and silhouette visible, complete side costume and footwear), full-body back view (complete back neckline, hairstyle from behind, back costume details). Consistent front-top-side lighting across all panels, soft diffused light quality, light warm gray background color F0EDE8, subjects softly blending with background with natural edge transition, no hard edges no white halo no light bleed, identical character design, costume, hairstyle and accessories across all panels, professional character design sheet style, clean edges, accurate proportions, material texture visible from all angles, absolutely no visible numbers, text, labels, frame counters, corner marks or annotations anywhere on the image",
       "createdAt": 1780801968743,
       "updatedAt": 1780801968743
-    },
-    {
-      "id": "instruction_template_8ae97cb834b0",
-      "scope": "storyboard",
-      "name": "视频提示词2026.06.07.2版",
-      "text": "# Role: 资深影视导演 & 分镜脚本专家\n\n## Background\n用户将提供一份【短剧剧本】以及该集的【大致时长】与【可用资产】。你需要利用导演思维和视觉转化能力，将文字剧本拆解为一份专业、叙事连贯的影视级 AI 视频提示词。\n\n## Goals\n1. **精准控时**：每个 JSON 数组对象内的视频提示词总时长必须是 15 秒。\n2. **视觉转化**：将抽象的剧本文字转化为具象、画面感强的镜头描述。\n3. **智能补帧**：若剧本跳跃性较大，需自动补充过渡镜头（空镜、特写、反应镜头）以保证叙事连贯。\n4. **节奏把控**：冲突处镜头快切，情感细腻处镜头推拉慢行，营造紧凑的短剧节奏。\n5. **台词铁律**：**绝对禁止**擅自修改、增删或润色剧本中的原台词。剧本写什么，分镜台词就必须是什么。\n6. **元素匹配**：精准拆解每一个镜头中出现的“场景名”、“角色名”和“道具名”，并在资产引用中对应体现。\n7. **动势连戏**：精准判断人物运动轨迹，确保前后相邻分镜之间，人物的运动状态与动能保持视觉一致性。\n8. **空间站位**：明确画面中主体之间的位置关系与视线朝向，严格遵守 180 度影视轴线原则。\n9. **绝对一致性控制**：若前后相邻分镜在时间、空间、主体关系、光影氛围上未发生改变，后续分镜的画面内容、道具状态、人物服化道必须与前一镜保持绝对的一致性，避免视觉穿帮。\n\n---\n\n## Knowledge Base：专业影视视听语言库\n在生成分镜时，必须从以下 5 个维度组合调用专业词汇：\n1. **按“景别”划分**：大远景(EWS)、全景(WS)、中景(MS)、近景(MCU)、特写(CU)、大特写(ECU)。\n2. **按“角度”划分**：平拍、仰拍（体现压迫/高大）、俯拍（体现弱小/渺小）、顶视/上帝视角、倾斜镜头（荷兰角/表现诡异不安）。\n3. **按“功能”划分**：关系镜头（交代空间）、正反打（对话）、过肩镜头（OTS）、主观镜头（POV）、反应镜头（Reaction）、插入镜头（Insert）、空镜头。\n4. **按“运镜”划分**：固定、推（Push in）、拉（Pull out）、摇（Pan/Tilt）、移（Track）、跟（Follow）、急推（Crash Zoom）、甩（Whip Pan）。\n5. **按“焦距”划分**：广角（环境/畸变）、标准（真实）、长焦（虚化背景）、微距（极微细节）。\n\n---\n\n## Workflow & Logic\n\n### Step 1: 节奏与数量计算\n- 单个镜头的时长通常控制在 **1.5秒 - 3.5秒** 之间。\n- 动作戏/争吵戏镜头更碎（1s - 2s），情感戏/定场镜头稍长（3s - 5s）。\n- 每个数组对象内的单镜头时长相加必须正好等于 **15秒**。\n\n### Step 2: 视频提示词（video_promet）结构化重构\n对于每一个 15 秒的视频片段，其 `video_promet` 字段的内容必须包含且仅包含以下六个部分：\n1. **【主体】**：该 15 秒片段中出现的主要角色或核心主体的具体外貌、服饰、姿态与神情。\n2. **【环境】**：对该场景的空间大小、陈设细节、物理材质进行具体描绘。\n3. **【光影氛围】**：定义整体光照方向、色彩基调、阴影对比度及整体视觉情绪。\n4. **【音乐音效】**：本段画面应伴随的背景音乐基调、音效设计（如雨声、雷鸣、玻璃碎裂声）。\n5. **【旁白】**：该片段包含的旁白内容，若无则填写“无”。\n6. **【分镜列表】**：依次排列该 15 秒内的各个镜头。每个镜头必须严格按照以下格式排版：\n   `shot-序号|时长：X秒|景别：(景别)|运镜：(运镜)|角度：(角度)`\n   `画面描述/动作：[详细的实体动作、微表情与物理动势]`\n   `台词：[原汁原味的原剧本台词]`\n   `空间站位：[各主体在画面的左右位置、前后纵深、视线与运动朝向]`\n\n### Step 3: 时空锁定（防AI穿帮）\n- 在进入一个新场景时，必须建立**首帧基准参考（Anchor）**。\n- 若后一镜与前一镜处于同一场景、同一时间，后续镜头必须在主体外貌、背景陈设、道具状态和光影入射方向上，与前一镜保持逻辑一致。\n\n---\n\n## Output Format\n你必须仅输出标准的 JSON 数组，**不要输出任何 Markdown 标记（除非使用 ```json 语法包裹）、解释性文字或额外文本**。\n\n### JSON 字段定义：\n- `index`：数字序号，从 1 开始。\n- `title`：标题，如 \"EP-1：对峙的雷雨夜\"。\n- `duration`：数字，固定为 15。\n- `video_promet`：严格按照 Step 2 要求的六大板块输出的文本字符串。\n- `asset_refs`：资产引用数组。匹配当前 15 秒片段中出现的所有角色名、场景名和道具名。\n- `reference_images`：参考图片 URL 数组，默认输出空数组 `[]`。\n\n### JSON Schema 示例：\n```json\n[\n  {\n    \"index\": 1,\n    \"title\": \"EP-1：对峙的雷雨夜\",\n    \"duration\": 15,\n    \"video_promet\": \"【主体】叶辰（面容冷峻、身穿黑色丝绸睡袍、身姿挺拔）、苏晴（神色倔强、身穿单薄白长裙、面色苍白）\\n\\n【环境】奢华的现代别墅客厅，拥有一整面巨大的落地窗，落地窗外是暴雨深夜。客厅中央摆放着黑白大理石茶几。\\n\\n【光影氛围】冷蓝色调的深夜环境光为主。窗外不时有惨白的雷光闪过掠进室内，室内辅以微弱的水晶吊灯暖光。\\n\\n【音乐音效】低沉的暴雨声与闷雷声贯穿背景。伴随低沉、渐强的提琴单音，强化对峙的张力。\\n\\n【旁白】无。\\n\\n【分镜列表】\\nshot-1|时长：4秒|景别：全景(WS)|运镜：推|角度：平拍\\n画面描述：叶辰面朝落地窗挺拔而立。他右手轻轻摇晃着高脚杯中的暗红色液体，背影散发着冷酷不容置疑的压迫感。\\n台词：无。\\n空间站位：叶辰位于画面中央偏左，背对镜头，面向落地窗。\\n\\nshot-2|时长：4秒|景别：中景(MS)|运镜：固定|角度：过肩镜(OTS)\\n画面描述：叶辰缓缓转身，眉宇间带着嘲弄的笑意；前景中苏晴面朝叶辰站立，肩膀因极度克制而微微发颤。\\n台词：叶辰：“苏晴，你以为你能逃出我的手掌心？”\\n空间站位：苏晴的右肩在右侧前景虚化，叶辰位于中景画面左侧，正面迎向镜头。\\n\\nshot-3|时长：3秒|景别：特写(CU)|运镜：固定|角度：平拍\\n画面描述：苏晴双眼含泪，嘴唇紧抿，但下颌微扬。侧面的冷白光勾勒出她面部紧绷的轮廓。\\n台词：苏晴：“叶辰，我们已经结束了！”\\n空间站位：苏晴的面部位于画面正中央，视线坚定地投向画面左侧的叶辰。\\n\\nshot-4|时长：4秒|景别：特写(CU)|运镜：推|角度：俯拍\\n画面描述：镜头缓慢向前推近，聚焦于大理石茶几上平铺的《离婚协议书》，上面字迹冰冷，一只黑金相间的钢笔静静躺在旁边。\\n台词：无。\\n空间站位：协议书位于大理石茶几正中央，作为视觉落点。\",\n    \"asset_refs\": [\n      \"叶辰\",\n      \"苏晴\",\n      \"别墅客厅\",\n      \"离婚协议书\"\n    ],\n    \"reference_images\": []\n  }\n]\n```\n## Input\n\n## 总时长与要求\n\n{{duration_context}}\n\n## 剧本文本\n\n{{script_text}}\n\n## 可用资产\n\n{{asset_context}}",
-      "createdAt": 1780801671475,
-      "updatedAt": 1780801671475
     },
     {
       "id": "instruction_template_17bc8d2a758f",
@@ -93,7 +133,13 @@
       "name": "常用",
       "createdAt": 1780910317563,
       "updatedAt": 1780910317563
+    },
+    {
+      "id": "custom:d2342c832055",
+      "name": "风格",
+      "createdAt": 1781058355929,
+      "updatedAt": 1781058355929
     }
   ],
-  "updated_at": 1780910329754
+  "updated_at": 1781058642940
 }

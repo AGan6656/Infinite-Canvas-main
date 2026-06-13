@@ -1,5 +1,87 @@
 [
     {
+        "prompt": "A 2x2 grid storyboard, comic panel layout, photorealistic cinematic style, 35mm film. Panel 1: A young man (Jiang Fan) in a grey hoodie running frantically in a dark, narrow alley, holding a phone, terrified expression. Panel 2: Close-up of Jiang Fan's face, sweaty, shouting into the phone, mouth open wide. Panel 3: Medium shot of Jiang Fan looking back over his shoulder in panic, dark alley background. Panel 4: Extreme close-up of Jiang Fan's eyes wide with fear, sweat dripping, dark shadows.\n\n参考图为当前分镜匹配到的角色、场景和道具资产。请保持资产外观一致。\n图1：江凡\n图2：老旧胡同巷口",
+        "images": [
+            "/assets/output/online_efcf3b299d.png"
+        ],
+        "timestamp": 1781248218.1861317,
+        "type": "online",
+        "model": "gpt-image-2-all",
+        "provider_id": "custom-api-4",
+        "provider_name": "yunwu2",
+        "task_id": null,
+        "request_id": null,
+        "params": {
+            "provider_id": "custom-api-4",
+            "model": "gpt-image-2-all",
+            "size": "1536x864",
+            "quality": "auto",
+            "n": 1,
+            "reference_images": [
+                {
+                    "url": "/assets/output/online_367c773a78.png",
+                    "name": "江凡",
+                    "role": "image_1"
+                },
+                {
+                    "url": "/assets/input/ai_ref_8d245f742c8d.png",
+                    "name": "老旧胡同巷口",
+                    "role": "image_2"
+                }
+            ]
+        },
+        "raw_usage": {
+            "total_tokens": 3323,
+            "input_tokens": 2218,
+            "output_tokens": 1105,
+            "input_tokens_details": {
+                "text_tokens": 1098,
+                "image_tokens": 1120
+            }
+        }
+    },
+    {
+        "prompt": "A 2x2 grid storyboard, comic panel layout, photorealistic cinematic style, 35mm film. Panel 1: A young man (Jiang Fan) in a grey hoodie running frantically in a dark, narrow alley, holding a phone, terrified expression. Panel 2: Close-up of Jiang Fan's face, sweaty, shouting into the phone, mouth open wide. Panel 3: Medium shot of Jiang Fan looking back over his shoulder in panic, dark alley background. Panel 4: Extreme close-up of Jiang Fan's eyes wide with fear, sweat dripping, dark shadows.\n\n参考图为当前分镜匹配到的角色、场景和道具资产。请保持资产外观一致。\n图1：江凡\n图2：老旧胡同巷口",
+        "images": [
+            "https://pro.filesystem.site/cdn/20260612/141f684620f24e69b6301393d739abf4.png"
+        ],
+        "timestamp": 1781246968.1325514,
+        "type": "online",
+        "model": "gpt-image-2-all",
+        "provider_id": "custom-api-4",
+        "provider_name": "yunwu2",
+        "task_id": null,
+        "request_id": null,
+        "params": {
+            "provider_id": "custom-api-4",
+            "model": "gpt-image-2-all",
+            "size": "1536x864",
+            "quality": "auto",
+            "n": 1,
+            "reference_images": [
+                {
+                    "url": "/assets/output/online_367c773a78.png",
+                    "name": "江凡",
+                    "role": "image_1"
+                },
+                {
+                    "url": "/assets/input/ai_ref_8d245f742c8d.png",
+                    "name": "老旧胡同巷口",
+                    "role": "image_2"
+                }
+            ]
+        },
+        "raw_usage": {
+            "total_tokens": 8637,
+            "input_tokens": 2387,
+            "output_tokens": 6250,
+            "input_tokens_details": {
+                "text_tokens": 177,
+                "image_tokens": 2210
+            }
+        }
+    },
+    {
         "prompt": "shot-1|时长：3秒|景别：特写(CU)|运镜：推(Push in)|角度：平拍\n画面描述：江凡绝望地抬起头，双眼通红，对着手机嘶吼，脖颈青筋暴起，完全不顾电话那头的警告。\n台词：江凡（绝望，带着哭腔）：\"真的有鬼啊！她是飘着的！\"\n空间站位：江凡面部填满画面，情绪极度激动。\n\nshot-2|时长：2秒|景别：大特写(ECU)|运镜：固定|角度：俯拍\n画面描述：江凡的手无力地垂下，手机屏幕的光亮映亮了他绝望的脸庞，随后屏幕熄灭，周围陷入更深的黑暗。\n台词：江凡os（混响）：\"完了，死定了……\"\n空间站位：手机位于画面前景，江凡虚化在背景。\n\nshot-3|时长：3秒|景别：全景(WS)|运镜：慢推(Slow Push)|角度：平拍\n画面描述：胡同深处的迷雾开始翻滚，气温骤降，地面结起薄霜。一道模糊的白影在迷雾深处无声无息地显现，正向镜头方向飘来。\n台词：无。\n空间站位：白影位于画面纵深远处，逐渐变大。\n\nshot-4|时长：2秒|景别：中景(MS)|运镜：固定|角度：侧拍\n画面描述：江凡背靠着墙壁，身体瑟瑟发抖，他似乎感觉到了逼近的危险，惊恐地瞪大眼睛看向画面右侧（白影来的方向）。\n台词：无。\n空间站位：江凡位于画面左侧边缘，视线投向右侧画外。\n\nshot-5|时长：3秒|景别：特写(CU)|运镜：快速横摇(Whip Pan)|角度：平拍\n画面描述：一道刺眼的闪电划破夜空，瞬间照亮了胡同。镜头快速扫过，定格在逼近的白影上。\n台词：无。\n空间站位：闪电光芒瞬间充斥画面，随后聚焦于白影。\n\nshot-6|时长：2秒|景别：大特写(ECU)|运镜：固定|角度：微仰\n画面描述：镜头聚焦在白影的下半身。一双白皙精致、不沾尘埃的赤足悬浮在离地半尺的空中，下方青石板上的积水微微震颤。\n台词：无。\n空间站位：赤足位于画面中央，悬空状态，背景虚化。",
         "images": [
             "/assets/output/online_64cf029f73.png"
